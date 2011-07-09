@@ -4,6 +4,8 @@
 #include "SDL/SDL_opengl.h"
 
 #include "ResourceManager/ResourceManager.hpp"
+#include "ResourceManager/TextureManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
 #include "Timer.hpp"
 
 //Screen attributes
@@ -15,7 +17,6 @@ const int SCREEN_BPP = 32;
 const int FRAMES_PER_SECOND = 60;
 
 int main(int argc, char* argv[]) {
-  ResourceManager::get();
 
   if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )
   {
@@ -34,7 +35,7 @@ int main(int argc, char* argv[]) {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_TEXTURE_2D);
-  glEnable(GL_COLOR_MATERIAL);
+  //glEnable(GL_COLOR_MATERIAL);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -64,26 +65,45 @@ int main(int argc, char* argv[]) {
 
   SDL_WM_SetCaption( "Cosmos", NULL );
 
+  ResourceManager::get();
+
   Timer::ShPtr fps_(new Timer());
 
+  Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
+  Texture::ShPtr t = TextureManager::get().get_texture("res/textures/default.png");
+  float r = 0.0f;
+
   while(1) {
+    
+    SDL_Event event_;
+    SDL_WaitEvent( &event_ );
+    if ( event_.type == SDL_QUIT ) {
+      break;
+    }
+    
     fps_->start();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    //glEnableClientState(GL_COLOR_ARRAY);
     //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
-    glTranslatef(0.0f, 0.0f, -10.0f);
-    glColor3f(1.0f,0.0f,0.0f);
+    r += 1.0f;
+    glTranslatef(4.0f, 0.0f, -10.0f);
+    glRotatef(r, 0.0f, 1.0f, 0.0f);
+    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    /*glColor3f(1.0f,0.0f,0.0f);
     GLUquadricObj* quadratic_ = gluNewQuadric();
     gluQuadricNormals(quadratic_, GLU_SMOOTH);
     //gluQuadricTexture(quadratic_, GL_TRUE);
-    gluSphere(quadratic_,0.5f,32,32);
+    gluSphere(quadratic_,0.5f,32,32);*/
+    glBindTexture(GL_TEXTURE_2D, t->get_index());
+    c->draw();
+    glDrawArrays(GL_TRIANGLES, 0, c->triangle_count() * 3);
 
     SDL_GL_SwapBuffers();
 
