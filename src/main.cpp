@@ -3,8 +3,12 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
+#include "GameObject.hpp"
+#include "Material.hpp"
+#include "Renderable.hpp"
 #include "ResourceManager/ResourceManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
+#include "ResourceManager/MaterialManager.hpp"
 #include "ResourceManager/MeshManager.hpp"
 #include "Timer.hpp"
 
@@ -70,8 +74,17 @@ int main(int argc, char* argv[]) {
   Timer::ShPtr fps_(new Timer());
 
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
-  Texture::ShPtr t = TextureManager::get().get_texture("res/textures/default.png");
+  Mesh::ShPtr q = MeshManager::get().get_mesh("res/meshes/face-center-quad.obj");
+  Material::ShPtr m = MaterialManager::get().get_material("res/textures/default.png");
   float r = 0.0f;
+  
+  GameObject::ShPtr ob(new GameObject());
+  Renderable::ShPtr ren(new Renderable(ob->id()));
+  ren->set_mesh(c).set_material(m);
+  
+  GameObject::ShPtr ob2(new GameObject());
+  Renderable::ShPtr ren2(new Renderable(ob2->id()));
+  ren2->set_mesh(q).set_material(m);
 
   while(1) {
     
@@ -93,18 +106,20 @@ int main(int argc, char* argv[]) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
     r += 1.0f;
-    glTranslatef(4.0f, 0.0f, -10.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, -10.0f);
     glRotatef(r, 0.0f, 1.0f, 0.0f);
     glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    /*glColor3f(1.0f,0.0f,0.0f);
-    GLUquadricObj* quadratic_ = gluNewQuadric();
-    gluQuadricNormals(quadratic_, GLU_SMOOTH);
-    //gluQuadricTexture(quadratic_, GL_TRUE);
-    gluSphere(quadratic_,0.5f,32,32);*/
-    glBindTexture(GL_TEXTURE_2D, t->get_index());
-    c->draw();
-    glDrawArrays(GL_TRIANGLES, 0, c->triangle_count() * 3);
-
+    
+    ren->render();
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(2.0f, 1.0f, -12.0f);
+    glRotatef(r, 0.0f, 1.0f, 0.0f);
+    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    ren2->render();
+    glPopMatrix();
+    
     SDL_GL_SwapBuffers();
 
     //Cap the frame rate
