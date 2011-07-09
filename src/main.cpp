@@ -11,6 +11,8 @@
 #include "ResourceManager/MaterialManager.hpp"
 #include "ResourceManager/MeshManager.hpp"
 #include "Timer.hpp"
+#include "Transform.hpp"
+#include "Vector3f.hpp"
 
 //Screen attributes
 const int SCREEN_WIDTH = 960;
@@ -80,11 +82,17 @@ int main(int argc, char* argv[]) {
   
   GameObject::ShPtr ob(new GameObject());
   Renderable::ShPtr ren(new Renderable(ob->id()));
+  Transform::ShPtr tran(new Transform(ob->id()));
   ren->set_mesh(c).set_material(m);
+  //tran->print();
+  tran->translate(Vector3f(0.0f, 0.0f, -10.0f));
+  //tran->print();
   
   GameObject::ShPtr ob2(new GameObject());
   Renderable::ShPtr ren2(new Renderable(ob2->id()));
-  ren2->set_mesh(q).set_material(m);
+  Transform::ShPtr tran2(new Transform(ob2->id()));
+  ren2->set_mesh(c).set_material(m);
+  tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
 
   while(1) {
     
@@ -107,9 +115,9 @@ int main(int argc, char* argv[]) {
     
     r += 1.0f;
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -10.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    tran->load();
+    tran->rotateY(1.0f);
+    tran->rotateX(0.5f);
     
     ren->render();
     glPopMatrix();

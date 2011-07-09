@@ -9,6 +9,7 @@
 //#include "SDL/SDL_opengl.h"
 
 #include "Renderable.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 //#include "Vector2f.hpp"
 //#include "Vector3f.hpp"
@@ -23,10 +24,11 @@ class GameObject {
 	GameObject(): id_(nextId_++) {}
   const unsigned int id() const { return id_; }
 
+  GameObject& set_transform(Transform::ShPtr t) { transform_ = t; return *this; }
   GameObject& set_renderable(Renderable::ShPtr r) { renderable_ = r; return *this; }
 
  protected:
-  //Transform transform_;
+  Transform::ShPtr transform_;
   Renderable::ShPtr renderable_;
   //CollidableObject collidable_;
   //InputManager input_;
