@@ -1,0 +1,151 @@
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <iostream>
+
+#include "MeshManager.hpp"
+
+MeshManager::MeshManager() 
+  : loaded_(false) {
+	init();
+}
+
+/*
+ * This initialization function is just to make it easier to manually edit the 'to-be-loaded' font list.
+ * In the future, FontMan should read from some kind of resource file so we don't need to specify these by
+ * hand
+ */
+void MeshManager::init() {
+	mesh_names_.push_back(std::string("res/meshes/cube.obj"));
+  mesh_names_.push_back(std::string("res/meshes/face-center-quad.obj"));
+  mesh_names_.push_back(std::string("res/meshes/edge-center-quad.obj"));
+  load_meshes();
+}
+
+/*
+ * Singleton pattern
+ */
+MeshManager& MeshManager::get() {
+  static MeshManager instance;
+  return instance;
+}
+
+/*
+ * 
+ */
+void MeshManager::load_meshes() {
+  if (loaded_) {
+		std::cout << "FontMan: Error - fonts already loaded" << std::endl;
+		return;
+	}
+    
+  int mesh_count = mesh_names_.size();
+    
+  for (int j = 0; j < mesh_count; ++j) {
+    FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
+    std::cout << "Decoding " << file->path() << std::endl;
+    meshes_.push_back(decode(*file));
+	}
+}
+
+/*
+ * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
+ */
+const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
+	foreach (Mesh::ShPtr mesh, meshes_) {
+		if (mesh->is_name(name)) {
+			return mesh;
+		}
+	}
+	
+	return Mesh::ShPtr();
+}
+
+Mesh::ShPtr MeshManager::decode(FileBlob& b) {
+   
+  int index = 0;
+  int triangles = 0;
+  
+  std::vector<Vector3f> verts;
+  std::vector<Vector2f> uvs;
+  std::vector<Vector3f> norms;
+  
+  std::vector<std::string> tokens;
+  Mesh::ShPtr mesh (new Mesh(b.path()));
+  
+  while (index < b.size()) {
+	  tokens = Tokenize(b, index);
+	  
+	  if (tokens.size() > 0) {
+		  if (tokens[0] == "#") {
+			  // this line is a comment - skip it
+		  } else if (tokens[0] == "v") {
+			  // found a vertex
+			  float x = boost::lexical_cast<float>(tokens[1]);
+			  float y = boost::lexical_cast<float>(tokens[2]);
+			  float z = boost::lexical_cast<float>(tokens[3]);
+			  verts.push_back(Vector3f(x, y, z));
+		  } else if (tokens[0] == "vt") {
+			  // found a normal
+        float u = boost::lexical_cast<float>(tokens[1]);
+			  float v = boost::lexical_cast<float>(tokens[2]);
+			  uvs.push_back(Vector2f(u, v));
+		  } else if (tokens[0] == "vn") {
+			  // found a normal
+        float x = boost::lexical_cast<float>(tokens[1]);
+			  float y = boost::lexical_cast<float>(tokens[2]);
+			  float z = boost::lexical_cast<float>(tokens[3]);
+			  norms.push_back(Vector3f(x, y, z));
+		  } else if (tokens[0] == "f") {
+			  // -1 to each of these because OBJ uses 1-based indexing
+			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
+        int vt1i = boost::lexical_cast<int>(tokens[2]) - 1;
+        int vn1i = boost::lexical_cast<int>(tokens[3]) - 1;
+			  int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
+        int vt2i = boost::lexical_cast<int>(tokens[5]) - 1;
+			  int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
+        int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
+			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
+        int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
+			  //std::cout << x << " " << y << " " << z << " " << n << std::endl;
+			  mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i],
+                            verts[v2i], uvs[vt2i], norms[vn2i],
+                            verts[v3i], uvs[vt3i], norms[vn3i]);
+		  }
+		  index = newline_index(b, index+1);
+	  } else {
+		  break;
+	  }
+  }
+  
+  std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
+  
+  return mesh;
+}
+
+// Returns the index of the first character following a group of newline characters after the offset
+const unsigned int MeshManager::newline_index(const FileBlob& b, const unsigned int offset) const {
+  
+  int ni = offset;
+  
+  while (!(b[ni] == '\n' || b[ni] == '\r')) {
+    ni++;
+  }
+  while (b[ni] == '\n' || b[ni] == '\r') {
+    ni++;
+  }
+  
+  return ni++;
+}
+
+// Returns a collection of whitespace-separated character strings occuring between offset and the end of the
+// line
+const std::vector<std::string> MeshManager::Tokenize(const FileBlob& b, const unsigned int offset) const {
+  std::vector<std::string> tokens;
+  
+  std::string line;
+  line.assign(&b[offset], &b[newline_index(b, offset)]);
+  boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
+  
+  return tokens;
+}
