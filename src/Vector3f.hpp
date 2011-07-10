@@ -35,7 +35,7 @@ class Vector3f {
   const float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
   const float length() const { return sqrt(lengthSquare()); }
   //Vector3f& normalize();
-  //const Vector3f normalize() const;
+  const Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
   
   float& x() { return x_; }
   const float x() const { return x_; }

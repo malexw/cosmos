@@ -83,7 +83,9 @@ void World::decode(FileBlob& b) {
 			  float y = boost::lexical_cast<float>(tokens[2]);
 			  float z = boost::lexical_cast<float>(tokens[3]);
 			  norms.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "usemtl") {
+		  } else if (tokens[0] == "o") {
+        // it's an object spawner 
+      } else if (tokens[0] == "usemtl") {
         set_material(MaterialManager::get().get_material(std::string("res/textures/") + tokens[1]));
       } else if (tokens[0] == "f") {
 			  // -1 to each of these because OBJ uses 1-based indexing

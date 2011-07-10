@@ -5,6 +5,7 @@
 
 #include "GameObject.hpp"
 #include "Material.hpp"
+#include "Quaternion.hpp"
 #include "Renderable.hpp"
 #include "ResourceManager/ResourceManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
@@ -86,14 +87,20 @@ int main(int argc, char* argv[]) {
   Transform::ShPtr tran(new Transform(ob->id()));
   ren->set_mesh(c).set_material(m);
   //tran->print();
-  tran->translate(Vector3f(0.0f, 0.0f, -10.0f));
+  //tran->translate(Vector3f(0.0f, 0.0f, -10.0f));
+  tran->set_translate(Vector3f(0.0f, 0.0f, -10.0f));
+  tran->set_quat(Quaternion(Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 1.0f).normalize(), Vector3f(0.0f, -1.0f, 1.0f).normalize()));
+  //tran->set_quat(Quaternion(Vector3f(0.0f, 0.0f, 1.0f).cross(Vector3f(1.0f, 1.0f, 1.0f)).normalize(), 45));
   //tran->print();
+  //tran->rotate(Quaternion(Vector3f(1.0f, 0.0f, 0.0f).cross(Vector3f(0.0f, 0.0f, 1.0f)), 45));
+  //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 45.0f));
   
   GameObject::ShPtr ob2(new GameObject());
   Renderable::ShPtr ren2(new Renderable(ob2->id()));
   Transform::ShPtr tran2(new Transform(ob2->id()));
   ren2->set_mesh(c).set_material(m);
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
+  std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
   
   World::ShPtr w(new World(std::string("res/worlds/world1.obj")));
 
@@ -117,22 +124,25 @@ int main(int argc, char* argv[]) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
     r += 1.0f;
-    w->draw();
+    //w->draw();
     glPushMatrix();
-    tran->load();
-    tran->rotateY(1.0f);
-    tran->rotateX(0.5f);
-    
-    //ren->render();
+    //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f));
+    //tran->set_quat(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), r));
+    //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f));
+    //tran->rotateY(1.0f);
+    //tran->rotateX(0.5f);
+    tran->apply();
+    ren->render();
     glPopMatrix();
+    
     glPushMatrix();
     /*tran2->load();
     tran2->rotateY(1.0f);
     tran2->rotateX(0.5f);*/
     glTranslatef(2.0f, 1.0f, -12.0f);
-    glRotatef(r, 0.5f, 1.0f, 0.0f);
-    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    //ren2->render();
+    glRotatef(r, 0.0f, 1.0f, 0.0f);
+    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    ren2->render();
     glPopMatrix();
     
     SDL_GL_SwapBuffers();
