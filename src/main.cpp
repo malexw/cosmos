@@ -13,6 +13,7 @@
 #include "Timer.hpp"
 #include "Transform.hpp"
 #include "Vector3f.hpp"
+#include "World.hpp"
 
 //Screen attributes
 const int SCREEN_WIDTH = 960;
@@ -93,6 +94,8 @@ int main(int argc, char* argv[]) {
   Transform::ShPtr tran2(new Transform(ob2->id()));
   ren2->set_mesh(c).set_material(m);
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
+  
+  World::ShPtr w(new World(std::string("res/worlds/world1.obj")));
 
   while(1) {
     
@@ -114,18 +117,22 @@ int main(int argc, char* argv[]) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
     r += 1.0f;
+    w->draw();
     glPushMatrix();
     tran->load();
     tran->rotateY(1.0f);
     tran->rotateX(0.5f);
     
-    ren->render();
+    //ren->render();
     glPopMatrix();
     glPushMatrix();
+    /*tran2->load();
+    tran2->rotateY(1.0f);
+    tran2->rotateX(0.5f);*/
     glTranslatef(2.0f, 1.0f, -12.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    ren2->render();
+    glRotatef(r, 0.5f, 1.0f, 0.0f);
+    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    //ren2->render();
     glPopMatrix();
     
     SDL_GL_SwapBuffers();
