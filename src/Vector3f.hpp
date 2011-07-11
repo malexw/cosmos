@@ -24,6 +24,20 @@ class Vector3f {
     return *this;
   }
   
+  Vector3f& operator *=(float rhs) {
+    x_ *= rhs;
+    y_ *= rhs;
+    z_ *= rhs;
+    return *this;
+  }
+  
+  Vector3f& operator *=(const Vector3f& rhs) {
+    x_ *= rhs.x();
+    y_ *= rhs.y();
+    z_ *= rhs.z();
+    return *this;
+  }
+  
   const Vector3f cross(const Vector3f& rhs) const {
     return Vector3f(
       y_*rhs.z() - z_*rhs.y(),

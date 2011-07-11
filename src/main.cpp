@@ -1,8 +1,13 @@
 #include <iostream>
 
+#include <boost/pointer_cast.hpp>
+
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
+#include "PlayerInputHandler.hpp"
+#include "InputManager.hpp"
+#include "Camera.hpp"
 #include "GameObject.hpp"
 #include "Material.hpp"
 #include "Quaternion.hpp"
@@ -77,6 +82,10 @@ int main(int argc, char* argv[]) {
 
   Timer::ShPtr fps_(new Timer());
 
+  Camera::ShPtr cam(new Camera());
+  cam->set_direction(Vector3f(0.0f, -1.0f, -1.0f));
+  cam->set_translate(Vector3f(0.0f, 10.0f, 20.0f));
+
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
   Mesh::ShPtr q = MeshManager::get().get_mesh("res/meshes/face-center-quad.obj");
   Material::ShPtr m = MaterialManager::get().get_material("res/textures/default.png");
@@ -88,8 +97,8 @@ int main(int argc, char* argv[]) {
   ren->set_mesh(c).set_material(m);
   //tran->print();
   //tran->translate(Vector3f(0.0f, 0.0f, -10.0f));
-  tran->set_translate(Vector3f(0.0f, 0.0f, -10.0f));
-  tran->set_quat(Quaternion(Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 1.0f).normalize(), Vector3f(0.0f, -1.0f, 1.0f).normalize()));
+  tran->set_translate(Vector3f(5.0f, 10.0f, 10.0f));
+  //tran->set_quat(Quaternion(Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 1.0f).normalize(), Vector3f(0.0f, -1.0f, 1.0f).normalize()));
   //tran->set_quat(Quaternion(Vector3f(0.0f, 0.0f, 1.0f).cross(Vector3f(1.0f, 1.0f, 1.0f)).normalize(), 45));
   //tran->print();
   //tran->rotate(Quaternion(Vector3f(1.0f, 0.0f, 0.0f).cross(Vector3f(0.0f, 0.0f, 1.0f)), 45));
@@ -102,15 +111,22 @@ int main(int argc, char* argv[]) {
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
   std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
   
-  World::ShPtr w(new World(std::string("res/worlds/world1.obj")));
+  World::ShPtr w(new World(std::string("res/worlds/bigbrother.obj")));
+  
+  InputManager im;
+  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(ob->id()));
+  InputHandler::ShPtr ih(boost::dynamic_pointer_cast<InputHandler>(pih));
+  im.pushHandler(ih);
+  pih->listener(cam);
 
   while(1) {
     
-    SDL_Event event_;
+    /*SDL_Event event_;
     SDL_WaitEvent( &event_ );
     if ( event_.type == SDL_QUIT ) {
       break;
-    }
+    }*/
+    im.handleInput();
     
     fps_->start();
 
@@ -124,7 +140,10 @@ int main(int argc, char* argv[]) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
     r += 1.0f;
-    //w->draw();
+    cam->apply();
+    //std::cout << Vector3f(0.0f, 0.0f, -10.0f)-Vector3f(0.0f, r/10, 0.0f) << std::endl;
+    //cam->set_direction(Vector3f(0.0f, 0.0f, -10.0f)-Vector3f(0.0f, r/10, 0.0f));
+    w->draw();
     glPushMatrix();
     //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f));
     //tran->set_quat(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), r));

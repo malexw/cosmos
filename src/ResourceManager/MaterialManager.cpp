@@ -18,6 +18,7 @@ MaterialManager::MaterialManager()
 void MaterialManager::init() {
 	mat_names_.push_back(std::string("res/textures/default.png"));
 	mat_names_.push_back(std::string("res/textures/terminal.png"));
+  mat_names_.push_back(std::string("res/textures/tronish.png"));
   load_materials();
 }
 

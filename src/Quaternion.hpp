@@ -100,6 +100,18 @@ class Quaternion {
   //Quaternion& invert() { x_ = -x_; y_ = -y_; z = -z_; return *this; }
   const Quaternion invert() const { return Quaternion(-vector(), w()); }
   
+  Vector3f operator*(const Vector3f& v) const {
+    // nVidia SDK implementation
+		Vector3f uv, uuv;
+		Vector3f qvec(x_, y_, z_);
+		uv = qvec.cross(v);
+		uuv = qvec.cross(uv);
+		uv *= (2.0f * w_);
+		uuv *= 2.0f;
+
+		return v + uv + uuv;
+  }
+  
   float& x() { return x_; }
   const float x() const { return x_; }
   float& y() { return y_; }

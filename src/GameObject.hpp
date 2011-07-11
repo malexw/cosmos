@@ -8,6 +8,7 @@
 //#include "SDL/SDL.h"
 //#include "SDL/SDL_opengl.h"
 
+#include "InputHandler.hpp"
 #include "Renderable.hpp"
 #include "Transform.hpp"
 #include "util.hpp"
@@ -31,7 +32,7 @@ class GameObject {
   Transform::ShPtr transform_;
   Renderable::ShPtr renderable_;
   //CollidableObject collidable_;
-  //InputManager input_;
+  InputHandler::ShPtr input_;
 
  private:
   const unsigned int id_;
