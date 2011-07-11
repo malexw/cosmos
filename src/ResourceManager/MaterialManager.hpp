@@ -8,6 +8,7 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
+#include "FileBlob.hpp"
 #include "Material.hpp"
 #include "util.hpp"
 
@@ -34,6 +35,14 @@ class MaterialManager {
   // Iterates through the list of materials that need to be loaded and loads them. First checks to see if
 	// materials have been loaded to prevent duplicate loadings
 	void load_materials();
+  
+  // OBJ Decoding stuff -------------
+  Material::ShPtr decode(FileBlob& b);
+  // Returns the index of the first character following a group of newline characters after the offset
+  const unsigned int newline_index(const FileBlob& b, const unsigned int offset) const;
+  // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
+  // line
+  const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;
 	
 	DISALLOW_COPY_AND_ASSIGN(MaterialManager);
 };

@@ -22,7 +22,7 @@ vn 0 1 0
 vn 0 -1 0
 o 1/1 cube.obj default.png
 o 3/1 cube.obj default.png
-usemtl terminal.png
+usemtl terminal.mtl
 f 1/1/1 2/2/1 3/3/1
 f 3/3/1 2/2/1 4/4/1
 f 3/1/6 4/2/6 8/4/6
@@ -35,6 +35,6 @@ f 7/3/4 1/2/4 3/4/4
 f 7/3/4 3/1/4 8/4/4
 f 7/4/3 8/3/3 5/2/3
 f 8/3/3 5/2/3 6/1/3
-usemtl default.png
+usemtl default.mtl
 f 2/1/1 4/3/1 9/5/1
 f 4/3/1 9/5/1 10/6/1

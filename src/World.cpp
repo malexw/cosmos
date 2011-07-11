@@ -12,10 +12,13 @@ World::World(std::string path)
 
 void World::init() {
   FileBlob::ShPtr file(new FileBlob(path_));
+  std::cout << "Loading world " << path_ << std::endl;
   decode(*file);
 }
 
-void World::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f v3, Vector2f vt3, Vector3f vn3) {
+void World::add_triangle( Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
+                          Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
+                          Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3) {
   verticies_.push_back(v1);
   verticies_.push_back(v2);
   verticies_.push_back(v3);
@@ -27,6 +30,10 @@ void World::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f v2, V
   normals_.push_back(vn1);
   normals_.push_back(vn2);
   normals_.push_back(vn3);
+  
+  colors_.push_back(c1);
+  colors_.push_back(c2);
+  colors_.push_back(c3);
   
   triangle_count_ += 1;
   mats_.back().second += 1;
@@ -44,6 +51,7 @@ void World::draw() const {
     glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
     glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[drawn]);
     glNormalPointer(GL_FLOAT, 0, &normals_[drawn]);
+    glColorPointer(3, GL_FLOAT, 0, &colors_[drawn]);
     glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
     drawn += mat.second * 3;
   }
@@ -86,7 +94,7 @@ void World::decode(FileBlob& b) {
 		  } else if (tokens[0] == "o") {
         // it's an object spawner 
       } else if (tokens[0] == "usemtl") {
-        set_material(MaterialManager::get().get_material(std::string("res/textures/") + tokens[1]));
+        set_material(MaterialManager::get().get_material(std::string("res/materials/") + tokens[1]));
       } else if (tokens[0] == "f") {
 			  // -1 to each of these because OBJ uses 1-based indexing
 			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
@@ -98,10 +106,11 @@ void World::decode(FileBlob& b) {
         int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
 			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
         int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
-			  //std::cout << x << " " << y << " " << z << " " << n << std::endl;
-			  add_triangle( verts[v1i], uvs[vt1i], norms[vn1i],
-                      verts[v2i], uvs[vt2i], norms[vn2i],
-                      verts[v3i], uvs[vt3i], norms[vn3i]);
+			  Vector3f color = mats_.back().first->get_diff_color();
+        //std::cout << x << " " << y << " " << z << " " << n << std::endl;
+			  add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
+                      verts[v2i], uvs[vt2i], norms[vn2i], color,
+                      verts[v3i], uvs[vt3i], norms[vn3i], color);
 		  }
 		  index = newline_index(b, index+1);
 	  } else {

@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_TEXTURE_2D);
-  //glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_COLOR_MATERIAL);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
   Mesh::ShPtr q = MeshManager::get().get_mesh("res/meshes/face-center-quad.obj");
-  Material::ShPtr m = MaterialManager::get().get_material("res/textures/default.png");
+  Material::ShPtr m = MaterialManager::get().get_material("res/materials/default.mtl");
   float r = 0.0f;
   
   GameObject::ShPtr ob(new GameObject());
@@ -134,8 +134,8 @@ int main(int argc, char* argv[]) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnableClientState(GL_VERTEX_ARRAY);
-    //glEnableClientState(GL_COLOR_ARRAY);
-    //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     

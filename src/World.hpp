@@ -23,9 +23,9 @@ class World {
 	World(std::string path);
   
   // This is to be used by whatever is parsing the OBJ file to build the geometry
-  void add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1,
-                    Vector3f v2, Vector2f vt2, Vector3f vn2,
-                    Vector3f v3, Vector2f vt3, Vector3f vn3);
+  void add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
+                    Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
+                    Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3);
 	// Also to be called by whatever is parsing the geometry file
   void set_material(Material::ShPtr mat);
   
@@ -42,6 +42,7 @@ class World {
 	std::vector<Vector3f> verticies_;
 	std::vector<Vector3f> normals_;
 	std::vector<Vector2f> tex_coords_;
+  std::vector<Vector3f> colors_;
   std::vector<MatPair> mats_;
   std::string path_;
   

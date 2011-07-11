@@ -78,6 +78,7 @@ const Texture::ShPtr TextureManager::get_texture(std::string name) const {
 			return tex;
 		}
 	}
-	
+
+  std::cout << "Error: texture <" << name << "> not found" << std::endl;	
 	return Texture::ShPtr();
 }

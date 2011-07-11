@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "MaterialManager.hpp"
 #include "MeshManager.hpp"
 
 MeshManager::MeshManager() 
@@ -72,6 +73,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
   
   std::vector<std::string> tokens;
   Mesh::ShPtr mesh (new Mesh(b.path()));
+  Material::ShPtr mat;
   
   while (index < b.size()) {
 	  tokens = Tokenize(b, index);
@@ -96,7 +98,10 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
 			  float y = boost::lexical_cast<float>(tokens[2]);
 			  float z = boost::lexical_cast<float>(tokens[3]);
 			  norms.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "f") {
+		  } else if (tokens[0] == "usemtl") {
+        mat = (MaterialManager::get().get_material("res/materials/" + tokens[1]));
+        std::cout << "Material has color " << mat->get_diff_color() << std::endl;
+      } else if (tokens[0] == "f") {
 			  // -1 to each of these because OBJ uses 1-based indexing
 			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
         int vt1i = boost::lexical_cast<int>(tokens[2]) - 1;
@@ -108,9 +113,10 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
 			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
         int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
 			  //std::cout << x << " " << y << " " << z << " " << n << std::endl;
-			  mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i],
-                            verts[v2i], uvs[vt2i], norms[vn2i],
-                            verts[v3i], uvs[vt3i], norms[vn3i]);
+        Vector3f color = mat->get_diff_color();
+			  mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
+                            verts[v2i], uvs[vt2i], norms[vn2i], color,
+                            verts[v3i], uvs[vt3i], norms[vn3i], color);
 		  }
 		  index = newline_index(b, index+1);
 	  } else {
