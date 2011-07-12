@@ -27,10 +27,14 @@ public:
   Material& set_bump_tex(Texture::ShPtr bt) { bump_tex_ = bt; return *this; }
   const Texture::ShPtr get_bump_tex() const { return bump_tex_; }
   
+  Material& set_n11n_tex(Texture::ShPtr nt) { n11n_tex_ = nt; return *this; }
+  const Texture::ShPtr get_n11n_tex() const { return n11n_tex_; }
+  
   Material& set_diff_color(Vector3f color) { diff_color_ = color; return *this; }
   Vector3f get_diff_color() const { return diff_color_; }
   
   const bool is_textured() const { return textured_; }
+  const bool is_bump_mapped() const { return bump_tex_; }
 
 private:
   bool textured_;
@@ -38,6 +42,7 @@ private:
   Vector3f diff_color_;
   Texture::ShPtr diff_tex_;
   Texture::ShPtr bump_tex_;
+  Texture::ShPtr n11n_tex_;
 
 	DISALLOW_COPY_AND_ASSIGN(Material);
 };

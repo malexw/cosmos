@@ -1,6 +1,6 @@
 redo-ifchange $1.cpp
 
-CFLAGS="-O3"
+CFLAGS="-O3 -DGL_GLEXT_PROTOTYPES"
 INCLUDE="-I./src"
 
 g++ $CFLAGS $INCLUDE -MD -MF $1.d -c -o $3 $1.cpp

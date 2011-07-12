@@ -30,6 +30,7 @@ class Mesh {
   void draw() const;
   
   const bool is_name(const std::string& rhs) const;
+  void set_tex_pointer() { glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]); }
   
   // The number of triangles in the mesh
 	const unsigned int triangle_count() const { return triangle_count_; }

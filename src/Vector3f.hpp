@@ -24,6 +24,13 @@ class Vector3f {
     return *this;
   }
   
+  Vector3f& operator +=(float rhs) {
+    x_ += rhs;
+    y_ += rhs;
+    z_ += rhs;
+    return *this;
+  }
+  
   Vector3f& operator *=(float rhs) {
     x_ *= rhs;
     y_ *= rhs;
@@ -49,7 +56,8 @@ class Vector3f {
   const float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
   const float length() const { return sqrt(lengthSquare()); }
   //Vector3f& normalize();
-  const Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
+  Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
+  //Vector3f& to_rgb() { (*this) = (normalize() * 0.5f) + 0.5f; }
   
   float& x() { return x_; }
   const float x() const { return x_; }

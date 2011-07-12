@@ -3,6 +3,7 @@
 #include "FontManager.hpp"
 #include "MaterialManager.hpp"
 #include "MeshManager.hpp"
+#include "ShaderManager.hpp"
 #include "ResourceManager.hpp"
 #include "TextureManager.hpp"
 
@@ -15,6 +16,7 @@ void ResourceManager::init() {
   FontManager::get();
   MaterialManager::get();
   MeshManager::get();
+  ShaderManager::get();
 }
 
 /*

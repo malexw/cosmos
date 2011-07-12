@@ -34,6 +34,8 @@ const std::string FileBlob::extension() const {
 void FileBlob::init() {
   FileReader fr(file_path_);
   file_size_ = fr.GetFileSize();
-  bytes_ = new char[file_size_];
+  bytes_ = new char[file_size_+1];
   fr.Read(bytes_, file_size_);
+  // Add a null termination just for lulz (actually needed when using FileBlob for loading shaders)
+  bytes_[file_size_] = '\0';
 }

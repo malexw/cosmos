@@ -79,13 +79,32 @@ int main(int argc, char* argv[]) {
   SDL_WM_SetCaption( "Cosmos", NULL );
 
   ResourceManager::get();
+  std::cout << "Resources loaded" << std::endl;
 
+  // ----------- LIGHTING ----------------------------------------------
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  GLfloat lightVals[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightVals);
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightVals);
+    
+  lightVals[0] = 0.8f; lightVals[1] = 0.8f; lightVals[2] = 0.8f; lightVals[3] = 1.0f;
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightVals);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, lightVals);
+
+  lightVals[0] = 5.0f; lightVals[1] = 10.0f; lightVals[2] = -5.0f; lightVals[3] = 1.0f;
+  glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
+
+  // --------------
   Timer::ShPtr fps_(new Timer());
 
+  // -------------- CAMERA ---------------------------------------------
   Camera::ShPtr cam(new Camera());
   cam->set_direction(Vector3f(0.0f, -1.0f, -1.0f));
   cam->set_translate(Vector3f(0.0f, 10.0f, 20.0f));
 
+  // -------------- OBJECTS --------------------------------------------
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
   Mesh::ShPtr q = MeshManager::get().get_mesh("res/meshes/face-center-quad.obj");
   Material::ShPtr m = MaterialManager::get().get_material("res/materials/default.mtl");
@@ -95,14 +114,7 @@ int main(int argc, char* argv[]) {
   Renderable::ShPtr ren(new Renderable(ob->id()));
   Transform::ShPtr tran(new Transform(ob->id()));
   ren->set_mesh(c).set_material(m);
-  //tran->print();
-  //tran->translate(Vector3f(0.0f, 0.0f, -10.0f));
   tran->set_translate(Vector3f(5.0f, 10.0f, 10.0f));
-  //tran->set_quat(Quaternion(Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 1.0f).normalize(), Vector3f(0.0f, -1.0f, 1.0f).normalize()));
-  //tran->set_quat(Quaternion(Vector3f(0.0f, 0.0f, 1.0f).cross(Vector3f(1.0f, 1.0f, 1.0f)).normalize(), 45));
-  //tran->print();
-  //tran->rotate(Quaternion(Vector3f(1.0f, 0.0f, 0.0f).cross(Vector3f(0.0f, 0.0f, 1.0f)), 45));
-  //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 45.0f));
   
   GameObject::ShPtr ob2(new GameObject());
   Renderable::ShPtr ren2(new Renderable(ob2->id()));
@@ -111,8 +123,10 @@ int main(int argc, char* argv[]) {
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
   std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
   
+  // ----------------- WORLD -------------------------------------------
   World::ShPtr w(new World(std::string("res/worlds/bigbrother.obj")));
   
+  // ----------------- INPUT -------------------------------------------
   InputManager im;
   PlayerInputHandler::ShPtr pih(new PlayerInputHandler(ob->id()));
   InputHandler::ShPtr ih(boost::dynamic_pointer_cast<InputHandler>(pih));
@@ -141,23 +155,15 @@ int main(int argc, char* argv[]) {
     
     r += 1.0f;
     cam->apply();
-    //std::cout << Vector3f(0.0f, 0.0f, -10.0f)-Vector3f(0.0f, r/10, 0.0f) << std::endl;
-    //cam->set_direction(Vector3f(0.0f, 0.0f, -10.0f)-Vector3f(0.0f, r/10, 0.0f));
     w->draw();
     glPushMatrix();
-    //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f));
-    //tran->set_quat(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), r));
-    //tran->rotate(Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f));
-    //tran->rotateY(1.0f);
-    //tran->rotateX(0.5f);
+
     tran->apply();
     ren->render();
     glPopMatrix();
     
     glPushMatrix();
-    /*tran2->load();
-    tran2->rotateY(1.0f);
-    tran2->rotateX(0.5f);*/
+
     glTranslatef(2.0f, 1.0f, -12.0f);
     glRotatef(r, 0.0f, 1.0f, 0.0f);
     glRotatef(r/2, 1.0f, 0.0f, 0.0f);

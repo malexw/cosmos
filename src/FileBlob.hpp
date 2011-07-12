@@ -21,6 +21,7 @@ class FileBlob {
   int size() const;
   const std::string extension() const;
   const std::string path() const { return file_path_; }
+  char* get_bytes() { return bytes_; }
 
  private:
   void init();

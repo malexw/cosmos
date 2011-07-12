@@ -18,6 +18,7 @@ void TextureManager::init() {
 	tex_names_.push_back(std::string("res/textures/default.png"));
 	tex_names_.push_back(std::string("res/textures/terminal.png"));
   tex_names_.push_back(std::string("res/textures/tronish.png"));
+  tex_names_.push_back(std::string("res/textures/normal_map.png"));
   load_textures();
 }
 
@@ -64,7 +65,13 @@ void TextureManager::load_textures() {
 		} else {
 			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
 		}
-	}	
+	}
+  
+  /*glBindTexture(GL_TEXTURE_CUBE_MAP, tex_indicies[tex_count]);
+  generate_norm_map();
+  Texture::ShPtr tex (new Texture("normalization_map"));
+  tex->set_index(tex_indicies[tex_count]);
+  textures_.push_back(tex);*/
 	
 	loaded_ = true;	
 }
@@ -82,3 +89,62 @@ const Texture::ShPtr TextureManager::get_texture(std::string name) const {
   std::cout << "Error: texture <" << name << "> not found" << std::endl;	
 	return Texture::ShPtr();
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//	Normalisation Cube Map.cpp
+//	Generate normalisation cube map
+//	Downloaded from: www.paulsprojects.net
+//	Created:	20th July 2002
+//
+//	Copyright (c) 2006, Paul Baker
+//	Distributed under the New BSD Licence. (See accompanying file License.txt or copy at
+//	http://www.paulsprojects.net/NewBSDLicense.txt)
+//////////////////////////////////////////////////////////////////////////////////////////	
+/*void generate_norm_map()
+{
+	unsigned char* data = new unsigned char[32*32*3];
+
+	int size = 32;
+  float halfSize = size/2;
+	float offset = 0.5f;
+	unsigned char* bytePtr;
+
+  for (int k = 0; k < 6; ++k) {
+    
+    bytePtr = data;
+    
+    for (int j = 0; j < size; ++j) {
+      for (int i = 0; i < size; ++i) {
+        Vector3f v;
+        
+        switch(k) {
+          case 0: v = Vector3f(halfSize, -(j+offset-halfSize), -(i+offset-halfSize)); break;
+          case 1: v = Vector3f(-halfSize, -(j+offset-halfSize), i+offset-halfSize); break;
+          case 2: v = Vector3f(i+offset-halfSize, halfSize, j+offset-halfSize); break;
+          case 3: v = Vector3f(i+offset-halfSize, -halfSize, -(j+offset-halfSize); break;
+          case 4: v = Vector3f(i+offset-halfSize, -(j+offset-halfSize), halfSize); break;
+          case 5: v = Vector3f(-(i+offset-halfSize), -(j+offset-halfSize), -halfSize); break;
+        }
+        
+        v.to_rgb();
+
+        bytePtr[0] = (unsigned char)(v.x() * 255);
+        bytePtr[1] = (unsigned char)(v.y() * 255);
+        bytePtr[2] = (unsigned char)(v.z() * 255);
+
+        bytePtr += 3;
+      }
+    }
+    
+    switch(k) {
+      case 0: glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+      case 1: glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+      case 2: glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+      case 3: glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+      case 4: glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+      case 5: glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
+    }
+  }
+
+	delete [] data;
+}*/

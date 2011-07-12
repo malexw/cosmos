@@ -9,4 +9,4 @@ map_Ka default.png
 map_Kd default.png
 map_Ks default.png
 map_d default.png
-map_bump default.png
+map_bump normal_map.png
