@@ -14,8 +14,8 @@ ShaderManager::ShaderManager()
  * hand
  */
 void ShaderManager::init() {
-	shader_names_.push_back(std::string("res/shaders/simple.vert"));
-  shader_names_.push_back(std::string("res/shaders/simple.frag"));
+	shader_names_.push_back(std::string("res/shaders/bump.vert"));
+  shader_names_.push_back(std::string("res/shaders/bump.frag"));
   load_shaders();
 }
 
@@ -68,9 +68,19 @@ void ShaderManager::load_shaders() {
   
   glAttachShader(p,v);
   glAttachShader(p,f);
+  
   glLinkProgram(p);
   print_program_log(p);
+  ShaderProgram::ShPtr program(new ShaderProgram("bump", p));
+  programs_.push_back(program);
   glUseProgram(p);
+  
+  GLint texSampler = glGetUniformLocation(p, "tex");
+  GLint bumpSampler = glGetUniformLocation(p, "bump");
+  glUniform1i(texSampler, 0);
+  glUniform1i(bumpSampler, 1);
+  
+  glUseProgram(0);
 }
 
 /*

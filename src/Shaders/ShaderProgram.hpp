@@ -5,6 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "SDL/SDL_opengl.h"
+
 #include "util.hpp"
 
 class ShaderProgram {
@@ -20,6 +22,8 @@ public:
 	const bool is_name(const std::string& rhs) const;
   
   const int get_id() const { return shader_id_; }
+  
+  void run() const { glUseProgram(shader_id_); }
 
 private:
 	std::string name_;
