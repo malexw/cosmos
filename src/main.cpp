@@ -84,16 +84,17 @@ int main(int argc, char* argv[]) {
   // ----------- LIGHTING ----------------------------------------------
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  GLfloat lightVals[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+  //GLfloat lightVals[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+  GLfloat lightVals[4] = {0.0f, 0.0f, 0.0f, 1.0f};
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightVals);
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightVals);
     
-  lightVals[0] = 0.8f; lightVals[1] = 0.8f; lightVals[2] = 0.8f; lightVals[3] = 1.0f;
+  lightVals[0] = 1.0f; lightVals[1] = 1.0f; lightVals[2] = 1.0f; lightVals[3] = 1.0f;
   glLightfv(GL_LIGHT0, GL_DIFFUSE, lightVals);
   glLightfv(GL_LIGHT0, GL_SPECULAR, lightVals);
 
-  lightVals[0] = 5.0f; lightVals[1] = 10.0f; lightVals[2] = -5.0f; lightVals[3] = 1.0f;
+  lightVals[0] = 5.0f; lightVals[1] = 7.0f; lightVals[2] = -5.0f; lightVals[3] = 1.0f;
   glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
 
   // --------------

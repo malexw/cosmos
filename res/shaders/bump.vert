@@ -20,7 +20,7 @@ void main(void)
     // Get surface normal in eye coordinates and pass them through to the fragment shader
     vVaryingNormal = gl_NormalMatrix * gl_Normal;
     // Get vector to light source
-    vVaryingLightDir = normalize(vec3(gl_LightSource[0].position));
+    vVaryingLightDir = normalize(gl_Vertex.xyz - vec3(gl_LightSource[0].position));
  
     // Pass the texture coordinates through the vertex shader so they get smoothly interpolated
     vTexCoords = gl_MultiTexCoord0.st;

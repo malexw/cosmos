@@ -77,9 +77,11 @@ void ShaderManager::load_shaders() {
   
   GLint texSampler = glGetUniformLocation(p, "tex");
   GLint bumpSampler = glGetUniformLocation(p, "bump");
+  GLint decalSampler = glGetUniformLocation(p, "decal");
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
-  
+  glUniform1i(decalSampler, 2);
+
   glUseProgram(0);
 }
 

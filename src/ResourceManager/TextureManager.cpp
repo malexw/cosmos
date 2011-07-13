@@ -19,6 +19,7 @@ void TextureManager::init() {
 	tex_names_.push_back(std::string("res/textures/terminal.png"));
   tex_names_.push_back(std::string("res/textures/tronish.png"));
   tex_names_.push_back(std::string("res/textures/normal_map.png"));
+  tex_names_.push_back(std::string("res/textures/decal-test.png"));
   load_textures();
 }
 
@@ -47,7 +48,7 @@ void TextureManager::load_textures() {
 	glGenTextures(tex_count, tex_indicies);
 
 	// TODO: OMG hacks - FIXME soon!
-	for (int i = 0; i < tex_count; ++i) {
+	for (int i = 0; i < tex_count-1; ++i) {
 		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
 		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
 		if (textureImage[i]) {		
@@ -66,7 +67,25 @@ void TextureManager::load_textures() {
 			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
 		}
 	}
-  
+  for (int i = tex_count-1; i < tex_count; ++i) {
+		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
+		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
+		if (textureImage[i]) {		
+			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, 4, textureImage[i]->w, textureImage[i]->h, 0, GL_RGBA,
+					GL_UNSIGNED_BYTE, textureImage[i]->pixels );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+			
+			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
+			tex->set_index(tex_indicies[i]);
+			textures_.push_back(tex);
+
+			SDL_FreeSurface(textureImage[i]);
+		} else {
+			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
+		}
+	}
   /*glBindTexture(GL_TEXTURE_CUBE_MAP, tex_indicies[tex_count]);
   generate_norm_map();
   Texture::ShPtr tex (new Texture("normalization_map"));
