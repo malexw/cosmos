@@ -28,6 +28,7 @@ const int SCREEN_BPP = 32;
 
 //The frame rate
 const int FRAMES_PER_SECOND = 60;
+const float US_PER_FRAME = 1000000/FRAMES_PER_SECOND;
 
 int main(int argc, char* argv[]) {
 
@@ -46,6 +47,8 @@ int main(int argc, char* argv[]) {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClearDepth(2.0f);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_COLOR_MATERIAL);
@@ -105,6 +108,30 @@ int main(int argc, char* argv[]) {
   cam->set_direction(Vector3f(0.0f, -1.0f, -1.0f));
   cam->set_translate(Vector3f(0.0f, 10.0f, 20.0f));
 
+  // -------------- SHADOWS --------------------------------------------
+  {    
+    /*GLuint shadowBuffer;
+    
+    // create a framebuffer object
+    glGenFramebuffers(1, &shadowBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
+    
+    // Instruct openGL that we won't bind a color texture with the currently binded FBO
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    
+    // attach the texture to FBO depth attachment point
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, TextureManager::get.get_texture("shadow_map")->get_index(), 0);
+    
+    // check FBO status*/
+    /*FBOstatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+      printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");*/
+    
+    // switch back to window-system-provided framebuffer
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+
   // -------------- OBJECTS --------------------------------------------
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
   Mesh::ShPtr q = MeshManager::get().get_mesh("res/meshes/face-center-quad.obj");
@@ -122,7 +149,7 @@ int main(int argc, char* argv[]) {
   Transform::ShPtr tran2(new Transform(ob2->id()));
   ren2->set_mesh(c).set_material(m);
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
-  std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
+  //std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
   
   // ----------------- WORLD -------------------------------------------
   World::ShPtr w(new World(std::string("res/worlds/bigbrother.obj")));
@@ -136,6 +163,8 @@ int main(int argc, char* argv[]) {
 
   while(1) {
     
+    fps_->frame_start();
+    
     /*SDL_Event event_;
     SDL_WaitEvent( &event_ );
     if ( event_.type == SDL_QUIT ) {
@@ -143,7 +172,8 @@ int main(int argc, char* argv[]) {
     }*/
     im.handleInput();
     
-    fps_->start();
+    cam->update(fps_->frame_delta());
+    r += 1.0f;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -154,17 +184,15 @@ int main(int argc, char* argv[]) {
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     
-    r += 1.0f;
     cam->apply();
     w->draw();
+    
     glPushMatrix();
-
     tran->apply();
     ren->render();
     glPopMatrix();
     
     glPushMatrix();
-
     glTranslatef(2.0f, 1.0f, -12.0f);
     glRotatef(r, 0.0f, 1.0f, 0.0f);
     glRotatef(r/2, 1.0f, 0.0f, 0.0f);
@@ -174,9 +202,11 @@ int main(int argc, char* argv[]) {
     SDL_GL_SwapBuffers();
 
     //Cap the frame rate
-    if( fps_->get_ticks() < 1000 / FRAMES_PER_SECOND )
+    fps_->frame_stop();
+    if( fps_->frame_length() < US_PER_FRAME )
     {
-      SDL_Delay( ( 1000 / FRAMES_PER_SECOND ) - fps_->get_ticks() );
+      //std::cout << "Waiting " << static_cast<int>(US_PER_FRAME - fps_->frame_length()) / 1000 << " ms" << std::endl;
+      SDL_Delay(static_cast<int>(US_PER_FRAME - fps_->frame_length()) / 1000);
     }
     
     glDisableClientState(GL_VERTEX_ARRAY);

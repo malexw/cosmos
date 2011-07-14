@@ -31,6 +31,12 @@ class Vector3f {
     return *this;
   }
   
+  Vector3f& operator +=(const Vector3f& rhs) {
+    x_ += rhs.x();
+    y_ += rhs.y();
+    z_ += rhs.z();
+  }
+  
   Vector3f& operator *=(float rhs) {
     x_ *= rhs;
     y_ *= rhs;

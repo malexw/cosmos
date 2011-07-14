@@ -3,56 +3,15 @@
 
 #include "Timer.hpp"
 
-Timer::Timer()
-  : startTicks(0), pausedTicks(0),
-    started(false), paused(false) {
-}
-
-void Timer::start() {
-  started = true;
-  paused = false;
-
-  startTicks = SDL_GetTicks();
-}
-
-void Timer::stop() {
-  started = false;
-  paused = false;
-}
-
-void Timer::pause() {
-  if (started && !paused) {
-    paused = true;
-    pausedTicks = SDL_GetTicks() - startTicks;
+void Timer::frame_start() {
+  if (!paused_) {
+    last_start_ = frame_start_;
+    gettimeofday(&frame_start_, NULL);
   }
 }
 
-void Timer::unpause() {
-  if (paused) {
-    paused = false;
-    startTicks = SDL_GetTicks() - pausedTicks;
-    pausedTicks = 0;
+void Timer::frame_stop() {
+  if (!paused_) {
+    gettimeofday(&frame_end_, NULL);
   }
-}
-
-int Timer::get_ticks() {
-
-  if (started) {
-    if (paused) {
-      return pausedTicks;
-    }
-    else {
-      return SDL_GetTicks() - startTicks;
-    }
-  }
-
-  return 0;
-}
-
-bool Timer::is_started() {
-  return started;
-}
-
-bool Timer::is_paused() {
-  return paused;
 }

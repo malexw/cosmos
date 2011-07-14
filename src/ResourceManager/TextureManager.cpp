@@ -42,13 +42,13 @@ void TextureManager::load_textures() {
 		return;
 	}
 	
-	unsigned int tex_count = tex_names_.size();
+	unsigned int tex_count = tex_names_.size() + 1;
 	unsigned int tex_indicies[tex_count];
 	SDL_Surface *textureImage[tex_count];
 	glGenTextures(tex_count, tex_indicies);
 
 	// TODO: OMG hacks - FIXME soon!
-	for (int i = 0; i < tex_count-1; ++i) {
+	for (int i = 0; i < tex_count-2; ++i) {
 		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
 		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
 		if (textureImage[i]) {		
@@ -67,7 +67,7 @@ void TextureManager::load_textures() {
 			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
 		}
 	}
-  for (int i = tex_count-1; i < tex_count; ++i) {
+  for (int i = tex_count-2; i < tex_count-1; ++i) {
 		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
 		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
 		if (textureImage[i]) {		
@@ -86,6 +86,19 @@ void TextureManager::load_textures() {
 			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
 		}
 	}
+  glBindTexture(GL_TEXTURE_2D, tex_indicies[tex_count-1]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);    
+  // Remove artefact on the edges of the shadowmap
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+  //glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+  // No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available 
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 960, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  Texture::ShPtr shadow (new Texture("shadow_map"));
+  shadow->set_index(tex_indicies[tex_count-1]);
+  textures_.push_back(shadow);
+  
   /*glBindTexture(GL_TEXTURE_CUBE_MAP, tex_indicies[tex_count]);
   generate_norm_map();
   Texture::ShPtr tex (new Texture("normalization_map"));

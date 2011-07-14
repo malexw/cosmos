@@ -21,14 +21,16 @@ class PlayerInputHandler : public InputHandler {
  public:
 	typedef boost::shared_ptr<PlayerInputHandler> ShPtr;
   
-  PlayerInputHandler(unsigned int id): InputHandler(id), pos_(Vector3f(0.0f, 10.0f, 20.0f)) {}
+  PlayerInputHandler(unsigned int id): InputHandler(id), grabbing_(false), rot_(0, -1, -1) {}
   
   void listener(Camera::ShPtr cam) { listener_ = cam; }
   virtual void handleInput(SDL_Event e);
 
  private:
-  Vector3f pos_;
+  Vector3f velo_;
+  Vector3f rot_;
   Camera::ShPtr listener_;
+  bool grabbing_;
   
   DISALLOW_COPY_AND_ASSIGN(PlayerInputHandler);
 };

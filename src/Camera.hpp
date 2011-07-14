@@ -26,17 +26,21 @@ class Camera {
   void apply();
   
   Camera& set_direction(const Vector3f& dir);
+  Camera& rotate(const Vector3f& axis, float angle);
   Camera& shift(const Vector3f& dir);
+  Camera& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }
+  void update(float delta);
   
   // S Q T
   Camera& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }
   Camera& set_quat(const Quaternion& quat) { quat_ = quat; return *this; }
-  Camera& set_translate(const Vector3f& trans) { translate_ = -trans; return *this; }
+  Camera& set_translate(const Vector3f& trans) { translate_ = trans; return *this; }
 
  private:
   Vector3f scale_;
   Quaternion quat_;
-  Vector3f translate_; 
+  Vector3f translate_;
+  Vector3f velo_;
   
   DISALLOW_COPY_AND_ASSIGN(Camera);
 };

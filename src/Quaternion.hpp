@@ -98,7 +98,7 @@ class Quaternion {
   }
   
   //Quaternion& invert() { x_ = -x_; y_ = -y_; z = -z_; return *this; }
-  const Quaternion invert() const { return Quaternion(-vector(), w()); }
+  const Quaternion invert() const { return Quaternion(-(vector().x()), -(vector().y()), -(vector().z()), w()); }
   
   Vector3f operator*(const Vector3f& v) const {
     // nVidia SDK implementation
