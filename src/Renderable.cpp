@@ -8,6 +8,7 @@
 
 void Renderable::render() const {
   if (textured_) {
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
   }
   mesh_->draw();
@@ -46,4 +47,13 @@ void Renderable::render() const {
   } else {
     glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
   }
+}
+
+// For passes without shaders (ie shadow mapping)
+void Renderable::draw_geometry() const {
+  if (textured_) {
+    glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
+  }
+  mesh_->draw();
+  glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
 }

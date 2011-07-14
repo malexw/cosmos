@@ -63,13 +63,18 @@ Camera& Camera::set_direction(const Vector3f& dir) {
   //Vector3f x(1.0f, 0.0f, 0.0f);
   //Vector3f y = ndir.normalize().cross(x).normalize();
 
-  std::cout << x << y << ndir << std::endl;
+  //std::cout << x << y << ndir << std::endl;
   Quaternion q(x, y, ndir);
-  std::cout << q << std::endl;
+  //std::cout << q << std::endl;
   set_quat(q);
 }
 
 Camera& Camera::rotate(const Vector3f& axis, float angle) {
+  Quaternion q(axis, angle);
+  quat_ = q.normalize() * quat_;
+}
+
+Camera& Camera::rotate_relative(const Vector3f& axis, float angle) {
   Quaternion q(quat_ * axis, angle);
   quat_ = q.normalize() * quat_;
 }
@@ -81,4 +86,28 @@ void Camera::update(float delta) {
   //std::cout << (delta * velo_) << std::endl;
   
   translate_ += (delta * (quat_ * velo_));
+}
+
+Matrix4f Camera::matrixFromPositionDirection(Vector3f position, Vector3f direction) {
+  Vector3f ndir = -(direction.normalize());
+  Vector3f vx = Vector3f(0, 1, 0).cross(ndir).normalize();
+  Vector3f vy = ndir.cross(vx).normalize();
+  Quaternion q(vx, vy, ndir);
+  
+  Vector3f iT = -position;
+  Quaternion iR = q.invert();
+
+  iT = iR * iT; // rotate
+
+  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
+  float dx = x+x; float dy = y+y; float dz = z+z;
+  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
+  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  
+  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
+              (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
+              (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
+              iT.x(), iT.y(), iT.z(), 1.0f );
+              
+  return m;
 }

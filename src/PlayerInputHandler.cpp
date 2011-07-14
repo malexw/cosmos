@@ -23,7 +23,7 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         //rot_.x() += e.motion.xrel/10.0f;
         //rot_.y() -= e.motion.yrel/10.0f;
         listener_->rotate(Vector3f(0, -1.0, 0), e.motion.xrel);
-        listener_->rotate(Vector3f(-1.0, 0, 0), e.motion.yrel);
+        listener_->rotate_relative(Vector3f(-1.0, 0, 0), e.motion.yrel);
       }
       break;
     case SDL_MOUSEBUTTONDOWN:

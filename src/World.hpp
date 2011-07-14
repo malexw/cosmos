@@ -31,7 +31,7 @@ class World {
   
   // Called by the engine to submit the geometry to the GPU
   void draw() const;
-  
+  void draw_geometry() const;
   // The number of triangles in the World
 	const unsigned int triangle_count() const { return triangle_count_; }
 

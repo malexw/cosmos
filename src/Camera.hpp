@@ -27,9 +27,12 @@ class Camera {
   
   Camera& set_direction(const Vector3f& dir);
   Camera& rotate(const Vector3f& axis, float angle);
+  Camera& rotate_relative(const Vector3f& axis, float angle);
   Camera& shift(const Vector3f& dir);
   Camera& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }
   void update(float delta);
+  
+  static Matrix4f matrixFromPositionDirection(Vector3f position, Vector3f direction);
   
   // S Q T
   Camera& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }

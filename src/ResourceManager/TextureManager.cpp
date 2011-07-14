@@ -94,7 +94,8 @@ void TextureManager::load_textures() {
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
   //glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
   // No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 960, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 960, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
   Texture::ShPtr shadow (new Texture("shadow_map"));
   shadow->set_index(tex_indicies[tex_count-1]);
   textures_.push_back(shadow);
@@ -104,7 +105,7 @@ void TextureManager::load_textures() {
   Texture::ShPtr tex (new Texture("normalization_map"));
   tex->set_index(tex_indicies[tex_count]);
   textures_.push_back(tex);*/
-	
+	glBindTexture(GL_TEXTURE_2D, 0);
 	loaded_ = true;	
 }
 

@@ -28,6 +28,7 @@ class Renderable {
   Renderable& set_mesh(Mesh::ShPtr mesh) { mesh_ = mesh; return *this; }
   
   void render() const;
+  void draw_geometry() const;
 
  protected:
   //Single mesh per object for now

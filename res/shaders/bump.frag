@@ -13,11 +13,9 @@ uniform sampler2D decal;
 
 //varying vec4 diffuse, ambient;
 varying vec3 vVaryingNormal;
-varying vec3 vVaryingLightDir;
+//varying vec3 vVaryingLightDir;
 varying vec2 vTexCoords;
 varying vec2 vBumpCoords;
- 
-//out vec4 vFragColour;
  
 void main(void)
 { 
@@ -25,7 +23,14 @@ void main(void)
 	vec3 normalAdjusted = vVaryingNormal + normalize((texture2D(bump, vBumpCoords.st).rgb - 0.5)*2.0);
  
 	// Calculate diffuse intensity
-	float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), normalize(vVaryingLightDir)));
+  //float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), normalize(vVaryingLightDir)));
+	//float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), normalize(vec3(0, 0, -1))));
+  // LightSource[0] is a directional light - therefore negative position is what we need to dot with
+  float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), -normalize(gl_LightSource[0].position.xyz)));
+  //if (diffuseIntensity < 0.5) {
+  //  discard;
+  //}
+  //float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), normalize(vVaryingLightDir)));
  
 	// Add the diffuse contribution blended with the standard texture lookup and add in the ambient light on top
   vec3 color = diffuseIntensity * (gl_FrontMaterial.diffuse).rgb + (gl_FrontMaterial.ambient).rgb;

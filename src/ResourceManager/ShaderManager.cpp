@@ -16,6 +16,8 @@ ShaderManager::ShaderManager()
 void ShaderManager::init() {
 	shader_names_.push_back(std::string("res/shaders/bump.vert"));
   shader_names_.push_back(std::string("res/shaders/bump.frag"));
+  shader_names_.push_back(std::string("res/shaders/shadow.vert"));
+  shader_names_.push_back(std::string("res/shaders/shadow.frag"));
   load_shaders();
 }
 
@@ -61,10 +63,10 @@ void ShaderManager::load_shaders() {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
 	}
-  // Sooo lazy
+  // The bump program
   int p = glCreateProgram();
-  int v = vshaders_.back()->get_id();
-  int f = fshaders_.back()->get_id();
+  int v = vshaders_[0]->get_id();
+  int f = fshaders_[0]->get_id();
   
   glAttachShader(p,v);
   glAttachShader(p,f);
@@ -81,6 +83,23 @@ void ShaderManager::load_shaders() {
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
   glUniform1i(decalSampler, 2);
+
+  // The shadow program
+  p = glCreateProgram();
+  v = vshaders_[1]->get_id();
+  f = fshaders_[1]->get_id();
+  
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
+  programs_.push_back(shadow);
+  glUseProgram(p);
+  texSampler = glGetUniformLocation(p, "tex");
+  GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
+  glUniform1i(texSampler, 0);
+  glUniform1i(shadowSampler, 3);
 
   glUseProgram(0);
 }

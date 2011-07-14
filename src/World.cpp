@@ -57,6 +57,14 @@ void World::draw() const {
   }
 }
 
+void World::draw_geometry() const {
+  glVertexPointer(3, GL_FLOAT, 0, &verticies_[0]);
+  glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
+  glNormalPointer(GL_FLOAT, 0, &normals_[0]);
+  glColorPointer(3, GL_FLOAT, 0, &colors_[0]);
+  glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+}
+
 void World::decode(FileBlob& b) {
    
   int index = 0;
