@@ -18,6 +18,7 @@ void TextureManager::init() {
 	tex_names_.push_back(std::string("res/textures/default.png"));
 	tex_names_.push_back(std::string("res/textures/terminal.png"));
   tex_names_.push_back(std::string("res/textures/tronish.png"));
+  tex_names_.push_back(std::string("res/textures/earth.png"));
   tex_names_.push_back(std::string("res/textures/normal_map.png"));
   tex_names_.push_back(std::string("res/textures/decal-test.png"));
   load_textures();

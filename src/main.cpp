@@ -132,8 +132,8 @@ int main(int argc, char* argv[]) {
   GameObject::ShPtr ob(new GameObject());
   Renderable::ShPtr ren(new Renderable(ob->id()));
   Transform::ShPtr tran(new Transform(ob->id()));
-  ren->set_mesh(c).set_material(m);
-  tran->set_translate(Vector3f(5.0f, 10.0f, 10.0f));
+  ren->set_mesh(c).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
+  //tran->set_translate(Vector3f(5.0f, 10.0f, 10.0f));
   
   GameObject::ShPtr ob2(new GameObject());
   Renderable::ShPtr ren2(new Renderable(ob2->id()));
@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,shadowBuffer);	//Rendering offscreen
       glUseProgram(0);
       glViewport(0,0,1024,1024);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClear(GL_DEPTH_BUFFER_BIT);
       glCullFace(GL_FRONT);
       glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
@@ -220,14 +220,33 @@ int main(int argc, char* argv[]) {
         glMultMatrixd(modelView);
 
         glMatrixMode(GL_MODELVIEW);
-      
-      //------------------- Second pass to actually draw things
+
+      //-------------- Second pass for skybox
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
       glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
       // MUST call glColorMask BEFORE glClear or things get explodey
       glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
       glCullFace(GL_BACK);
+      
+      glActiveTexture(GL_TEXTURE0);
+      
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),0.1,3);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      //gluLookAt(5, 5, -5, 0, -1, 0, 0, 0, -1);
+      glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1)).to_array());
+      glDisable(GL_LIGHTING);
+      glFrontFace(GL_CW);
+      cam->apply_rotation();
+      ren->render();
+      glFrontFace(GL_CCW);
+      glEnable(GL_LIGHTING);      
+      
+      //------------------- Third pass to actually draw things
+      glClear(GL_DEPTH_BUFFER_BIT); 
 
       ShaderManager::get().get_shader_program("shadow")->run();
       glActiveTexture(GL_TEXTURE3);
@@ -260,6 +279,7 @@ int main(int argc, char* argv[]) {
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
+
       ////
     //////////////////////////////////////////
     SDL_GL_SwapBuffers();

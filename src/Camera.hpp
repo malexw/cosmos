@@ -24,6 +24,7 @@ class Camera {
 	Camera(): scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
   
   void apply();
+  void apply_rotation();
   
   Camera& set_direction(const Vector3f& dir);
   Camera& rotate(const Vector3f& axis, float angle);

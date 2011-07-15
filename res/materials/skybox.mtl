@@ -1,0 +1,6 @@
+newmtl skybox
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+map_Ka earth.png
+map_Kd earth.png
+map_Ks earth.png
