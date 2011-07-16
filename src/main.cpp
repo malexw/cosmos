@@ -10,6 +10,8 @@
 #include "InputManager.hpp"
 #include "Camera.hpp"
 #include "GameObject.hpp"
+#include "GameObjectManager.hpp"
+#include "CollidableObject.hpp"
 #include "Material.hpp"
 #include "ParticleEmitter.hpp"
 #include "Quaternion.hpp"
@@ -99,9 +101,10 @@ int main(int argc, char* argv[]) {
   Timer::ShPtr fps_(new Timer());
 
   // -------------- CAMERA ---------------------------------------------
-  Camera::ShPtr cam(new Camera());
-  cam->set_direction(Vector3f(0.0f, -1.0f, -1.0f));
-  cam->set_translate(Vector3f(0.0f, 10.0f, 20.0f));
+  //Camera::ShPtr cam(new Camera());
+  //cam->set_direction(Vector3f(0.0f, 0.0f, -1.0f));
+  //cam->set_translate(Vector3f(5.0f, 3.0f, -3.0f));
+  //cam->set_translate(Vector3f(6.732f, 1.0f, -12.0f));
 
   //cam->set_direction(Vector3f(2, 0, -10)-Vector3f(32, 20, 0));
   //cam->set_translate(Vector3f(32, 20, 0));
@@ -134,24 +137,45 @@ int main(int argc, char* argv[]) {
   Material::ShPtr m = MaterialManager::get().get_material("res/materials/default.mtl");
   float r = 0.0f;
   
-  GameObject::ShPtr ob(new GameObject());
-  Renderable::ShPtr ren(new Renderable(ob->id()));
-  Transform::ShPtr tran(new Transform(ob->id()));
-  ren->set_mesh(c).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
-  //tran->set_translate(Vector3f(5.0f, 10.0f, 10.0f));
+  GameObject::ShPtr skybox(new GameObject());
+  GameObjectManager::get().add_object(skybox);
+  Transform::ShPtr skybox_transform(new Transform(skybox->id()));
+  skybox->set_transform(skybox_transform);
+  Renderable::ShPtr skybox_renderable(new Renderable(skybox->id()));
+  skybox->set_renderable(skybox_renderable);
+  skybox_renderable->set_mesh(c).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
   
-  GameObject::ShPtr ob2(new GameObject());
-  Renderable::ShPtr ren2(new Renderable(ob2->id()));
-  Transform::ShPtr tran2(new Transform(ob2->id()));
-  ren2->set_mesh(c).set_material(m);
-  tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
+  GameObject::ShPtr camera(new GameObject());
+  GameObjectManager::get().add_object(camera);
+  Transform::ShPtr camera_transform(new Transform(camera->id()));
+  camera->set_transform(camera_transform);
+  CollidableObject::ShPtr camera_collidable(new CollidableObject(camera->id()));
+  camera->set_collidable(camera_collidable);
+  camera_collidable->set_scale(Vector3f(3.0f, 3.0f, 3.0f));
+  camera_transform->set_direction(Vector3f(0.0f, 0.0f, -1.0f));
+  camera_transform->set_translate(Vector3f(5.0f, 3.0f, -3.0f));
+  
+  GameObject::ShPtr spinning_cube(new GameObject());
+  GameObjectManager::get().add_object(spinning_cube); 
+  Transform::ShPtr cube_transform(new Transform(spinning_cube->id()));
+  spinning_cube->set_transform(cube_transform);
+  Renderable::ShPtr cube_renderable(new Renderable(spinning_cube->id()));
+  spinning_cube->set_renderable(cube_renderable);
+  CollidableObject::ShPtr cube_collidable(new CollidableObject(spinning_cube->id()));
+  spinning_cube->set_collidable(cube_collidable);
+  cube_renderable->set_mesh(c).set_material(m);
+  cube_transform->set_translate(Vector3f(2.0f, 1.0f, -12.0f));
+  //cube_collidable->set_translate(Vector3f(2.0f, 1.0f, -12.0f));
+  cube_collidable->set_scale(Vector3f(1.732, 1.732, 1.732));
   
   GameObject::ShPtr part(new GameObject());
+  GameObjectManager::get().add_object(part);
   Renderable::ShPtr particle_renderable(new Renderable(part->id()));
+  part->set_renderable(particle_renderable);
   particle_renderable->set_mesh(q).set_material(MaterialManager::get().get_material("res/materials/ion.mtl"));
   //std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
   
-  ParticleEmitter::ShPtr emitter(new ParticleEmitter(particle_renderable, Vector3f(7, 1, -20), Vector3f(0, 1, 0), Vector3f(1, 0, 0), 3.0f, 2.0f, 15, 30));
+  ParticleEmitter::ShPtr emitter(new ParticleEmitter(particle_renderable, Vector3f(7, 1, -20), Vector3f(0, 1, 0), Vector3f(1, 0, 0), 3.0f, 2.0f, 20, 30));
   //Particle::ShPtr part(new Particle(ren2));
   
   // ----------------- WORLD -------------------------------------------
@@ -159,10 +183,10 @@ int main(int argc, char* argv[]) {
   
   // ----------------- INPUT -------------------------------------------
   InputManager im;
-  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(ob->id()));
+  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(camera->id()));
   InputHandler::ShPtr ih(boost::dynamic_pointer_cast<InputHandler>(pih));
   im.pushHandler(ih);
-  pih->listener(cam);
+  //pih->listener(cam);
   
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_COLOR_ARRAY);
@@ -172,12 +196,23 @@ int main(int argc, char* argv[]) {
 
   while(1) {
     fps_->frame_start();
+    
+    // Input
     im.handleInput();
+    
+    // Update
     float updateDelta = fps_->frame_delta();
-    cam->update(updateDelta);
+    //cam->update(updateDelta);
+    camera_collidable->update(updateDelta);
     emitter->update(updateDelta);
+    //camera_transform->set_translate(cam->get_position());
     r += 1.0f;
-    //emitter->rotate(Vector3f(0, 0, 1), 1.0f);
+    
+    // Collisions
+    //cube_collidable->check(camera_collidable);
+    camera_collidable->check(cube_collidable);
+    
+    // Reupdate
 
     //-------------- First pass for shadows
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,shadowBuffer);	//Rendering offscreen
@@ -206,7 +241,7 @@ int main(int argc, char* argv[]) {
       glRotatef(r, 0.0f, 1.0f, 0.0f);
       glRotatef(r/2, 1.0f, 0.0f, 0.0f);
       //
-      ren2->draw_geometry();
+      cube_renderable->draw_geometry();
       //
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
@@ -255,8 +290,9 @@ int main(int argc, char* argv[]) {
       glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1)).to_array());
       glDisable(GL_LIGHTING);
       glFrontFace(GL_CW);
-      cam->apply_rotation();
-      ren->render();
+      //cam->apply_rotation();
+      camera_transform->apply_rotation();
+      skybox_renderable->render();
       glFrontFace(GL_CCW);
       glEnable(GL_LIGHTING);      
       
@@ -272,18 +308,16 @@ int main(int argc, char* argv[]) {
       gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
-      cam->apply();
+      glActiveTexture(GL_TEXTURE0);
+      camera_transform->apply_inverse();
+      glPushMatrix();
+      camera_transform->apply();
+      //camera_collidable->render_collision();
+      glPopMatrix();
       // Remember kids, always apply your lights *after* the camera transform
       glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
 
-      glActiveTexture(GL_TEXTURE0);
       w->draw();
-      glUseProgram(0);
-      glDisable(GL_LIGHTING);
-      glAlphaFunc(GL_GREATER, 0.5);
-      emitter->render(cam);
-      glAlphaFunc(GL_GREATER, 0.1);
-      glEnable(GL_LIGHTING);
       
       glPushMatrix();
       glTranslatef(2.0f,1.0f,-12.0f);
@@ -295,12 +329,25 @@ int main(int argc, char* argv[]) {
       glRotatef(r, 0.0f, 1.0f, 0.0f);
       glRotatef(r/2, 1.0f, 0.0f, 0.0f);
       //
-      ren2->render();
+      cube_renderable->render();
+      cube_collidable->render_collision();
       //
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
-
+      glUseProgram(0);
+      glDisable(GL_LIGHTING);
+      //glAlphaFunc(GL_GREATER, 0.1);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+      //glDisable(GL_DEPTH_TEST);
+      glDepthMask(GL_FALSE);
+      emitter->render(camera_transform);
+      //emitter->render(cam);
+      glDepthMask(GL_TRUE);
+      //glEnable(GL_DEPTH_TEST);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      //glAlphaFunc(GL_GREATER, 0.1);
+      glEnable(GL_LIGHTING);
       ////
     //////////////////////////////////////////
     SDL_GL_SwapBuffers();

@@ -1,29 +1,36 @@
+#include "GameObjectManager.hpp"
 #include "PlayerInputHandler.hpp"
+
+PlayerInputHandler::PlayerInputHandler(unsigned int id)
+ : InputHandler(id), grabbing_(false), rot_(0, -1, -1) {
+  collidable_ = GameObjectManager::get().get_object(id)->get_collidable();
+  transform_ = GameObjectManager::get().get_object(id)->get_transform();
+}
 
 void PlayerInputHandler::handleInput(SDL_Event e) {
   switch (e.type) {
     case SDL_KEYDOWN:
       switch(e.key.keysym.sym) {
-        case SDLK_w: velo_.z() = -10; listener_->set_velocity(velo_); break;
-        case SDLK_a: velo_.x() = -10; listener_->set_velocity(velo_); break;
-        case SDLK_s: velo_.z() = 10; listener_->set_velocity(velo_); break;
-        case SDLK_d: velo_.x() = 10; listener_->set_velocity(velo_); break;
+        case SDLK_w: velo_.z() = -10; collidable_->set_velocity(velo_); break;
+        case SDLK_a: velo_.x() = -10; collidable_->set_velocity(velo_); break;
+        case SDLK_s: velo_.z() = 10; collidable_->set_velocity(velo_); break;
+        case SDLK_d: velo_.x() = 10; collidable_->set_velocity(velo_); break;
       };
       break;
     case SDL_KEYUP:
       switch(e.key.keysym.sym) {
-        case SDLK_w: velo_.z() = 0; listener_->set_velocity(velo_); break;
-        case SDLK_a: velo_.x() = 0; listener_->set_velocity(velo_); break;
-        case SDLK_s: velo_.z() = 0; listener_->set_velocity(velo_); break;
-        case SDLK_d: velo_.x() = 0; listener_->set_velocity(velo_); break;
+        case SDLK_w: velo_.z() = 0; collidable_->set_velocity(velo_); break;
+        case SDLK_a: velo_.x() = 0; collidable_->set_velocity(velo_); break;
+        case SDLK_s: velo_.z() = 0; collidable_->set_velocity(velo_); break;
+        case SDLK_d: velo_.x() = 0; collidable_->set_velocity(velo_); break;
       };
       break;
     case SDL_MOUSEMOTION:
       if (grabbing_) { //std::cout << "Mouse " << e.motion.xrel << " " << e.motion.yrel << std::endl;
         //rot_.x() += e.motion.xrel/10.0f;
         //rot_.y() -= e.motion.yrel/10.0f;
-        listener_->rotate(Vector3f(0, -1.0, 0), e.motion.xrel);
-        listener_->rotate_relative(Vector3f(-1.0, 0, 0), e.motion.yrel);
+        transform_->rotate(Vector3f(0, -1.0, 0), e.motion.xrel);
+        transform_->rotate_relative(Vector3f(-1.0, 0, 0), e.motion.yrel);
       }
       break;
     case SDL_MOUSEBUTTONDOWN:

@@ -29,7 +29,7 @@ void ParticleEmitter::update(float delta) {
   //translate_ += (delta * (quat_ * velo_));
 }
 
-void ParticleEmitter::render(Camera::ShPtr cam) {
+void ParticleEmitter::render(Transform::ShPtr cam) {
 
   glPushMatrix();
   /*float modelview[16];

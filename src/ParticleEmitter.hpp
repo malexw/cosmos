@@ -32,7 +32,7 @@ class ParticleEmitter {
   }
 
   void update(float delta);
-  void render(Camera::ShPtr cam);
+  void render(Transform::ShPtr cam);
   void rotate(const Vector3f& axis, float angle);
 
  private:

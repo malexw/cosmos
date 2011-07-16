@@ -11,7 +11,7 @@ class Timer {
  public:
   typedef boost::shared_ptr<Timer> ShPtr;
   
-  Timer(): paused_(false) { gettimeofday(&frame_start_, NULL); }
+  Timer(): paused_(false), frame_counter_(1) { gettimeofday(&frame_start_, NULL); }
 
   void frame_start();
   void frame_stop();
@@ -26,6 +26,8 @@ class Timer {
   timeval frame_start_, frame_end_;
   timeval last_start_;
   bool paused_;
+  float fps_counter_;
+  int frame_counter_;
   
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

@@ -27,7 +27,7 @@ class Particle {
    : renderable_(renderable), lifetime_(0.0f) {}
 
   void update(float delta);
-  void render(Camera::ShPtr cam);
+  void render(Transform::ShPtr cam);
 
   void reset(Vector3f position, Vector3f velocity, float lifetime) {
     pos_ = position;

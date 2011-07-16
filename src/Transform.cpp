@@ -19,11 +19,71 @@ void Transform::apply() {
   glMultMatrixf(m.to_array());
 }
 
-void Transform::load() {
-  glLoadMatrixf(trans_.to_array());
+void Transform::apply_inverse() {
+  Vector3f iT = -translate_;
+  Vector3f iS(1 / scale_.x(), 1 / scale_.y(), 1 / scale_.z());
+  Quaternion iR = quat_.invert();
+
+  iT = iR * iT; // rotate
+  iT *= iS; // scale
+
+  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
+  float dx = x+x; float dy = y+y; float dz = z+z;
+  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
+  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  
+  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
+                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
+                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
+                iT.x(), iT.y(), iT.z(), 1.0f );
+
+  m[0] = m[0] * iS.x(); m[1] = m[1] * iS.x(); m[2] = m[2] * iS.x();
+  m[4] = m[4] * iS.y(); m[5] = m[5] * iS.y(); m[7] = m[7] * iS.y();
+  m[8] = m[8] * iS.z(); m[9] = m[9] * iS.z(); m[10] = m[10] * iS.z();
+  
+  glMultMatrixf(m.to_array());
 }
 
-Transform& Transform::rotate(const Quaternion& q) {
+void Transform::apply_rotation() {
+  Quaternion iR = quat_.invert();
+
+  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
+  float dx = x+x; float dy = y+y; float dz = z+z;
+  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
+  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  
+  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
+                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
+                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f );
+
+  glMultMatrixf(m.to_array());
+}
+
+/*void Transform::load() {
+  glLoadMatrixf(trans_.to_array());
+}*/
+
+Transform& Transform::rotate(const Vector3f& axis, float angle) {
+  Quaternion q(axis, angle);
+  quat_ = q.normalize() * quat_;
+}
+
+Transform& Transform::rotate_relative(const Vector3f& axis, float angle) {
+  Quaternion q(quat_ * axis, angle);
+  quat_ = q.normalize() * quat_;
+}
+
+void Transform::set_direction(const Vector3f& dir) {
+  Vector3f ndir = -(dir.normalize());
+  Vector3f x = Vector3f(0, 1, 0).cross(ndir).normalize();
+  Vector3f y = ndir.cross(x).normalize();
+
+  Quaternion q(x, y, ndir);
+  set_quat(q);
+}
+
+/*Transform& Transform::rotate(const Quaternion& q) {
   float x = q.x(); float y = q.y(); float z = q.z(); float w = q.w();
   float dx = x+x; float dy = y+y; float dz = z+z;
   float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
@@ -35,7 +95,8 @@ Transform& Transform::rotate(const Quaternion& q) {
   trans_ = rot * trans_;
   itrans_ = itrans_ * rot.transpose();
   
-  return *this;
+  return *this;*/
+  // Following code may not work
   /*float x = q.x(); float y = q.y(); float z = q.z(); float w = q.w();
   float xx = x*x; float yy = y*y; float zz = z*z;
   float xy = x*y; float xz = x*z; float xw = x*w; float yz = y*z; float yw = y*w; float zw = z*w;
@@ -46,9 +107,10 @@ Transform& Transform::rotate(const Quaternion& q) {
   trans_ = rot * trans_;
   itrans_ = itrans_ * rot.transpose();
   
-  return *this;*/
-}
+  return *this;
+}*/
 
+/*
 Transform& Transform::rotateX(float angle) {
   double cos_t = cos(angle * M_PI / 180);
   double sin_t = sin(angle * M_PI / 180);
@@ -99,9 +161,9 @@ Transform& Transform::scale(const Vector3f& scale) {
   itrans_ = s * itrans_;
   
   return *this;
-};
+};*/
 
-Transform& Transform::translate(const Vector3f& translation) {
+//Transform& Transform::translate(const Vector3f& translation) {
   /*Matrix4f trans( 1.0f, 0.0f, 0.0f, translation.x(),
                   0.0f, 1.0f, 0.0f, translation.y(),
                   0.0f, 0.0f, 1.0f, translation.z(),
@@ -116,7 +178,7 @@ Transform& Transform::translate(const Vector3f& translation) {
                   0.0f, 1.0f, 0.0f, translation.y(),
                   0.0f, 0.0f, 1.0f, translation.z(),
                   0.0f, 0.0f, 0.0f, 1.0f );*/
-  Matrix4f trans( 1.0f, 0.0f, 0.0f, 0.0f,
+  /*Matrix4f trans( 1.0f, 0.0f, 0.0f, 0.0f,
                   0.0f, 1.0f, 0.0f, 0.0f,
                   0.0f, 0.0f, 1.0f, 0.0f,
                   translation.x(), translation.y(), translation.z(), 1.0f );
@@ -125,4 +187,4 @@ Transform& Transform::translate(const Vector3f& translation) {
   itrans_ = itrans_ * trans;
   
   return *this;
-}
+}*/

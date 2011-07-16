@@ -7,7 +7,7 @@ void Particle::update(float delta) {
   }
 }
 
-void Particle::render(Camera::ShPtr cam) {
+void Particle::render(Transform::ShPtr cam) {
   if (lifetime_ > 0) {
     glPushMatrix();
     Vector3f up = cam->get_rotation() * Vector3f(0, 1, 0);
