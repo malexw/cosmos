@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 
 #include <boost/pointer_cast.hpp>
 
@@ -10,6 +11,7 @@
 #include "Camera.hpp"
 #include "GameObject.hpp"
 #include "Material.hpp"
+#include "ParticleEmitter.hpp"
 #include "Quaternion.hpp"
 #include "Renderable.hpp"
 #include "ResourceManager/ResourceManager.hpp"
@@ -33,6 +35,8 @@ const float US_PER_FRAME = 1000000/FRAMES_PER_SECOND;
 
 int main(int argc, char* argv[]) {
 
+  srand(31337);
+
   if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )
   {
       //error
@@ -55,6 +59,7 @@ int main(int argc, char* argv[]) {
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, 0.1);
   
@@ -140,7 +145,14 @@ int main(int argc, char* argv[]) {
   Transform::ShPtr tran2(new Transform(ob2->id()));
   ren2->set_mesh(c).set_material(m);
   tran2->translate(Vector3f(2.0f, 1.0f, -12.0f));
+  
+  GameObject::ShPtr part(new GameObject());
+  Renderable::ShPtr particle_renderable(new Renderable(part->id()));
+  particle_renderable->set_mesh(q).set_material(MaterialManager::get().get_material("res/materials/ion.mtl"));
   //std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
+  
+  ParticleEmitter::ShPtr emitter(new ParticleEmitter(particle_renderable, Vector3f(7, 1, -20), Vector3f(0, 1, 0), Vector3f(1, 0, 0), 3.0f, 2.0f, 15, 30));
+  //Particle::ShPtr part(new Particle(ren2));
   
   // ----------------- WORLD -------------------------------------------
   World::ShPtr w(new World(std::string("res/worlds/bigbrother.obj")));
@@ -161,8 +173,11 @@ int main(int argc, char* argv[]) {
   while(1) {
     fps_->frame_start();
     im.handleInput();
-    cam->update(fps_->frame_delta());
+    float updateDelta = fps_->frame_delta();
+    cam->update(updateDelta);
+    emitter->update(updateDelta);
     r += 1.0f;
+    //emitter->rotate(Vector3f(0, 0, 1), 1.0f);
 
     //-------------- First pass for shadows
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,shadowBuffer);	//Rendering offscreen
@@ -263,7 +278,13 @@ int main(int argc, char* argv[]) {
 
       glActiveTexture(GL_TEXTURE0);
       w->draw();
-
+      glUseProgram(0);
+      glDisable(GL_LIGHTING);
+      glAlphaFunc(GL_GREATER, 0.5);
+      emitter->render(cam);
+      glAlphaFunc(GL_GREATER, 0.1);
+      glEnable(GL_LIGHTING);
+      
       glPushMatrix();
       glTranslatef(2.0f,1.0f,-12.0f);
       glRotatef(r, 0.0f, 1.0f, 0.0f);

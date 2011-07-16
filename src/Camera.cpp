@@ -42,6 +42,20 @@ void Camera::apply_rotation() {
   glMultMatrixf(m.to_array());
 }
 
+/*void Camera::apply_rotation_inv() {
+  float x = quat_.x(); float y = quat_.y(); float z = quat_.z(); float w = quat_.w();
+  float dx = x+x; float dy = y+y; float dz = z+z;
+  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
+  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  
+  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
+                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
+                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f );
+
+  glMultMatrixf(m.to_array());
+}*/
+
 Camera& Camera::set_direction(const Vector3f& dir) {
   Vector3f ndir = -(dir.normalize());
   Vector3f x = Vector3f(0, 1, 0).cross(ndir).normalize();

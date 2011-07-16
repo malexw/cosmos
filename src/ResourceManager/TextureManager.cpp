@@ -21,6 +21,7 @@ void TextureManager::init() {
   tex_names_.push_back(std::string("res/textures/earth.png"));
   tex_names_.push_back(std::string("res/textures/normal_map.png"));
   tex_names_.push_back(std::string("res/textures/decal-test.png"));
+  tex_names_.push_back(std::string("res/textures/ion.png"));
   load_textures();
 }
 
@@ -68,7 +69,7 @@ void TextureManager::load_textures() {
 			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
 		}
 	}
-  for (int i = tex_count-2; i < tex_count-1; ++i) {
+  for (int i = tex_count-3; i < tex_count-1; ++i) {
 		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
 		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
 		if (textureImage[i]) {		

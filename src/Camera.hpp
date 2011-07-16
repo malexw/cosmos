@@ -25,6 +25,7 @@ class Camera {
   
   void apply();
   void apply_rotation();
+  //void apply_rotation_inv();
   
   Camera& set_direction(const Vector3f& dir);
   Camera& rotate(const Vector3f& axis, float angle);
@@ -39,6 +40,7 @@ class Camera {
   Camera& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }
   Camera& set_quat(const Quaternion& quat) { quat_ = quat; return *this; }
   Camera& set_translate(const Vector3f& trans) { translate_ = trans; return *this; }
+  Quaternion get_rotation() { return quat_; }
 
  private:
   Vector3f scale_;
