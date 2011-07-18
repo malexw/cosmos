@@ -1,18 +1,14 @@
 #ifndef COSMOS_GAMEOBJECTMANAGER_H_
 #define COSMOS_GAMEOBJECTMANAGER_H_
 
-#include <boost/shared_ptr.hpp>
-//#include <vector>
 #include <list>
-#include <string>
+
+#include <boost/shared_ptr.hpp>
 
 #include "SDL/SDL.h"
-//#include "SDL/SDL_opengl.h"
 
 #include "GameObject.hpp"
 #include "util.hpp"
-//#include "Vector2f.hpp"
-//#include "Vector3f.hpp"
 
 /*
  * A class for managing things in the game
@@ -28,6 +24,7 @@ class GameObjectManager {
   GameObject::ShPtr get_object(unsigned int id);
 
  private:
+  // TODO make this a hashmap
   std::list<GameObject::ShPtr> objects_;
   
   DISALLOW_COPY_AND_ASSIGN(GameObjectManager);

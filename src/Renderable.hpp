@@ -2,17 +2,13 @@
 #define COSMOS_RENDERABLE_H_
 
 #include <boost/shared_ptr.hpp>
-//#include <vector>
 #include <string>
 
-//#include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
 #include "Material.hpp"
 #include "Mesh.hpp"
 #include "util.hpp"
-//#include "Vector2f.hpp"
-//#include "Vector3f.hpp"
 
 /*
  * A class for representing the renderable parts of objects in the game

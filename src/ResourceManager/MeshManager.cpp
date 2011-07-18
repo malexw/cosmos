@@ -20,6 +20,7 @@ void MeshManager::init() {
 	mesh_names_.push_back(std::string("res/meshes/cube.obj"));
   mesh_names_.push_back(std::string("res/meshes/face-center-quad.obj"));
   mesh_names_.push_back(std::string("res/meshes/edge-center-quad.obj"));
+  mesh_names_.push_back(std::string("res/meshes/skybox.obj"));
   load_meshes();
 }
 

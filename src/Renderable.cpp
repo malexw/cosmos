@@ -13,7 +13,6 @@ void Renderable::render() const {
   }
   mesh_->draw();
   if (material_->is_bump_mapped()) {
-    //glBindTexture(GL_TEXTURE_2D, material_->get_bump_tex()->get_index());
     glActiveTexture(GL_TEXTURE1);
     glClientActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);

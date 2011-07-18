@@ -3,10 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <iostream>
-//#include <vector>
 #include <string>
 
-//#include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
 #include "Material.hpp"
@@ -14,7 +12,6 @@
 #include "Mesh.hpp"
 #include "Quaternion.hpp"
 #include "util.hpp"
-//#include "Vector2f.hpp"
 #include "Vector3f.hpp"
 
 /*
@@ -25,7 +22,6 @@ class Transform {
 	typedef boost::shared_ptr<Transform> ShPtr;
 
   Transform(unsigned int id): id_(id), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
-	//Transform(GameObject::ShPtr parent): parent_(partent) id_(parent.id()), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
   const unsigned int id() const { return id_; }
   
   void apply();

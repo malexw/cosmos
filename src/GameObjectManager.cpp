@@ -8,7 +8,7 @@ GameObjectManager& GameObjectManager::get() {
 }
 
 void GameObjectManager::add_object(GameObject::ShPtr ob) {
-  //if not already added
+  //TODO if not already added
   objects_.push_back(ob);
 }
 

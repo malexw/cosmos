@@ -26,11 +26,10 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
       };
       break;
     case SDL_MOUSEMOTION:
-      if (grabbing_) { //std::cout << "Mouse " << e.motion.xrel << " " << e.motion.yrel << std::endl;
-        //rot_.x() += e.motion.xrel/10.0f;
-        //rot_.y() -= e.motion.yrel/10.0f;
-        transform_->rotate(Vector3f(0, -1.0, 0), e.motion.xrel);
-        transform_->rotate_relative(Vector3f(-1.0, 0, 0), e.motion.yrel);
+      if (grabbing_) {
+        //std::cout << "Mouse " << e.motion.xrel << " " << e.motion.yrel << std::endl;
+        transform_->rotate(Vector3f::NEGATIVE_Y, e.motion.xrel);
+        transform_->rotate_relative(Vector3f::NEGATIVE_X, e.motion.yrel);
       }
       break;
     case SDL_MOUSEBUTTONDOWN:

@@ -60,10 +60,6 @@ void Transform::apply_rotation() {
   glMultMatrixf(m.to_array());
 }
 
-/*void Transform::load() {
-  glLoadMatrixf(trans_.to_array());
-}*/
-
 Transform& Transform::rotate(const Vector3f& axis, float angle) {
   Quaternion q(axis, angle);
   quat_ = q.normalize() * quat_;
@@ -76,12 +72,16 @@ Transform& Transform::rotate_relative(const Vector3f& axis, float angle) {
 
 void Transform::set_direction(const Vector3f& dir) {
   Vector3f ndir = -(dir.normalize());
-  Vector3f x = Vector3f(0, 1, 0).cross(ndir).normalize();
+  Vector3f x = Vector3f::UNIT_Y.cross(ndir).normalize();
   Vector3f y = ndir.cross(x).normalize();
 
   Quaternion q(x, y, ndir);
   set_quat(q);
 }
+
+/*void Transform::load() {
+  glLoadMatrixf(trans_.to_array());
+}*/
 
 /*Transform& Transform::rotate(const Quaternion& q) {
   float x = q.x(); float y = q.y(); float z = q.z(); float w = q.w();

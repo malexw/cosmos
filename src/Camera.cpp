@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-void Camera::apply() {
+/*void Camera::apply() {
 
   Vector3f iT = -translate_;
   Vector3f iS(1 / scale_.x(), 1 / scale_.y(), 1 / scale_.z());
@@ -24,9 +24,9 @@ void Camera::apply() {
   m[8] = m[8] * iS.z(); m[9] = m[9] * iS.z(); m[10] = m[10] * iS.z();
   
   glMultMatrixf(m.to_array());
-}
+}*/
 
-void Camera::apply_rotation() {
+/*void Camera::apply_rotation() {
   Quaternion iR = quat_.invert();
 
   float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
@@ -40,38 +40,35 @@ void Camera::apply_rotation() {
                 0.0f, 0.0f, 0.0f, 1.0f );
 
   glMultMatrixf(m.to_array());
-}
+}*/
 
-Camera& Camera::set_direction(const Vector3f& dir) {
+/*Camera& Camera::set_direction(const Vector3f& dir) {
   Vector3f ndir = -(dir.normalize());
   Vector3f x = Vector3f(0, 1, 0).cross(ndir).normalize();
   Vector3f y = ndir.cross(x).normalize();
 
-  //std::cout << x << y << ndir << std::endl;
   Quaternion q(x, y, ndir);
-  //std::cout << q << std::endl;
   set_quat(q);
-}
+}*/
 
-Camera& Camera::rotate(const Vector3f& axis, float angle) {
+/*Camera& Camera::rotate(const Vector3f& axis, float angle) {
   Quaternion q(axis, angle);
   quat_ = q.normalize() * quat_;
-}
+}*/
 
-Camera& Camera::rotate_relative(const Vector3f& axis, float angle) {
+/*Camera& Camera::rotate_relative(const Vector3f& axis, float angle) {
   Quaternion q(quat_ * axis, angle);
   quat_ = q.normalize() * quat_;
-}
+}*/
 
-void Camera::update(float delta) {
-  //std::cout << (delta * velo_) << std::endl;
-  
+/*void Camera::update(float delta) {  
   translate_ += (delta * (quat_ * velo_));
-}
+}*/
 
+// Should probably move this to the matrix class or something
 Matrix4f Camera::matrixFromPositionDirection(Vector3f position, Vector3f direction) {
   Vector3f ndir = -(direction.normalize());
-  Vector3f vx = Vector3f(0, 1, 0).cross(ndir).normalize();
+  Vector3f vx = Vector3f::UNIT_Y.cross(ndir).normalize();
   Vector3f vy = ndir.cross(vx).normalize();
   Quaternion q(vx, vy, ndir);
   
