@@ -16,6 +16,8 @@
 #include "ParticleEmitter.hpp"
 #include "Quaternion.hpp"
 #include "Renderable.hpp"
+#include "Sound.hpp"
+#include "ResourceManager/AudioManager.hpp"
 #include "ResourceManager/ResourceManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
 #include "ResourceManager/MaterialManager.hpp"
@@ -176,6 +178,12 @@ int main(int argc, char* argv[]) {
   part->set_renderable(particle_renderable);
   particle_renderable->set_mesh(q).set_material(MaterialManager::get().get_material("res/materials/ion.mtl"));
   //std::cout << Quaternion(Vector3f(0.0f, 1.0f, 0.0f), 1.0f)*Quaternion(Vector3f(1.0f, 0.0f, 0.0f), 0.5f) << std::endl;
+  Sound::ShPtr part_sound = AudioManager::get().get_sound("res/sounds/starshipmono.wav");
+  part_sound->set_position(Vector3f(7, 1, -20));
+  part_sound->set_gain(1.0f);
+  part_sound->set_looping(true);
+  part_sound->set_rolloff(0.5f);
+  part_sound->play();
   
   ParticleEmitter::ShPtr emitter(new ParticleEmitter(particle_renderable, Vector3f(7, 1, -20), Vector3f::UNIT_Y, Vector3f::UNIT_X, 3.0f, 2.0f, 20, 30));
   //Particle::ShPtr part(new Particle(ren2));
@@ -212,6 +220,9 @@ int main(int argc, char* argv[]) {
     //camera_collidable->gjk(cube_collidable);
     
     // Reupdate
+
+    // With final positions, we can update the sound
+    AudioManager::get().set_listener_transform(camera_transform);
 
     //-------------- First pass for shadows
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,shadowBuffer);	//Rendering offscreen

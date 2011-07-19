@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "AudioManager.hpp"
 #include "FontManager.hpp"
 #include "MaterialManager.hpp"
 #include "MeshManager.hpp"
@@ -17,6 +18,7 @@ void ResourceManager::init() {
   MaterialManager::get();
   MeshManager::get();
   ShaderManager::get();
+  AudioManager::get();
 }
 
 /*

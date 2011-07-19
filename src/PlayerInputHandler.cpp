@@ -43,6 +43,8 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
       }
       break;
     case SDL_QUIT:
-        exit(0);
+      SDL_Quit();
+      exit(0);
+      break;
   }
 }
