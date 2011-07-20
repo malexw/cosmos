@@ -1,5 +1,7 @@
 #include <vector>
 
+#include "CosmosConfig.hpp"
+
 #include "ResourceManager/ShaderManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
 
@@ -7,6 +9,11 @@
 #include "Vector2f.hpp"
 
 void Renderable::render() const {
+  if (!CosmosConfig::get().is_textures()) {
+    draw_geometry();
+    return;
+  }
+  
   if (textured_) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());

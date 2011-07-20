@@ -215,12 +215,24 @@ int main(int argc, char* argv[]) {
       } else {
         skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/skybox.obj")).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
       }
+      
+      if (!config.is_textures()) {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
+      
+      config.set_valid();
     }
     
     // Update
     float updateDelta = fps_->frame_delta();
     camera_collidable->update(updateDelta);
-    emitter->update(updateDelta);
+    // Keep updating the emitter so when we turn it on, all the particles start up
+    //if (config.is_particles()) {
+      emitter->update(updateDelta);
+    //}
     r += 1.0f;
     
     // Collisions
@@ -328,15 +340,20 @@ int main(int argc, char* argv[]) {
     glLoadIdentity();
     
     // "skybox"
-    glPushMatrix();
-    glDisable(GL_LIGHTING);
-    glTranslatef(0.0f, 0.0f, -2.0f);
-    glScalef(2.7f, 1.7f, 1.0f);
-    glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
-    MeshManager::get().get_mesh("res/meshes/face-center-quad.obj")->draw();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glEnable(GL_LIGHTING);
-    glPopMatrix();
+    // Skip drawing the background when textures are off since it obscures everything
+    if (config.is_textures()) {
+      glPushMatrix();
+      glDisable(GL_LIGHTING);
+      glTranslatef(0.0f, 0.0f, -2.0f);
+      glScalef(2.7f, 1.7f, 1.0f);
+      if (config.is_textures()) {
+        glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
+      }
+      MeshManager::get().get_mesh("res/meshes/face-center-quad.obj")->draw();
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glEnable(GL_LIGHTING);
+      glPopMatrix();
+    }
     
     glClear(GL_DEPTH_BUFFER_BIT);
     
@@ -357,7 +374,9 @@ int main(int argc, char* argv[]) {
     
     glPushMatrix();
     glTranslatef(2.0f,1.0f,-12.0f);
-    cube_collidable->render_collision();
+    if (config.is_collidables()) {
+      cube_collidable->render_collision();
+    }
     glRotatef(r, 0.0f, 1.0f, 0.0f);
     glRotatef(r/2, 1.0f, 0.0f, 0.0f);
     glMatrixMode(GL_TEXTURE);
@@ -373,15 +392,18 @@ int main(int argc, char* argv[]) {
     glPopMatrix();
     
     glUseProgram(0);
-    glDisable(GL_LIGHTING);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-    glDepthMask(GL_FALSE);
-    emitter->render(camera_transform);
-    glDepthMask(GL_TRUE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_LIGHTING);
+    if (config.is_particles()) {
+      glDisable(GL_LIGHTING);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+      glDepthMask(GL_FALSE);
+      emitter->render(camera_transform);
+      glDepthMask(GL_TRUE);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      glEnable(GL_LIGHTING);
+    }
     //////////////////////////////////////////
     SDL_GL_SwapBuffers();
+    
     //Cap the frame rate
     fps_->frame_stop();
     if( fps_->frame_length() < US_PER_FRAME )

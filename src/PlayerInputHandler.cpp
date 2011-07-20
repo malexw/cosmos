@@ -25,7 +25,13 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         case SDLK_a: velo_.x() = 0; collidable_->set_velocity(velo_); break;
         case SDLK_s: velo_.z() = 0; collidable_->set_velocity(velo_); break;
         case SDLK_d: velo_.x() = 0; collidable_->set_velocity(velo_); break;
+        // Config stuff
+        case SDLK_c: config_.set_collidables(!config_.is_collidables()); break;
+        case SDLK_b: config_.set_bump_mapping(!config_.is_bump_mapping()); break;
+        case SDLK_t: config_.set_textures(!config_.is_textures()); break;
         case SDLK_h: config_.set_hdr(!config_.is_hdr()); break;
+        case SDLK_y: config_.set_decals(!config_.is_decals()); break;
+        case SDLK_p: config_.set_particles(!config_.is_particles()); break;
         // HDR exposure
         case SDLK_1: hdr_program_->setf(std::string("exposure"), 1.0f); break;
         case SDLK_2: hdr_program_->setf(std::string("exposure"), 2.0f); break;

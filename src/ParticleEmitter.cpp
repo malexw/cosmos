@@ -32,32 +32,8 @@ void ParticleEmitter::update(float delta) {
 void ParticleEmitter::render(Transform::ShPtr cam) {
 
   glPushMatrix();
-  /*float modelview[16];
-  int i,j;
-  glGetFloatv(GL_MODELVIEW_MATRIX , modelview);
-  for( i=0; i<3; i++ ) {
-    //modelview[i] = -modelview[i];
-    //modelview[i+8] = -modelview[i+8];
-    for (j = 0; j < 3; ++j) {
-      modelview[i*4+j] = (i == j) ? 1.0f : 0.0f;
-      if (i == j) {
-        modelview[i*4+j] == 1.0f;
-      } else {
-        modelview[i*4+j] == 0.0f;
-      }
-      //modelview[0] = 1.0f;
-      modelview[2] = 0.0f;
-      modelview[4] = 0.0f;
-      modelview[6] = 0.0f;
-      modelview[8] = 0.0f;
-      modelview[10] = 1.0f;
-    }
-  }
-  glLoadMatrixf(modelview);*/
-  //glLoadIdentity();
 
   foreach (Particle::ShPtr part, parts_) {
-  //for (int i = 0; i < part_count_; ++i) {
     part->render(cam);
   }
   

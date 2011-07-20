@@ -1,6 +1,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "CosmosConfig.hpp"
 #include "FileBlob.hpp"
 #include "ResourceManager/MaterialManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
@@ -47,23 +48,27 @@ void World::set_material(Material::ShPtr mat) {
 }
 
 void World::draw() const {
-	int drawn = 0;
-  //
-  //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
-  //
-  foreach (World::MatPair mat, mats_) {
-    glBindTexture(GL_TEXTURE_2D, mat.first->get_texture()->get_index());
-    //glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
-    glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
-    glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[drawn]);
-    glNormalPointer(GL_FLOAT, 0, &normals_[drawn]);
-    glColorPointer(3, GL_FLOAT, 0, &colors_[drawn]);
-    glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
-    drawn += mat.second * 3;
+	if (CosmosConfig::get().is_textures()) {
+    int drawn = 0;
+    //
+    //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
+    //
+    foreach (World::MatPair mat, mats_) {
+      glBindTexture(GL_TEXTURE_2D, mat.first->get_texture()->get_index());
+      //glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
+      glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
+      glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[drawn]);
+      glNormalPointer(GL_FLOAT, 0, &normals_[drawn]);
+      glColorPointer(3, GL_FLOAT, 0, &colors_[drawn]);
+      glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
+      drawn += mat.second * 3;
+    }
+    //
+    //glUseProgram(0);
+    //
+  } else {
+    draw_geometry();
   }
-  //
-  //glUseProgram(0);
-  //
 }
 
 void World::draw_geometry() const {
