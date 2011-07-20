@@ -181,7 +181,6 @@ int main(int argc, char* argv[]) {
   part_sound->set_gain(1.0f);
   part_sound->set_looping(true);
   part_sound->set_rolloff(0.5f);
-  part_sound->play();
   
   ParticleEmitter::ShPtr emitter(new ParticleEmitter(particle_renderable, Vector3f(7, 1, -20), Vector3f::UNIT_Y, Vector3f::UNIT_X, 3.0f, 2.0f, 20, 30));
   //Particle::ShPtr part(new Particle(ren2));
@@ -215,14 +214,22 @@ int main(int argc, char* argv[]) {
       } else {
         skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/skybox.obj")).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
       }
-      
       if (!config.is_textures()) {
         glBindTexture(GL_TEXTURE_2D, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       }
-      
+      if (!config.is_sounds()) {
+        part_sound->pause();
+      } else {
+        part_sound->play();
+      }
+      if (!config.is_shadows()) {
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
+      }
+
       config.set_valid();
     }
     
@@ -236,7 +243,9 @@ int main(int argc, char* argv[]) {
     r += 1.0f;
     
     // Collisions
-    camera_collidable->check(cube_collidable);
+    if (config.is_collisions()) {
+      camera_collidable->check(cube_collidable);
+    }
     //camera_collidable->gjk(cube_collidable);
     
     // Reupdate
@@ -245,61 +254,63 @@ int main(int argc, char* argv[]) {
     AudioManager::get().set_listener_transform(camera_transform);
 
     //-------------- First pass for shadows
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);	//Rendering offscreen
-    glUseProgram(0);
-    glViewport(0,0,1024,1024);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glCullFace(GL_FRONT);
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    if (config.is_shadows()) {
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);	//Rendering offscreen
+      glUseProgram(0);
+      glViewport(0,0,1024,1024);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glCullFace(GL_FRONT);
+      glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45,1,10,40000);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluPerspective(45,1,10,40000);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
 
-    // Draw all the things that should cast shadows
-    world->draw_geometry();
+      // Draw all the things that should cast shadows
+      world->draw_geometry();
 
-    glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    //
-    cube_renderable->draw_geometry();
-    //
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    
-    // Configure the shadow texture
-    double modelView[16];
-    double projection[16];
+      glPushMatrix();
+      glTranslatef(2.0f,1.0f,-12.0f);
+      glRotatef(r, 0.0f, 1.0f, 0.0f);
+      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+      glMatrixMode(GL_TEXTURE);
+      glPushMatrix();
+      glTranslatef(2.0f,1.0f,-12.0f);
+      glRotatef(r, 0.0f, 1.0f, 0.0f);
+      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+      //
+      cube_renderable->draw_geometry();
+      //
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+      glPopMatrix();
+      
+      // Configure the shadow texture
+      double modelView[16];
+      double projection[16];
 
-    const GLdouble bias[16] = {	
-    0.5, 0.0, 0.0, 0.0, 
-    0.0, 0.5, 0.0, 0.0,
-    0.0, 0.0, 0.5, 0.0,
-    0.5, 0.5, 0.5, 1.0};
+      const GLdouble bias[16] = {	
+      0.5, 0.0, 0.0, 0.0, 
+      0.0, 0.5, 0.0, 0.0,
+      0.0, 0.0, 0.5, 0.0,
+      0.5, 0.5, 0.5, 1.0};
 
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+      glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
+      glGetDoublev(GL_PROJECTION_MATRIX, projection);
 
-    glMatrixMode(GL_TEXTURE);
-    glActiveTexture(GL_TEXTURE3);
+      glMatrixMode(GL_TEXTURE);
+      glActiveTexture(GL_TEXTURE3);
 
-    glLoadIdentity();	
-    glLoadMatrixd(bias);
-    glMultMatrixd(projection);
-    glMultMatrixd(modelView);
+      glLoadIdentity();	
+      glLoadMatrixd(bias);
+      glMultMatrixd(projection);
+      glMultMatrixd(modelView);
 
-    glMatrixMode(GL_MODELVIEW);
+      glMatrixMode(GL_MODELVIEW);
+    }
 
     //-------------- Second pass for skybox
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
@@ -324,7 +335,10 @@ int main(int argc, char* argv[]) {
     if (config.is_hdr()) {
       ShaderManager::get().get_shader_program("hdr")->run();
     }
+    glPushMatrix();
+    glRotatef(180, 0.0, 1.0f, 0.0);
     skybox_renderable->render();
+    glPopMatrix();
     glUseProgram(0);
     glFrontFace(GL_CCW);
     glEnable(GL_LIGHTING);
@@ -341,7 +355,7 @@ int main(int argc, char* argv[]) {
     
     // "skybox"
     // Skip drawing the background when textures are off since it obscures everything
-    if (config.is_textures()) {
+    if (config.is_textures() && config.is_skybox()) {
       glPushMatrix();
       glDisable(GL_LIGHTING);
       glTranslatef(0.0f, 0.0f, -2.0f);
@@ -357,10 +371,12 @@ int main(int argc, char* argv[]) {
     
     glClear(GL_DEPTH_BUFFER_BIT);
     
-    ShaderManager::get().get_shader_program("shadow")->run();
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D,TextureManager::get().get_texture("shadow_map")->get_index());
-    glActiveTexture(GL_TEXTURE0);
+    if (config.is_shadows()) {
+      ShaderManager::get().get_shader_program("shadow")->run();
+      glActiveTexture(GL_TEXTURE3);
+      glBindTexture(GL_TEXTURE_2D,TextureManager::get().get_texture("shadow_map")->get_index());
+      glActiveTexture(GL_TEXTURE0);
+    }
     
     camera_transform->apply_inverse();
     //glPushMatrix();

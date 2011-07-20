@@ -19,7 +19,7 @@ void Renderable::render() const {
     glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
   }
   mesh_->draw();
-  if (material_->is_bump_mapped()) {
+  if (material_->is_bump_mapped() && CosmosConfig::get().is_bump_mapping()) {
     glActiveTexture(GL_TEXTURE1);
     glClientActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);
@@ -28,16 +28,16 @@ void Renderable::render() const {
     
     // assume true for now
     //if (material_->has_decals()) {
+    if (CosmosConfig::get().is_decals()) {
       glActiveTexture(GL_TEXTURE2);
       //glEnable(GL_TEXTURE_2D); // probably never necessary
       //glEnableClientState(GL_TEXTURE_COORD_ARRAY); // no need for this for now
       glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("res/textures/decal-test.png")->get_index());
-    //}
-    
+      ShaderManager::get().get_shader_program("bumpdec")->run();
+    } else {
+      ShaderManager::get().get_shader_program("bump")->run();
+    }
     //std::cout << "Tex " << material_->get_texture()->get_index() << " Bump " << material_->get_bump_tex()->get_index() << std::endl;
-    
-    ShaderProgram::ShPtr prog = ShaderManager::get().get_shader_program("bump");
-    prog->run();
     
     mesh_->set_tex_pointer();
     

@@ -26,7 +26,8 @@ public:
 	// Return the source index of the sound. This value is meaningless unless the Sound is loaded.
 	const int get_index() const;
   
-  void play(); 
+  void play();
+  void pause();
   void set_gain(float gain);
   void set_looping(bool loop);
   void set_position(const Vector3f& pos);

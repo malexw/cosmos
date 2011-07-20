@@ -14,6 +14,11 @@ void main(void)
   float diffuseIntensity = max(0.0, dot(normalize(normalAdjusted), -normalize(gl_LightSource[0].position.xyz)));
  
   vec3 color = diffuseIntensity * (gl_FrontMaterial.diffuse).rgb + (gl_FrontMaterial.ambient).rgb;
-  vec4 texel = texture2D(tex, vTexCoords.st);
-  gl_FragColor = vec4(texel.rgb * color, texel.a * gl_FrontMaterial.diffuse.a);
+  vec4 dec = texture2D(decal, vBumpCoords.st);
+  if (dec.a < 0.1) {
+    vec4 texel = texture2D(tex, vTexCoords.st);
+    gl_FragColor = vec4(texel.rgb * color, texel.a * gl_FrontMaterial.diffuse.a);
+  } else {
+    gl_FragColor = vec4(dec.rgb * color, 1.0);
+  }
 }

@@ -24,6 +24,10 @@ void Sound::play() {
   alSourcePlay(sound_index_);
 }
 
+void Sound::pause() {
+  alSourcePause(sound_index_);
+}
+
 void Sound::set_gain(float gain) {
   alSourcef(sound_index_, AL_GAIN, gain);
 }

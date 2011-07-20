@@ -14,12 +14,14 @@ ShaderManager::ShaderManager()
  * hand
  */
 void ShaderManager::init() {
-	shader_names_.push_back(std::string("res/shaders/bump.vert"));
-  shader_names_.push_back(std::string("res/shaders/bump.frag"));
+	shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
+  shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
   shader_names_.push_back(std::string("res/shaders/shadow.vert"));
   shader_names_.push_back(std::string("res/shaders/shadow.frag"));
   shader_names_.push_back(std::string("res/shaders/hdr.vert"));
   shader_names_.push_back(std::string("res/shaders/hdr.frag"));
+  shader_names_.push_back(std::string("res/shaders/bump.vert"));
+  shader_names_.push_back(std::string("res/shaders/bump.frag"));
   load_shaders();
 }
 
@@ -65,7 +67,7 @@ void ShaderManager::load_shaders() {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
 	}
-  // The bump program
+  // The bumpdec program
   int p = glCreateProgram();
   int v = vshaders_[0]->get_id();
   int f = fshaders_[0]->get_id();
@@ -75,7 +77,7 @@ void ShaderManager::load_shaders() {
   
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr program(new ShaderProgram("bump", p));
+  ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
   programs_.push_back(program);
   glUseProgram(p);
   
@@ -119,6 +121,25 @@ void ShaderManager::load_shaders() {
   //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1f(exp, 1.0);
   //glUniform1i(shadowSampler, 3);
+  
+  // The bump program
+  p = glCreateProgram();
+  v = vshaders_[3]->get_id();
+  f = fshaders_[3]->get_id();
+  
+  glAttachShader(p,v);
+  glAttachShader(p,f);
+  
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
+  programs_.push_back(bump);
+  glUseProgram(p);
+  
+  texSampler = glGetUniformLocation(p, "tex");
+  bumpSampler = glGetUniformLocation(p, "bump");
+  glUniform1i(texSampler, 0);
+  glUniform1i(bumpSampler, 1);
 
   glUseProgram(0);
 }
