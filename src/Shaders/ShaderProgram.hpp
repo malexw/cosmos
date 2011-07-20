@@ -24,6 +24,8 @@ public:
   const int get_id() const { return shader_id_; }
   
   void run() const { glUseProgram(shader_id_); }
+  void setf(std::string varname, float value);
+  void seti(std::string varname, int value);
 
 private:
 	std::string name_;

@@ -43,8 +43,10 @@ void Renderable::render() const {
     glDisable(GL_TEXTURE_2D);
     glClientActiveTexture(GL_TEXTURE0);
     glActiveTexture(GL_TEXTURE0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   } else {
     glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 }
 
@@ -55,4 +57,5 @@ void Renderable::draw_geometry() const {
   }
   mesh_->draw();
   glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

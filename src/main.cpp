@@ -9,6 +9,7 @@
 #include "PlayerInputHandler.hpp"
 #include "InputManager.hpp"
 #include "Camera.hpp"
+#include "CosmosConfig.hpp"
 #include "GameObject.hpp"
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"
@@ -142,7 +143,8 @@ int main(int argc, char* argv[]) {
   skybox->set_transform(skybox_transform);
   Renderable::ShPtr skybox_renderable(new Renderable(skybox->id()));
   skybox->set_renderable(skybox_renderable);
-  skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/hdrbox.obj")).set_material(MaterialManager::get().get_material("res/materials/hdrbox.mtl"));
+  skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/skybox.obj")).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
+  //skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/hdrbox.obj")).set_material(MaterialManager::get().get_material("res/materials/hdrbox.mtl"));
   
   GameObject::ShPtr camera(new GameObject());
   GameObjectManager::get().add_object(camera);
@@ -199,11 +201,21 @@ int main(int argc, char* argv[]) {
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
 
+  CosmosConfig& config = CosmosConfig::get();
+
   while(1) {
     fps_->frame_start();
     
     // Input
     im.handleInput();
+    if (!config.is_valid()) {
+      // HDR
+      if (config.is_hdr()) {
+        skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/hdrbox.obj")).set_material(MaterialManager::get().get_material("res/materials/hdrbox.mtl"));
+      } else {
+        skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/skybox.obj")).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
+      }
+    }
     
     // Update
     float updateDelta = fps_->frame_delta();
@@ -297,7 +309,9 @@ int main(int argc, char* argv[]) {
     glFrontFace(GL_CW);
     //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
     camera_transform->apply_rotation();
-    ShaderManager::get().get_shader_program("hdr")->run();
+    if (config.is_hdr()) {
+      ShaderManager::get().get_shader_program("hdr")->run();
+    }
     skybox_renderable->render();
     glUseProgram(0);
     glFrontFace(GL_CCW);

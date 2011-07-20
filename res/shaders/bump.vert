@@ -25,7 +25,7 @@ void main(void)
  
     // Pass the texture coordinates through the vertex shader so they get smoothly interpolated
     vTexCoords = gl_MultiTexCoord0.st;
-    vBumpCoords = gl_MultiTexCoord1.st;
+    vBumpCoords = gl_MultiTexCoord0.st;
     
     //diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
     //ambient = gl_FrontMaterial.ambient * gl_LightSource[0].ambient;

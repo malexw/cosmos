@@ -19,13 +19,15 @@ class Mesh {
  public:
 	typedef boost::shared_ptr<Mesh> ShPtr;
 
-	Mesh(std::string name): name_(name), triangle_count_(0) {}
+	Mesh(std::string name): name_(name), triangle_count_(0), on_gpu_(false) {}
   
   // This is to be used by whatever is parsing the OBJ file to build the geometry
   void add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                     Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
                     Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3);
 	
+  void uploadToGpu();
+  
   // Called by the engine to submit the geometry to the GPU
   void draw() const;
   
@@ -43,6 +45,10 @@ class Mesh {
 	std::vector<Vector2f> tex_coords_;
   // Hopefully one day we won't need a whole new mesh object for color variations
   std::vector<Vector3f> colors_;
+  
+  GLuint vbo_address_;
+  bool on_gpu_;
+  int offsets_[4];
   
   DISALLOW_COPY_AND_ASSIGN(Mesh);
 };

@@ -1,10 +1,12 @@
 #include "GameObjectManager.hpp"
 #include "PlayerInputHandler.hpp"
+#include "ResourceManager/ShaderManager.hpp"
 
 PlayerInputHandler::PlayerInputHandler(unsigned int id)
- : InputHandler(id), grabbing_(false), rot_(0, -1, -1) {
+ : InputHandler(id), grabbing_(false), rot_(0, -1, -1), config_(CosmosConfig::get()) {
   collidable_ = GameObjectManager::get().get_object(id)->get_collidable();
   transform_ = GameObjectManager::get().get_object(id)->get_transform();
+  hdr_program_ = ShaderManager::get().get_shader_program("hdr");
 }
 
 void PlayerInputHandler::handleInput(SDL_Event e) {
@@ -23,6 +25,13 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         case SDLK_a: velo_.x() = 0; collidable_->set_velocity(velo_); break;
         case SDLK_s: velo_.z() = 0; collidable_->set_velocity(velo_); break;
         case SDLK_d: velo_.x() = 0; collidable_->set_velocity(velo_); break;
+        case SDLK_h: config_.set_hdr(!config_.is_hdr()); break;
+        // HDR exposure
+        case SDLK_1: hdr_program_->setf(std::string("exposure"), 1.0f); break;
+        case SDLK_2: hdr_program_->setf(std::string("exposure"), 2.0f); break;
+        case SDLK_3: hdr_program_->setf(std::string("exposure"), 3.0f); break;
+        case SDLK_4: hdr_program_->setf(std::string("exposure"), 4.0f); break;
+        case SDLK_5: hdr_program_->setf(std::string("exposure"), 5.0f); break;
       };
       break;
     case SDL_MOUSEMOTION:

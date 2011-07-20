@@ -115,9 +115,9 @@ void ShaderManager::load_shaders() {
   ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
   programs_.push_back(hdr);
   glUseProgram(p);
-  texSampler = glGetUniformLocation(p, "tex");
+  GLint exp = glGetUniformLocation(p, "exposure");
   //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1i(texSampler, 0);
+  glUniform1f(exp, 1.0);
   //glUniform1i(shadowSampler, 3);
 
   glUseProgram(0);

@@ -9,8 +9,10 @@
 //#include "SDL/SDL_opengl.h"
 
 #include "CollidableObject.hpp"
-#include "Transform.hpp"
+#include "CosmosConfig.hpp"
 #include "InputHandler.hpp"
+#include "Shaders/ShaderProgram.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 //#include "Vector2f.hpp"
 #include "Vector3f.hpp"
@@ -32,6 +34,9 @@ class PlayerInputHandler : public InputHandler {
   CollidableObject::ShPtr collidable_;
   Transform::ShPtr transform_;
   bool grabbing_;
+  
+  ShaderProgram::ShPtr hdr_program_;
+  CosmosConfig& config_;
   
   DISALLOW_COPY_AND_ASSIGN(PlayerInputHandler);
 };
