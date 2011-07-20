@@ -21,6 +21,7 @@ void MeshManager::init() {
   mesh_names_.push_back(std::string("res/meshes/face-center-quad.obj"));
   mesh_names_.push_back(std::string("res/meshes/edge-center-quad.obj"));
   mesh_names_.push_back(std::string("res/meshes/skybox.obj"));
+  mesh_names_.push_back(std::string("res/meshes/hdrbox.obj"));
   load_meshes();
 }
 
@@ -60,6 +61,7 @@ const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
 		}
 	}
 	
+  std::cout << "Error: mesh <" << name << "> not found" << std::endl;
 	return Mesh::ShPtr();
 }
 

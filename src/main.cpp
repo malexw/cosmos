@@ -114,24 +114,20 @@ int main(int argc, char* argv[]) {
 
   // -------------- SHADOWS --------------------------------------------
   GLuint shadowBuffer;
-  
-  // create a framebuffer object
   glGenFramebuffersEXT(1, &shadowBuffer);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);
-  
-  // Instruct openGL that we won't bind a color texture with the currently binded FBO
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
-  
-  // attach the texture to FBO depth attachment point
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, TextureManager::get().get_texture("shadow_map")->get_index(), 0);
-  
-  // check FBO status
-  /*FBOstatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-  if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-    printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");*/
-  
-  // switch back to window-system-provided framebuffer
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+  // -------------- HDR? -----------------------------------------------
+  GLuint hdrFrameBuffer;
+  glGenFramebuffersEXT(1, &hdrFrameBuffer);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index(), 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
   // -------------- OBJECTS --------------------------------------------
@@ -146,7 +142,7 @@ int main(int argc, char* argv[]) {
   skybox->set_transform(skybox_transform);
   Renderable::ShPtr skybox_renderable(new Renderable(skybox->id()));
   skybox->set_renderable(skybox_renderable);
-  skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/skybox.obj")).set_material(MaterialManager::get().get_material("res/materials/skybox.mtl"));
+  skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/hdrbox.obj")).set_material(MaterialManager::get().get_material("res/materials/hdrbox.mtl"));
   
   GameObject::ShPtr camera(new GameObject());
   GameObjectManager::get().add_object(camera);
@@ -225,7 +221,7 @@ int main(int argc, char* argv[]) {
     AudioManager::get().set_listener_transform(camera_transform);
 
     //-------------- First pass for shadows
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,shadowBuffer);	//Rendering offscreen
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);	//Rendering offscreen
     glUseProgram(0);
     glViewport(0,0,1024,1024);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -282,7 +278,7 @@ int main(int argc, char* argv[]) {
     glMatrixMode(GL_MODELVIEW);
 
     //-------------- Second pass for skybox
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
     glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     // MUST call glColorMask BEFORE glClear or things get explodey
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -299,24 +295,41 @@ int main(int argc, char* argv[]) {
 
     glDisable(GL_LIGHTING);
     glFrontFace(GL_CW);
+    //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
     camera_transform->apply_rotation();
+    ShaderManager::get().get_shader_program("hdr")->run();
     skybox_renderable->render();
+    glUseProgram(0);
     glFrontFace(GL_CCW);
     glEnable(GL_LIGHTING);
       
     //------------------- Third pass to actually draw things
-    glClear(GL_DEPTH_BUFFER_BIT); 
-
-    ShaderManager::get().get_shader_program("shadow")->run();
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D,TextureManager::get().get_texture("shadow_map")->get_index());
-    glActiveTexture(GL_TEXTURE0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    
+    // "skybox"
+    glPushMatrix();
+    glDisable(GL_LIGHTING);
+    glTranslatef(0.0f, 0.0f, -2.0f);
+    glScalef(2.7f, 1.7f, 1.0f);
+    glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
+    MeshManager::get().get_mesh("res/meshes/face-center-quad.obj")->draw();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_LIGHTING);
+    glPopMatrix();
+    
+    glClear(GL_DEPTH_BUFFER_BIT);
+    
+    ShaderManager::get().get_shader_program("shadow")->run();
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D,TextureManager::get().get_texture("shadow_map")->get_index());
+    glActiveTexture(GL_TEXTURE0);
     
     camera_transform->apply_inverse();
     //glPushMatrix();

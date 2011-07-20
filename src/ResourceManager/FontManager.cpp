@@ -92,5 +92,6 @@ const Font::ShPtr FontManager::get_font(std::string name) const {
 		}
 	}
 	
+  std::cout << "Error: font <" << name << "> not found" << std::endl;
 	return Font::ShPtr();
 }

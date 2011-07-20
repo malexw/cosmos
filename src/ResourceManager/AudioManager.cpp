@@ -77,5 +77,6 @@ Sound::ShPtr AudioManager::get_sound(std::string name) {
 		}
 	}
 	
+  std::cout << "Error: sound <" << name << "> not found" << std::endl;
 	return Sound::ShPtr();
 }

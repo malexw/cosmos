@@ -18,6 +18,8 @@ void ShaderManager::init() {
   shader_names_.push_back(std::string("res/shaders/bump.frag"));
   shader_names_.push_back(std::string("res/shaders/shadow.vert"));
   shader_names_.push_back(std::string("res/shaders/shadow.frag"));
+  shader_names_.push_back(std::string("res/shaders/hdr.vert"));
+  shader_names_.push_back(std::string("res/shaders/hdr.frag"));
   load_shaders();
 }
 
@@ -100,6 +102,23 @@ void ShaderManager::load_shaders() {
   GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(texSampler, 0);
   glUniform1i(shadowSampler, 3);
+  
+  // HDR program
+  p = glCreateProgram();
+  v = vshaders_[2]->get_id();
+  f = fshaders_[2]->get_id();
+  
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
+  programs_.push_back(hdr);
+  glUseProgram(p);
+  texSampler = glGetUniformLocation(p, "tex");
+  //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
+  glUniform1i(texSampler, 0);
+  //glUniform1i(shadowSampler, 3);
 
   glUseProgram(0);
 }
@@ -114,6 +133,7 @@ const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& 
 		}
 	}
 	
+  std::cout << "Error: shader program <" << name << "> not found" << std::endl;
 	return ShaderProgram::ShPtr();
 }
 

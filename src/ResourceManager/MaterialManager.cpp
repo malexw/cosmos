@@ -26,6 +26,7 @@ void MaterialManager::init() {
   mat_names_.push_back(std::string("res/materials/tronish.mtl"));
   mat_names_.push_back(std::string("res/materials/skybox.mtl"));
   mat_names_.push_back(std::string("res/materials/ion.mtl"));
+  mat_names_.push_back(std::string("res/materials/hdrbox.mtl"));
   load_materials();
 }
 
