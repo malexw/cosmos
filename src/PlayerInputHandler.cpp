@@ -39,9 +39,9 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         // HDR exposure
         case SDLK_1: hdr_program_->setf(std::string("exposure"), 1.0f); break;
         case SDLK_2: hdr_program_->setf(std::string("exposure"), 2.0f); break;
-        case SDLK_3: hdr_program_->setf(std::string("exposure"), 3.0f); break;
-        case SDLK_4: hdr_program_->setf(std::string("exposure"), 4.0f); break;
-        case SDLK_5: hdr_program_->setf(std::string("exposure"), 5.0f); break;
+        case SDLK_3: hdr_program_->setf(std::string("exposure"), 6.0f); break;
+        case SDLK_4: hdr_program_->setf(std::string("exposure"), 8.0f); break;
+        case SDLK_5: hdr_program_->setf(std::string("exposure"), 10.0f); break;
       };
       break;
     case SDL_MOUSEMOTION:

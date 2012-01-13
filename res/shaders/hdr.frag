@@ -15,9 +15,15 @@ void main()
   // Fabien Houlmann, Stéphane Metz
   // http://transporter-game.googlecode.com/files/HDRRenderingInOpenGL.pdf
   float Y = dot(vec4(0.30, 0.59, 0.11, 0.0), texel);
-  float YD = exposure * (exposure/10.0 + 1.0) / (exposure + 1.0);
-  texel *= YD;
-  gl_FragColor = texel;
+  //float YD = exposure * (exposure/10.0 + 1.0) / (exposure + 1.0);
+  //float YD = exposure * (exposure/10.0 + 1.0) / (exposure + 1.0);
+  //texel *= YD;
+  Y = Y * exposure;
+  Y = Y / (Y + 1.0);
+  texel.rgb = texel.rgb * Y;
+  //texel.rgb = texel.rgb / (texel.rgb + vec3(1.0, 1.0, 1.0));
+  
+  gl_FragColor = vec4(texel.rgb, 1.0);
   
   //if (texel.r == 0.0) {
     //gl_FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);

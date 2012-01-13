@@ -4,6 +4,6 @@ done
 
 redo-ifchange $DEPS
 
-LIBS="-lGL -lGLU -lSDL_image -lopenal -lalut"
+LIBS="-lGL -lGLU -lSDL -lSDL_image -lopenal -lalut"
 
 g++ $DEPS $LIBS -o $3
