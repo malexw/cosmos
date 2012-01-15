@@ -45,14 +45,16 @@ int main(int argc, char* argv[]) {
 
   if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )
   {
-      //error
+     std:: cout << "SDL_Init failed";
+     return 0;
   }
 
-  SDL_Surface* sdlSurface_ = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_OPENGL );
-  /*if( SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_OPENGL ) == NULL )
-  {
-      //error
-  }*/
+  SDL_Surface* sdlSurface_ = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_OPENGL | SDL_HWSURFACE /*| SDL_FULLSCREEN*/);
+  if (sdlSurface_ == NULL) {
+    std::cout << "SDL_SetVideoMode failed";
+    return 0;
+  }
+  
   SDL_WM_SetCaption( "Cosmos", NULL );
 
   glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
@@ -208,6 +210,9 @@ int main(int argc, char* argv[]) {
     // Input
     im.handleInput();
     if (!config.is_valid()) {
+      if (config.is_quit()) {
+        break;
+      }
       // HDR
       if (config.is_hdr()) {
         skybox_renderable->set_mesh(MeshManager::get().get_mesh("res/meshes/hdrbox.obj")).set_material(MaterialManager::get().get_material("res/materials/hdrbox.mtl"));
@@ -433,5 +438,6 @@ int main(int argc, char* argv[]) {
     }*/
   }  
   
+  SDL_Quit();
   return 0;
 }

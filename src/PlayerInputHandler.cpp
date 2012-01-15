@@ -36,6 +36,7 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         case SDLK_p: config_.set_particles(!config_.is_particles()); break;
         case SDLK_n: config_.set_shadows(!config_.is_shadows()); break;
         case SDLK_m: config_.set_sounds(!config_.is_sounds()); break;
+        case SDLK_ESCAPE: config_.set_quit(true); break;
         // HDR exposure
         case SDLK_1: hdr_program_->setf(std::string("exposure"), 1.0f); break;
         case SDLK_2: hdr_program_->setf(std::string("exposure"), 2.0f); break;
@@ -62,8 +63,7 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
       }
       break;
     case SDL_QUIT:
-      SDL_Quit();
-      exit(0);
+      config_.set_quit(true);
       break;
   }
 }

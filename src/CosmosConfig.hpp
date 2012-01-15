@@ -49,6 +49,9 @@ public:
   
   void set_sounds(bool value) { sounds_ = value; invalidate(); }
   bool is_sounds() const { return sounds_; }
+  
+  void set_quit(bool value) { quit_ = value; invalidate(); }
+  bool is_quit() const { return quit_; }
 
 private:
   bool valid_;
@@ -62,6 +65,7 @@ private:
   bool skybox_;
   bool shadows_;
   bool sounds_;
+  bool quit_;
 
 	DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
 };
