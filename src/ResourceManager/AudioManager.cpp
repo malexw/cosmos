@@ -4,7 +4,7 @@
 
 AudioManager::AudioManager() 
   : loaded_(false) {
-	init();
+  init();
 }
 
 /*
@@ -19,21 +19,13 @@ void AudioManager::init() {
 }
 
 /*
- * Singleton pattern
- */
-AudioManager& AudioManager::get() {
-  static AudioManager instance;
-  return instance;
-}
-
-/*
  * 
  */
 void AudioManager::load_sounds() {
   if (loaded_) {
-		std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
-		return;
-	}
+    std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
+    return;
+  }
   
   // For now, assuming one sound (buffer) per source
   int sound_count = sound_names_.size();
@@ -55,7 +47,7 @@ void AudioManager::load_sounds() {
     alutUnloadWAV(format, data, size, freq);
     Sound::ShPtr s(new Sound(sound_names_[j], source_indicies[j], buffer_indicies[j]));
     sounds_.push_back(s);
-	}
+  }
 }
 
 void AudioManager::set_listener_transform(Transform::ShPtr transform) {
@@ -71,12 +63,12 @@ void AudioManager::set_listener_transform(Transform::ShPtr transform) {
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 Sound::ShPtr AudioManager::get_sound(std::string name) {
-	foreach (Sound::ShPtr sound, sounds_) {
-		if (sound->is_name(name)) {
-			return sound;
-		}
-	}
-	
+  foreach (Sound::ShPtr sound, sounds_) {
+    if (sound->is_name(name)) {
+      return sound;
+    }
+  }
+  
   std::cout << "Error: sound <" << name << "> not found" << std::endl;
-	return Sound::ShPtr();
+  return Sound::ShPtr();
 }

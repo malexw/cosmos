@@ -5,7 +5,7 @@
 
 ShaderManager::ShaderManager() 
   : loaded_(false) {
-	init();
+  init();
 }
 
 /*
@@ -14,7 +14,7 @@ ShaderManager::ShaderManager()
  * hand
  */
 void ShaderManager::init() {
-	shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
+  shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
   shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
   shader_names_.push_back(std::string("res/shaders/shadow.vert"));
   shader_names_.push_back(std::string("res/shaders/shadow.frag"));
@@ -26,21 +26,13 @@ void ShaderManager::init() {
 }
 
 /*
- * Singleton pattern
- */
-ShaderManager& ShaderManager::get() {
-  static ShaderManager instance;
-  return instance;
-}
-
-/*
  * 
  */
 void ShaderManager::load_shaders() {
   if (loaded_) {
-		std::cout << "ShaderManager error: shaders already loaded" << std::endl;
-		return;
-	}
+    std::cout << "ShaderManager error: shaders already loaded" << std::endl;
+    return;
+  }
     
   int shader_count = shader_names_.size();
     
@@ -66,7 +58,7 @@ void ShaderManager::load_shaders() {
     } else {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
-	}
+  }
   // The bumpdec program
   int p = glCreateProgram();
   int v = vshaders_[0]->get_id();
@@ -148,14 +140,14 @@ void ShaderManager::load_shaders() {
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& name) const {
-	foreach (ShaderProgram::ShPtr shaderp, programs_) {
-		if (shaderp->is_name(name)) {
-			return shaderp;
-		}
-	}
-	
+  foreach (ShaderProgram::ShPtr shaderp, programs_) {
+    if (shaderp->is_name(name)) {
+      return shaderp;
+    }
+  }
+  
   std::cout << "Error: shader program <" << name << "> not found" << std::endl;
-	return ShaderProgram::ShPtr();
+  return ShaderProgram::ShPtr();
 }
 
 void ShaderManager::print_shader_log(int id) {

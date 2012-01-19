@@ -8,9 +8,9 @@
 #include "MaterialManager.hpp"
 #include "TextureManager.hpp"
 
-MaterialManager::MaterialManager() 
-  : loaded_(false) {
-	init();
+MaterialManager::MaterialManager(TextureManager::ShPtr texture_manager) 
+  : texture_manager_(texture_manager), loaded_(false) {
+  init();
 }
 
 /*
@@ -19,8 +19,8 @@ MaterialManager::MaterialManager()
  * hand
  */
 void MaterialManager::init() {
-	//mat_names_.push_back(std::string("res/textures/default.png"));
-	//mat_names_.push_back(std::string("res/textures/terminal.png"));
+  //mat_names_.push_back(std::string("res/textures/default.png"));
+  //mat_names_.push_back(std::string("res/textures/terminal.png"));
   mat_names_.push_back(std::string("res/materials/default.mtl"));
   mat_names_.push_back(std::string("res/materials/terminal.mtl"));
   mat_names_.push_back(std::string("res/materials/tronish.mtl"));
@@ -31,22 +31,14 @@ void MaterialManager::init() {
 }
 
 /*
- * Singleton pattern
- */
-MaterialManager& MaterialManager::get() {
-  static MaterialManager instance;
-  return instance;
-}
-
-/*
  *
  */
 void MaterialManager::load_materials() {
-	if (loaded_) {
-		std::cout << "TextureMan: Error - textures already loaded" << std::endl;
-		return;
-	}
-	
+  if (loaded_) {
+    std::cout << "TextureMan: Error - textures already loaded" << std::endl;
+    return;
+  }
+  
   int mat_count = mat_names_.size();
     
   for (int j = 0; j < mat_count; ++j) {
@@ -54,23 +46,23 @@ void MaterialManager::load_materials() {
     std::cout << "Decoding " << mat_names_[j] << std::endl;
     FileBlob::ShPtr file(new FileBlob(mat_names_[j]));
     mats_.push_back(decode(*file));
-	}
-	
-	loaded_ = true;	
+  }
+  
+  loaded_ = true; 
 }
 
 /*
  * Uses a dumb linear search to find a texture with the same name. Optimizations welcome!
  */
 const Material::ShPtr MaterialManager::get_material(std::string name) const {
-	foreach (Material::ShPtr mat, mats_) {
-		if (mat->is_name(name)) {
-			return mat;
-		}
-	}
-	
+  foreach (Material::ShPtr mat, mats_) {
+    if (mat->is_name(name)) {
+      return mat;
+    }
+  }
+  
   std::cout << "Error: material <" << name << "> not found" << std::endl;
-	return Material::ShPtr();
+  return Material::ShPtr();
 }
 
 Material::ShPtr MaterialManager::decode(FileBlob& b) {
@@ -85,28 +77,28 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
   std::vector<std::string> tokens;
   
   while (index < b.size()) {
-	  tokens = Tokenize(b, index);
-	  
-	  if (tokens.size() > 0) {
-		  if (tokens[0] == "#") {
-			  // this line is a comment - skip it
-		  } else if (tokens[0] == "newmtl") {
-			  // the name of the material is tokens[1]
-		  } else if (tokens[0] == "Ka") {
-			  // Ambient lighting color
+    tokens = Tokenize(b, index);
+    
+    if (tokens.size() > 0) {
+      if (tokens[0] == "#") {
+        // this line is a comment - skip it
+      } else if (tokens[0] == "newmtl") {
+        // the name of the material is tokens[1]
+      } else if (tokens[0] == "Ka") {
+        // Ambient lighting color
         /*float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
+        float g = boost::lexical_cast<float>(tokens[2]);
         float b = boost::lexical_cast<float>(tokens[2]);*/
-		  } else if (tokens[0] == "Kd") {
-			  // Diffuse lighting color
+      } else if (tokens[0] == "Kd") {
+        // Diffuse lighting color
         float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
+        float g = boost::lexical_cast<float>(tokens[2]);
         float b = boost::lexical_cast<float>(tokens[2]);
         mat->set_diff_color(Vector3f(r, g, b));
-		  } else if (tokens[0] == "Ks") {
+      } else if (tokens[0] == "Ks") {
         // Specular lighting color
         /*float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
+        float g = boost::lexical_cast<float>(tokens[2]);
         float b = boost::lexical_cast<float>(tokens[2]);*/
       } else if (tokens[0] == "Ns") {
         // Shininess
@@ -114,19 +106,19 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
       } else if (tokens[0] == "d") {
         // dissolve, the .OBJ's version of alpha
       } else if (tokens[0] == "illum") {
-			  // Lighting model
-			  //int model = boost::lexical_cast<int>(tokens[1]) - 1;
-		  } else if (tokens[0] == "map_Ka") {
+        // Lighting model
+        //int model = boost::lexical_cast<int>(tokens[1]) - 1;
+      } else if (tokens[0] == "map_Ka") {
         // ambient texture map
       } else if (tokens[0] == "map_Kd") {
         // diffuse texture map
-        mat->set_texture(TextureManager::get().get_texture("res/textures/" + tokens[1]));  
+        mat->set_texture(texture_manager_->get_texture("res/textures/" + tokens[1]));  
       } else if (tokens[0] == "map_Ks") {
         // specular texture map 
       } else if (tokens[0] == "map_d") {
         // dissolve texture map 
       } else if (tokens[0] == "map_bump") {
-        mat->set_bump_tex(TextureManager::get().get_texture("res/textures/" + tokens[1]));
+        mat->set_bump_tex(texture_manager_->get_texture("res/textures/" + tokens[1]));
         //mat->set_n11n_tex(TextureManager::get().get_texture("normalization_map");
         // bump map
       } else {

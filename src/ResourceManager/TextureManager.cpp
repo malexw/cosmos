@@ -8,7 +8,7 @@
 
 TextureManager::TextureManager() 
   : loaded_(false) {
-	init();
+  init();
 }
 
 /*
@@ -18,8 +18,8 @@ TextureManager::TextureManager()
  */
 void TextureManager::init() {
   // RGB
-	tex_names_.push_back(std::string("res/textures/default.png"));
-	tex_names_.push_back(std::string("res/textures/terminal.png"));
+  tex_names_.push_back(std::string("res/textures/default.png"));
+  tex_names_.push_back(std::string("res/textures/terminal.png"));
   tex_names_.push_back(std::string("res/textures/tronish.png"));
   tex_names_.push_back(std::string("res/textures/earth.png"));
   tex_names_.push_back(std::string("res/textures/normal_map.png"));
@@ -33,97 +33,89 @@ void TextureManager::init() {
 }
 
 /*
- * Singleton pattern
- */
-TextureManager& TextureManager::get() {
-  static TextureManager instance;
-  return instance;
-}
-
-/*
  * load_textures iterates through each texture in the tex_names_ collection and attempts to load the texture.
  * This implementation is guided mostly by NeHe Lesson 06:
  * http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=06
  */
 void TextureManager::load_textures() {
-	if (loaded_) {
-		std::cout << "TextureMan: Error - textures already loaded" << std::endl;
-		return;
-	}
-	
-	unsigned int tex_count = tex_names_.size() + 2;
-	unsigned int tex_indicies[tex_count];
-	SDL_Surface *textureImage[tex_count-2]; // -1 for the HDR image, -1 for the shadow map image
-	glGenTextures(tex_count, tex_indicies);
+  if (loaded_) {
+    std::cout << "TextureMan: Error - textures already loaded" << std::endl;
+    return;
+  }
+  
+  unsigned int tex_count = tex_names_.size() + 2;
+  unsigned int tex_indicies[tex_count];
+  SDL_Surface *textureImage[tex_count-2]; // -1 for the HDR image, -1 for the shadow map image
+  glGenTextures(tex_count, tex_indicies);
 
-	// TODO: OMG hacks - FIXME soon!
-	// RGB
+  // TODO: OMG hacks - FIXME soon!
+  // RGB
   for (int i = 0; i < tex_count-6; ++i) {
-		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
-		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
-		if (textureImage[i]) {		
-			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, 3, textureImage[i]->w, textureImage[i]->h, 0, GL_RGB,
-					GL_UNSIGNED_BYTE, textureImage[i]->pixels );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-			
-			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-			tex->set_index(tex_indicies[i]);
-			textures_.push_back(tex);
+    //textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
+    textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
+    if (textureImage[i]) {    
+      glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, 3, textureImage[i]->w, textureImage[i]->h, 0, GL_RGB,
+          GL_UNSIGNED_BYTE, textureImage[i]->pixels );
+      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      
+      Texture::ShPtr tex (new Texture(tex_names_.at(i)));
+      tex->set_index(tex_indicies[i]);
+      textures_.push_back(tex);
 
-			SDL_FreeSurface(textureImage[i]);
-		} else {
-			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-		}
-	}
+      SDL_FreeSurface(textureImage[i]);
+    } else {
+      std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
+    }
+  }
   // RGBA
   for (int i = tex_count-6; i < tex_count-3; ++i) {
-		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
-		textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
-		if (textureImage[i]) {		
-			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, 4, textureImage[i]->w, textureImage[i]->h, 0, GL_RGBA,
-					GL_UNSIGNED_BYTE, textureImage[i]->pixels );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-			
-			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-			tex->set_index(tex_indicies[i]);
-			textures_.push_back(tex);
+    //textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
+    textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
+    if (textureImage[i]) {    
+      glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, 4, textureImage[i]->w, textureImage[i]->h, 0, GL_RGBA,
+          GL_UNSIGNED_BYTE, textureImage[i]->pixels );
+      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      
+      Texture::ShPtr tex (new Texture(tex_names_.at(i)));
+      tex->set_index(tex_indicies[i]);
+      textures_.push_back(tex);
 
-			SDL_FreeSurface(textureImage[i]);
-		} else {
-			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-		}
-	}
+      SDL_FreeSurface(textureImage[i]);
+    } else {
+      std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
+    }
+  }
   // HDR
   for (int i = tex_count-3; i < tex_count-2; ++i) {
-		//textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
-		//textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
-		int image_width, image_height;
+    //textureImage[i] = SDL_LoadBMP(tex_names_.at(i).c_str());
+    //textureImage[i] = IMG_Load(tex_names_.at(i).c_str());
+    int image_width, image_height;
     FILE* f = fopen(tex_names_[i].c_str(),"rb");
     RGBE_ReadHeader(f,&image_width,&image_height,NULL);
     float* image = (float *)malloc(sizeof(float)*3*image_width*image_height);
     RGBE_ReadPixels_RLE(f,image,image_width,image_height);
     fclose(f);
-    if (textureImage[i]) {		
-			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, image_width, image_height, 0, GL_RGB,
-					GL_FLOAT, image );
-			// Filtering not supported for HDR??
+    if (textureImage[i]) {    
+      glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, image_width, image_height, 0, GL_RGB,
+          GL_FLOAT, image );
+      // Filtering not supported for HDR??
       glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-			
-			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-			tex->set_index(tex_indicies[i]);
-			textures_.push_back(tex);
+      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      
+      Texture::ShPtr tex (new Texture(tex_names_.at(i)));
+      tex->set_index(tex_indicies[i]);
+      textures_.push_back(tex);
 
-			//SDL_FreeSurface(textureImage[i]);
-		} else {
-			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-		}
-	}
+      //SDL_FreeSurface(textureImage[i]);
+    } else {
+      std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
+    }
+  }
   // Generate a texture as a target for the shadow mapping FBO
   glBindTexture(GL_TEXTURE_2D, tex_indicies[tex_count-2]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -149,42 +141,42 @@ void TextureManager::load_textures() {
   Texture::ShPtr tex (new Texture("normalization_map"));
   tex->set_index(tex_indicies[tex_count]);
   textures_.push_back(tex);*/
-	glBindTexture(GL_TEXTURE_2D, 0);
-	loaded_ = true;	
+  glBindTexture(GL_TEXTURE_2D, 0);
+  loaded_ = true; 
 }
 
 /*
  * Uses a dumb linear search to find a texture with the same name. Optimizations welcome!
  */
 const Texture::ShPtr TextureManager::get_texture(std::string name) const {
-	foreach (Texture::ShPtr tex, textures_) {
-		if (tex->is_name(name)) {
-			return tex;
-		}
-	}
+  foreach (Texture::ShPtr tex, textures_) {
+    if (tex->is_name(name)) {
+      return tex;
+    }
+  }
 
-  std::cout << "Error: texture <" << name << "> not found" << std::endl;	
-	return Texture::ShPtr();
+  std::cout << "Error: texture <" << name << "> not found" << std::endl;  
+  return Texture::ShPtr();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//	Normalisation Cube Map.cpp
-//	Generate normalisation cube map
-//	Downloaded from: www.paulsprojects.net
-//	Created:	20th July 2002
+//  Normalisation Cube Map.cpp
+//  Generate normalisation cube map
+//  Downloaded from: www.paulsprojects.net
+//  Created:  20th July 2002
 //
-//	Copyright (c) 2006, Paul Baker
-//	Distributed under the New BSD Licence. (See accompanying file License.txt or copy at
-//	http://www.paulsprojects.net/NewBSDLicense.txt)
-//////////////////////////////////////////////////////////////////////////////////////////	
+//  Copyright (c) 2006, Paul Baker
+//  Distributed under the New BSD Licence. (See accompanying file License.txt or copy at
+//  http://www.paulsprojects.net/NewBSDLicense.txt)
+//////////////////////////////////////////////////////////////////////////////////////////  
 /*void generate_norm_map()
 {
-	unsigned char* data = new unsigned char[32*32*3];
+  unsigned char* data = new unsigned char[32*32*3];
 
-	int size = 32;
+  int size = 32;
   float halfSize = size/2;
-	float offset = 0.5f;
-	unsigned char* bytePtr;
+  float offset = 0.5f;
+  unsigned char* bytePtr;
 
   for (int k = 0; k < 6; ++k) {
     
@@ -223,5 +215,5 @@ const Texture::ShPtr TextureManager::get_texture(std::string name) const {
     }
   }
 
-	delete [] data;
+  delete [] data;
 }*/

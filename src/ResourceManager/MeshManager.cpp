@@ -3,12 +3,12 @@
 
 #include <iostream>
 
-#include "MaterialManager.hpp"
+//#include "MaterialManager.hpp"
 #include "MeshManager.hpp"
 
 MeshManager::MeshManager() 
   : loaded_(false) {
-	init();
+  init();
 }
 
 /*
@@ -17,7 +17,7 @@ MeshManager::MeshManager()
  * hand
  */
 void MeshManager::init() {
-	mesh_names_.push_back(std::string("res/meshes/cube.obj"));
+  mesh_names_.push_back(std::string("res/meshes/cube.obj"));
   mesh_names_.push_back(std::string("res/meshes/face-center-quad.obj"));
   mesh_names_.push_back(std::string("res/meshes/edge-center-quad.obj"));
   mesh_names_.push_back(std::string("res/meshes/skybox.obj"));
@@ -26,21 +26,13 @@ void MeshManager::init() {
 }
 
 /*
- * Singleton pattern
- */
-MeshManager& MeshManager::get() {
-  static MeshManager instance;
-  return instance;
-}
-
-/*
  * 
  */
 void MeshManager::load_meshes() {
   if (loaded_) {
-		std::cout << "FontMan: Error - fonts already loaded" << std::endl;
-		return;
-	}
+    std::cout << "FontMan: Error - fonts already loaded" << std::endl;
+    return;
+  }
     
   int mesh_count = mesh_names_.size();
     
@@ -48,21 +40,21 @@ void MeshManager::load_meshes() {
     FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
     std::cout << "Decoding " << file->path() << std::endl;
     meshes_.push_back(decode(*file));
-	}
+  }
 }
 
 /*
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
-	foreach (Mesh::ShPtr mesh, meshes_) {
-		if (mesh->is_name(name)) {
-			return mesh;
-		}
-	}
-	
+  foreach (Mesh::ShPtr mesh, meshes_) {
+    if (mesh->is_name(name)) {
+      return mesh;
+    }
+  }
+  
   std::cout << "Error: mesh <" << name << "> not found" << std::endl;
-	return Mesh::ShPtr();
+  return Mesh::ShPtr();
 }
 
 Mesh::ShPtr MeshManager::decode(FileBlob& b) {
@@ -76,55 +68,56 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
   
   std::vector<std::string> tokens;
   Mesh::ShPtr mesh (new Mesh(b.path()));
-  Material::ShPtr mat;
+  //Material::ShPtr mat;
   
   while (index < b.size()) {
-	  tokens = Tokenize(b, index);
-	  
-	  if (tokens.size() > 0) {
-		  if (tokens[0] == "#") {
-			  // this line is a comment - skip it
-		  } else if (tokens[0] == "v") {
-			  // found a vertex
-			  float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
-			  verts.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "vt") {
-			  // found a normal
-        float u = boost::lexical_cast<float>(tokens[1]);
-			  float v = boost::lexical_cast<float>(tokens[2]);
-			  uvs.push_back(Vector2f(u, v));
-		  } else if (tokens[0] == "vn") {
-			  // found a normal
+    tokens = Tokenize(b, index);
+    
+    if (tokens.size() > 0) {
+      if (tokens[0] == "#") {
+        // this line is a comment - skip it
+      } else if (tokens[0] == "v") {
+        // found a vertex
         float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
-			  norms.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "usemtl") {
-        mat = (MaterialManager::get().get_material("res/materials/" + tokens[1]));
-        std::cout << "Material has color " << mat->get_diff_color() << std::endl;
+        float y = boost::lexical_cast<float>(tokens[2]);
+        float z = boost::lexical_cast<float>(tokens[3]);
+        verts.push_back(Vector3f(x, y, z));
+      } else if (tokens[0] == "vt") {
+        // found a normal
+        float u = boost::lexical_cast<float>(tokens[1]);
+        float v = boost::lexical_cast<float>(tokens[2]);
+        uvs.push_back(Vector2f(u, v));
+      } else if (tokens[0] == "vn") {
+        // found a normal
+        float x = boost::lexical_cast<float>(tokens[1]);
+        float y = boost::lexical_cast<float>(tokens[2]);
+        float z = boost::lexical_cast<float>(tokens[3]);
+        norms.push_back(Vector3f(x, y, z));
+      } else if (tokens[0] == "usemtl") {
+        // do nothing here
+        //mat = (MaterialManager::get().get_material("res/materials/" + tokens[1]));
+        //std::cout << "Material has color " << mat->get_diff_color() << std::endl;
       } else if (tokens[0] == "f") {
-			  // -1 to each of these because OBJ uses 1-based indexing
-			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
+        // -1 to each of these because OBJ uses 1-based indexing
+        int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
         int vt1i = boost::lexical_cast<int>(tokens[2]) - 1;
         int vn1i = boost::lexical_cast<int>(tokens[3]) - 1;
-			  int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
+        int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
         int vt2i = boost::lexical_cast<int>(tokens[5]) - 1;
-			  int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
+        int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
         int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
-			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
+        int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
         int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
-			  //std::cout << x << " " << y << " " << z << " " << n << std::endl;
-        Vector3f color = mat->get_diff_color();
-			  mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
+        //std::cout << x << " " << y << " " << z << " " << n << std::endl;
+        Vector3f color(1.0f, 1.0f, 1.0f); //= mat->get_diff_color(); Seems silly to assign colors to a mesh this early
+        mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
                             verts[v2i], uvs[vt2i], norms[vn2i], color,
                             verts[v3i], uvs[vt3i], norms[vn3i], color);
-		  }
-		  index = newline_index(b, index+1);
-	  } else {
-		  break;
-	  }
+      }
+      index = newline_index(b, index+1);
+    } else {
+      break;
+    }
   }
   
   //mesh->uploadToGpu();

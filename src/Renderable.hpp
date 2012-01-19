@@ -15,9 +15,9 @@
  */
 class Renderable {
  public:
-	typedef boost::shared_ptr<Renderable> ShPtr;
+  typedef boost::shared_ptr<Renderable> ShPtr;
 
-	Renderable(unsigned int id): id_(id) {}
+  Renderable(unsigned int id): id_(id) {}
   const unsigned int id() const { return id_; }
   
   Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->is_textured(); return *this; }

@@ -8,8 +8,8 @@
 #include "ResourceManager/ShaderManager.hpp"
 #include "World.hpp"
 
-World::World(std::string path)
- : path_(path), triangle_count_(0) {
+World::World(CosmosSimulation& sim, std::string path)
+ : sim_(sim), path_(path), triangle_count_(0) {
   init();
 }
 
@@ -48,7 +48,7 @@ void World::set_material(Material::ShPtr mat) {
 }
 
 void World::draw() const {
-	if (CosmosConfig::get().is_textures()) {
+  if (CosmosConfig::get().is_textures()) {
     int drawn = 0;
     //
     //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
@@ -91,53 +91,53 @@ void World::decode(FileBlob& b) {
   std::vector<std::string> tokens;
   
   while (index < b.size()) {
-	  tokens = Tokenize(b, index);
-	  
-	  if (tokens.size() > 0) {
-		  if (tokens[0] == "#") {
-			  // this line is a comment - skip it
-		  } else if (tokens[0] == "v") {
-			  // found a vertex
-			  float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
-			  verts.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "vt") {
-			  // found a normal
-        float u = boost::lexical_cast<float>(tokens[1]);
-			  float v = boost::lexical_cast<float>(tokens[2]);
-			  uvs.push_back(Vector2f(u, v));
-		  } else if (tokens[0] == "vn") {
-			  // found a normal
+    tokens = Tokenize(b, index);
+    
+    if (tokens.size() > 0) {
+      if (tokens[0] == "#") {
+        // this line is a comment - skip it
+      } else if (tokens[0] == "v") {
+        // found a vertex
         float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
-			  norms.push_back(Vector3f(x, y, z));
-		  } else if (tokens[0] == "o") {
+        float y = boost::lexical_cast<float>(tokens[2]);
+        float z = boost::lexical_cast<float>(tokens[3]);
+        verts.push_back(Vector3f(x, y, z));
+      } else if (tokens[0] == "vt") {
+        // found a normal
+        float u = boost::lexical_cast<float>(tokens[1]);
+        float v = boost::lexical_cast<float>(tokens[2]);
+        uvs.push_back(Vector2f(u, v));
+      } else if (tokens[0] == "vn") {
+        // found a normal
+        float x = boost::lexical_cast<float>(tokens[1]);
+        float y = boost::lexical_cast<float>(tokens[2]);
+        float z = boost::lexical_cast<float>(tokens[3]);
+        norms.push_back(Vector3f(x, y, z));
+      } else if (tokens[0] == "o") {
         // it's an object spawner 
       } else if (tokens[0] == "usemtl") {
-        set_material(MaterialManager::get().get_material(std::string("res/materials/") + tokens[1]));
+        set_material(sim_.material_manager_->get_material(std::string("res/materials/") + tokens[1]));
       } else if (tokens[0] == "f") {
-			  // -1 to each of these because OBJ uses 1-based indexing
-			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
+        // -1 to each of these because OBJ uses 1-based indexing
+        int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
         int vt1i = boost::lexical_cast<int>(tokens[2]) - 1;
         int vn1i = boost::lexical_cast<int>(tokens[3]) - 1;
-			  int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
+        int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
         int vt2i = boost::lexical_cast<int>(tokens[5]) - 1;
-			  int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
+        int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
         int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
-			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
+        int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
         int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
-			  Vector3f color = mats_.back().first->get_diff_color();
+        Vector3f color = mats_.back().first->get_diff_color();
         //std::cout << x << " " << y << " " << z << " " << n << std::endl;
-			  add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
+        add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
                       verts[v2i], uvs[vt2i], norms[vn2i], color,
                       verts[v3i], uvs[vt3i], norms[vn3i], color);
-		  }
-		  index = newline_index(b, index+1);
-	  } else {
-		  break;
-	  }
+      }
+      index = newline_index(b, index+1);
+    } else {
+      break;
+    }
   }
   
   std::cout << "Read " << triangle_count() << " triangles" << std::endl;
