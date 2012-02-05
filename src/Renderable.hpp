@@ -8,6 +8,8 @@
 
 #include "Material.hpp"
 #include "Mesh.hpp"
+#include "Message.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 
 /*
@@ -17,12 +19,14 @@ class Renderable {
  public:
   typedef boost::shared_ptr<Renderable> ShPtr;
 
-  Renderable(unsigned int id): id_(id) {}
+  Renderable(unsigned int id, Transform::ShPtr transform): id_(id), transform_(transform) {}
   const unsigned int id() const { return id_; }
-  
+
+  void handle_message(Message::ShPtr msg);
+
   Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->is_textured(); return *this; }
   Renderable& set_mesh(Mesh::ShPtr mesh) { mesh_ = mesh; return *this; }
-  
+
   void render() const;
   void draw_geometry() const;
 
@@ -30,11 +34,12 @@ class Renderable {
   //Single mesh per object for now
   Material::ShPtr material_;
   Mesh::ShPtr mesh_;
+  Transform::ShPtr transform_;
 
  private:
   bool textured_;
   const unsigned int id_;
-  
+
   DISALLOW_COPY_AND_ASSIGN(Renderable);
 };
 

@@ -1,14 +1,25 @@
+#include <boost::pointer_cast.hpp>
+
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"
 
 const unsigned int CollidableObject::TYPE_SPHERE = 0;
 const unsigned int CollidableObject::TYPE_CAPSULE = 1;
 
-CollidableObject::CollidableObject(unsigned int id, unsigned int type)
- : id_(id), type_(type), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {
-  transform_ = GameObjectManager::get().get_object(id)->get_transform();
+CollidableObject::CollidableObject(unsigned int id, unsigned int type, Transform::ShPtr transform)
+ : id_(id), type_(type), scale_(Vector3f(1.0f, 1.0f, 1.0f)), transform_(transform) {
   quadric_ = gluNewQuadric();
   gluQuadricNormals(quadric_, GLU_SMOOTH);
+}
+
+void CollidableObject::handle_message(Message::ShPtr msg) {
+  if (msg->type() == MESSAGE_COLLIDABLE_SCALE) {
+    CollidableScaleMessage::ShPtr m = boost::static_pointer_cast<CollidableScaleMessage>(msg);
+    set_scale(m->scale);
+  } else if (msg->type() == MESSAGE_COLLIDABLE_VELOCITY) {
+    CollidableVelocityMessage::ShPtr m = boost::static_pointer_cast<CollidableVelocityMessage>(msg);
+    set_velocity(m->velocity);
+  }
 }
 
 void CollidableObject::update(float delta) {
@@ -34,7 +45,7 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
         //std::cout << "correction: " << distance << std::endl;
         transform_->set_translate(distance + transform_->get_position());
       }
-      
+
       Vector3f sphere2_pos = rhs->get_transform()->get_position() - Vector3f(0, 0, scale_.z()/2);//(rhs->get_transform()->get_rotation() * Vector3f(0, 0, -(scale_.z()/2)));
       distance = transform_->get_position() - sphere2_pos;
       length = distance.lengthSquare();
@@ -47,7 +58,7 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
         //std::cout << "correction: " << distance << std::endl;
         transform_->set_translate(distance + transform_->get_position());
       }
-      
+
       // Check against the second sphere
       break; }
     case CollidableObject::TYPE_SPHERE:
@@ -70,25 +81,25 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
 
   search_direction = -search_direction;
   simplex_[1] = supportSS(rhs, search_direction);
-  
+
   if (simplex_[1].dot(search_direction) <= 0) {
     //std::cout << "Fail 1" << std::endl;
     return;
   }
-  
+
   //std::cout << "Pass 1" << std::endl;
   Vector3f edge1 = simplex_[1] - simplex_[0];
   search_direction = edge1.cross(-simplex_[1]).cross(edge1);
   simplex_[2] = supportSS(rhs, search_direction);
-  
+
   if (simplex_[2].dot(search_direction) <= 0) {
     //std::cout << "Fail 2" << std::endl;
     return;
   }
-  
+
   Vector3f edge2 = simplex_[2] - simplex_[1];
   search_direction = edge2.cross(-simplex_[2]).cross(edge2);
-  
+
   if (search_direction.dot(simplex_[2]) <= 0) {
     //std::cout << "Fail 3" << std::endl;
     return;
@@ -97,19 +108,19 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
   if (edge3.cross(edge2).cross(edge3).dot > 0) {
     return;
   }
-  
+
   simplex_[3] = supportSS(rhs, search_direction);
-  
+
   if (simplex_[3].dot(search_direction) > 0) {
     return;
   }
   Vector3f edge4 = simplex_[3] - simplex_[2];
   search_direction = edge4.cross(-simplex_[3]).cross(edge4);
-  
+
   if (search_direction.dot(simplex_[3]) > 0) {
     return;
   }
-  
+
   std::cout << "Hit" << std::endl;
 }*/
 

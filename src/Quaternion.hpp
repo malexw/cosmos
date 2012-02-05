@@ -11,12 +11,12 @@
 
 // Represents an axis of rotation and an angle
 class Quaternion {
- public: 
-	typedef boost::shared_ptr<Quaternion> ShPtr;
+ public:
+  typedef boost::shared_ptr<Quaternion> ShPtr;
 
   Quaternion(): x_(0.0f), y_(0.0f), z_(0.0f), w_(1.0f) {}
   Quaternion(float x, float y, float z, float w): x_(x), y_(y), z_(z), w_(w) {}
-  
+
   // TODO Clean me up!!
   Quaternion(const Vector3f& x, const Vector3f& y, const Vector3f& z) {
     // Quaternion Calculus and Fast Animation - Ken Shoemake, SIGGRAPH 87
@@ -71,7 +71,7 @@ class Quaternion {
         x = fSin*rkAxis.x;
         y = fSin*rkAxis.y;
         z = fSin*rkAxis.z;*/
-	Quaternion(Vector3f axis, float angle)
+  Quaternion(Vector3f axis, float angle)
    :  x_(axis.x() * sin(angle * M_PI / 360)),
       y_(axis.y() * sin(angle * M_PI / 360)),
       z_(axis.z() * sin(angle * M_PI / 360)),
@@ -81,9 +81,9 @@ class Quaternion {
       y_(axis.y() * sin(angle / 2)),
       z_(axis.z() * sin(angle / 2)),
       w_(cos(angle / 2)) {}*/
-  
+
   Quaternion(const Quaternion& rhs): x_(rhs.x()), y_(rhs.y()), z_(rhs.z()), w_(rhs.w()) {}
-  
+
   Quaternion& operator =(const Quaternion& rhs) {
     x_ = rhs.x();
     y_ = rhs.y();
@@ -91,27 +91,27 @@ class Quaternion {
     w_ = rhs.w();
     return *this;
   }
-  
+
   const Quaternion normalize() const {
     float f = 1/sqrt(x_*x_ + y_*y_ + z_*z_ + w_*w_);
     return Quaternion(x_*f, y_*f, z_*f, w_*f);
   }
-  
+
   //Quaternion& invert() { x_ = -x_; y_ = -y_; z = -z_; return *this; }
   const Quaternion invert() const { return Quaternion(-(vector().x()), -(vector().y()), -(vector().z()), w()); }
-  
+
   Vector3f operator*(const Vector3f& v) const {
     // nVidia SDK implementation
-		Vector3f uv, uuv;
-		Vector3f qvec(x_, y_, z_);
-		uv = qvec.cross(v);
-		uuv = qvec.cross(uv);
-		uv *= (2.0f * w_);
-		uuv *= 2.0f;
+    Vector3f uv, uuv;
+    Vector3f qvec(x_, y_, z_);
+    uv = qvec.cross(v);
+    uuv = qvec.cross(uv);
+    uv *= (2.0f * w_);
+    uuv *= 2.0f;
 
-		return v + uv + uuv;
+    return v + uv + uuv;
   }
-  
+
   float& x() { return x_; }
   const float x() const { return x_; }
   float& y() { return y_; }
@@ -120,9 +120,9 @@ class Quaternion {
   const float z() const { return z_; }
   float& w() { return w_; }
   const float w() const { return w_; }
-  
+
   const Vector3f vector() const { return Vector3f(x_, y_, z_); }
-  
+
  private:
 
   float x_, y_, z_, w_;

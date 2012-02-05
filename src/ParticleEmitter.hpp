@@ -15,6 +15,7 @@
 #include "Particle.hpp"
 #include "Quaternion.hpp"
 #include "Renderable.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -23,24 +24,23 @@
  */
 class ParticleEmitter {
  public:
-	typedef boost::shared_ptr<ParticleEmitter> ShPtr;
+  typedef boost::shared_ptr<ParticleEmitter> ShPtr;
 
-	ParticleEmitter(Renderable::ShPtr renderable, Vector3f position, Vector3f normal, Vector3f up, float speed, float lifetime, float radius, float generation_rate/*, int count*/)
-   : renderable_(renderable), pos_(position), norm_(normal), up_(up), speed_(speed), lifetime_(lifetime), radius_(radius),
+  ParticleEmitter(Transform::ShPtr transform, Renderable::ShPtr renderable, float speed, float lifetime, float radius, float generation_rate/*, int count*/)
+   : transform_(transform), renderable_(renderable), speed_(speed), lifetime_(lifetime), radius_(radius),
      part_count_((generation_rate*lifetime)+1), generation_rate_(1/generation_rate), generation_remainder_(1/generation_rate), next_part_(0) {
     init();
   }
 
   void update(float delta);
   void render(Transform::ShPtr cam);
-  void rotate(const Vector3f& axis, float angle);
 
  private:
-  Renderable::ShPtr renderable_; // Should not use these - designed for objects
+
+  Transform::ShPtr transform_;
+  Renderable::ShPtr renderable_;
+  
   float speed_;
-  Vector3f pos_;
-  Vector3f norm_;
-  Vector3f up_;
   std::vector<Particle::ShPtr> parts_;
   int part_count_;
   float radius_;
@@ -48,9 +48,9 @@ class ParticleEmitter {
   float generation_remainder_;
   int next_part_;
   float lifetime_;
-  
+
   void init();
-  
+
   DISALLOW_COPY_AND_ASSIGN(ParticleEmitter);
 };
 

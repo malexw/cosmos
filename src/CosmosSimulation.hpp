@@ -14,6 +14,7 @@
 #include "ResourceManager/ShaderManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
 
+#include "GameObjectManager.hpp"
 #include "Timer.hpp"
 
 class CosmosSimulation {
@@ -22,7 +23,7 @@ class CosmosSimulation {
 
   CosmosSimulation();
   ~CosmosSimulation();
-  
+
   void run();
 
   AudioManager::ShPtr audio_manager_;
@@ -32,12 +33,13 @@ class CosmosSimulation {
   //ResourceManager::ShPtr resource_manager_;
   ShaderManager::ShPtr shader_manager_;
   TextureManager::ShPtr texture_manager_;
-  
+  GameObjectManager::ShPtr gob_manager_;
+
   // Screen size
   static const int SCREEN_WIDTH;
   static const int SCREEN_HEIGHT;
   static const int SCREEN_BPP;
-  
+
   // Frame rate
   static const int FRAMES_PER_SECOND;
   static const float US_PER_FRAME;
@@ -47,11 +49,11 @@ class CosmosSimulation {
   void init_resource_managers();
   void init_sdl();
   void init_gl();
-  
+
   SDL_Surface* surface_;
-  
+
   Timer::ShPtr fps_;
-  
+
   DISALLOW_COPY_AND_ASSIGN(CosmosSimulation);
 };
 

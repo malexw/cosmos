@@ -1,5 +1,7 @@
 #include <vector>
 
+#include <boost/pointer_cast.hpp>
+
 #include "CosmosConfig.hpp"
 
 #include "ResourceManager/ShaderManager.hpp"
@@ -8,12 +10,19 @@
 #include "Renderable.hpp"
 #include "Vector2f.hpp"
 
+void Renderable::handle_message(Message::ShPtr msg) {
+  // Only one kind of message defined so far
+  RenderableSetMessage::ShPtr m = boost::static_pointer_cast<RenderableSetMessage>(msg);
+  set_mesh(m->mesh);
+  set_material(m->material);
+}
+
 void Renderable::render() const {
   if (!CosmosConfig::get().is_textures()) {
     draw_geometry();
     return;
   }
-  
+
   if (textured_) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
@@ -26,7 +35,7 @@ void Renderable::render() const {
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindTexture(GL_TEXTURE_2D, material_->get_bump_tex()->get_index());
-    
+
     /// Decals disabled until I can figure out how to write a proper decal system
     /*
     // assume true for now
@@ -41,11 +50,11 @@ void Renderable::render() const {
       ShaderManager::get().get_shader_program("bump")->run();
     } */
     //std::cout << "Tex " << material_->get_texture()->get_index() << " Bump " << material_->get_bump_tex()->get_index() << std::endl;
-    
+
     mesh_->set_tex_pointer();
-    
+
     glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
-    
+
     glUseProgram(0);
     //glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
