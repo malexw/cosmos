@@ -12,7 +12,8 @@ class Message {
  public:
   typedef boost::shared_ptr<Message> ShPtr;
 
-  virtual void type() = 0;
+  Message() {}
+  virtual int type() = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Message);
@@ -22,44 +23,49 @@ static const int MESSAGE_TRANSFORM_SET = 1;
 static const int MESSAGE_TRANSFORM_UPDATE = 2;
 static const int MESSAGE_TRANSFORM_LOOKAT = 3;
 
-class TransformSetMessage : Message {
+class TransformSetMessage : public Message {
  public:
   typedef boost::shared_ptr<TransformSetMessage> ShPtr;
 
-  virtual void type() { return MESSAGE_TRANSFORM_SET; }
+  TransformSetMessage() {}
+  virtual int type() { return MESSAGE_TRANSFORM_SET; }
 
   Vector3f translation;
   Vector3f scale;
   Quaternion quaternion;
 };
 
-class TransformUpdateMessage : Message {
+class TransformUpdateMessage : public Message {
  public:
   typedef boost::shared_ptr<TransformUpdateMessage> ShPtr;
 
-  virtual void type() { return MESSAGE_TRANSFORM_UPDATE; }
+  TransformUpdateMessage() {}
+  virtual int type() { return MESSAGE_TRANSFORM_UPDATE; }
 
   Vector3f translation;
   Vector3f scale;
-  Quaternion quaternion;
+  Quaternion global_rotation;
+  Quaternion local_rotation;
 };
 
-class TransformLookatMessage : Message {
+class TransformLookatMessage : public Message {
  public:
   typedef boost::shared_ptr<TransformLookatMessage> ShPtr;
 
-  virtual void type() { return MESSAGE_TRANSFORM_LOOKAT; }
+  TransformLookatMessage() {}
+  virtual int type() { return MESSAGE_TRANSFORM_LOOKAT; }
 
   Vector3f direction;
 };
 
 static const int MESSAGE_RENDERABLE_SET = 1;
 
-class RenderableSetMessage : Message {
+class RenderableSetMessage : public Message {
  public:
   typedef boost::shared_ptr<RenderableSetMessage> ShPtr;
 
-  virtual void type() { return MESSAGE_RENDERABLE_SET; }
+  RenderableSetMessage() {}
+  virtual int type() { return MESSAGE_RENDERABLE_SET; }
 
   Mesh::ShPtr mesh;
   Material::ShPtr material;
@@ -68,24 +74,25 @@ class RenderableSetMessage : Message {
 static const int MESSAGE_COLLIDABLE_SCALE = 1;
 static const int MESSAGE_COLLIDABLE_VELOCITY = 2;
 
-class CollidableScaleMessage : Message {
+class CollidableScaleMessage : public Message {
  public:
   typedef boost::shared_ptr<CollidableScaleMessage> ShPtr;
 
   CollidableScaleMessage() : scale(1.0f, 1.0f, 1.0f) {}
 
-  virtual void type() { return MESSAGE_COLLIDABLE_SCALE; }
+  virtual int type() { return MESSAGE_COLLIDABLE_SCALE; }
 
   Vector3f scale;
-}
+};
 
-class CollidableVelocityMessage : Message {
+class CollidableVelocityMessage : public Message {
  public:
   typedef boost::shared_ptr<CollidableVelocityMessage> ShPtr;
 
-  virtual void type() { return MESSAGE_COLLIDABLE_VELOCITY; }
+  CollidableVelocityMessage() {}
+  virtual int type() { return MESSAGE_COLLIDABLE_VELOCITY; }
 
   Vector3f velocity;
-}
+};
 
 #endif

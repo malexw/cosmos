@@ -7,7 +7,7 @@ const char GameObjectManager::COMPONENT_RENDERABLE = 0x02;
 const char GameObjectManager::COMPONENT_COLLIDABLE = 0x04;
 const char GameObjectManager::COMPONENT_INPUTHANDLER = 0x08;
 
-unsigned int s_next_id = 0;
+unsigned int GameObjectManager::s_next_id = 0;
 
 unsigned int GameObjectManager::spawn(char components) {
   unsigned int id = s_next_id;
@@ -34,47 +34,49 @@ unsigned int GameObjectManager::spawn(char components) {
   }
 
   if (components & COMPONENT_INPUTHANDLER) {
-    InputHandler::ShPtr i(new InputHandler(id));
-    input_handlers_.push_back(i);
+    // TODO InputHandler shouldn't be abstract, will accept a callback
+    //InputHandler::ShPtr i(new InputHandler(id));
+    //input_handlers_.push_back(i);
   }
 
   return id;
 }
 
 void GameObjectManager::message_transform(unsigned int id, Message::ShPtr msg) {
-  find<Transform::ShPtr>(transforms_, id)->handle_message(msg);
+  (find_component<Transform::ShPtr>(transforms_, id))->handle_message(msg);
 }
 
 void GameObjectManager::message_renderable(unsigned int id, Message::ShPtr msg) {
-  find<Renderable::ShPtr>(renderables_, id)->handle_message(msg);
+  (find_component<Renderable::ShPtr>(renderables_, id))->handle_message(msg);
 }
 
 void GameObjectManager::message_collidable(unsigned int id, Message::ShPtr msg) {
-  find<CollidableObject::ShPtr>(collidables_, id)->handle_message(msg);
+  (find_component<CollidableObject::ShPtr>(collidables_, id))->handle_message(msg);
 }
 
 void GameObjectManager::message_input_handler(unsigned int id, Message::ShPtr msg) {
-  find<InputHandler::ShPtr>(input_handlers_, id)->handle_message(msg);
+  // TODO Implement this
+  //(find_component<InputHandler::ShPtr>(input_handlers_, id))->handle_message(msg);
 }
 
-Transform::ShPtr get_transform(unsigned int id) {
-  return find<Transform::ShPtr>(transforms_, id);
+Transform::ShPtr GameObjectManager::get_transform(unsigned int id) {
+  return find_component<Transform::ShPtr>(transforms_, id);
 }
 
-Renderable::ShPtr get_renderable(unsigned int id) {
-  return find<Renderable::ShPtr>(renderables_, id);
+Renderable::ShPtr GameObjectManager::get_renderable(unsigned int id) {
+  return find_component<Renderable::ShPtr>(renderables_, id);
 }
 
-CollidableObject::ShPtr get_collidable(unsigned int id) {
-  return find<CollidableObject::ShPtr>(collidables_, id);
+CollidableObject::ShPtr GameObjectManager::get_collidable(unsigned int id) {
+  return find_component<CollidableObject::ShPtr>(collidables_, id);
 }
 
-InputHandler::ShPtr get_input_handler(unsigned int id) {
-  return find<InputHandler::ShPtr>(input_handlers_, id);
+InputHandler::ShPtr GameObjectManager::get_input_handler(unsigned int id) {
+  return find_component<InputHandler::ShPtr>(input_handlers_, id);
 }
 
 template<typename T>
-T GameObjectManager::find(std::list<T> list, unsigned int id) {
+T GameObjectManager::find_component(std::list<T> list, unsigned int id) {
   foreach (T item, list) {
     if (item->id() == id) {
       return item;
@@ -82,17 +84,17 @@ T GameObjectManager::find(std::list<T> list, unsigned int id) {
   }
 } 
 
-void draw_geometries() {
+void GameObjectManager::draw_geometries() {
 
 }
 
-void update_collidables(float delta) {
+void GameObjectManager::update_collidables(float delta) {
   foreach (CollidableObject::ShPtr c, collidables_) {
     c->update(delta);
   }
 }
 
-void check_collisions() {  
+void GameObjectManager::check_collisions() {  
   // Check against every other object for a collision. Horribly inefficient.
   for (std::list<CollidableObject::ShPtr>::const_iterator ci = collidables_.begin(); ci != collidables_.end(); ++ci) {
     for (std::list<CollidableObject::ShPtr>::const_iterator rhs = ci; rhs != collidables_.end(); ++rhs) {

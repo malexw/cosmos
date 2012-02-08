@@ -8,13 +8,13 @@ void Transform::handle_message(Message::ShPtr msg) {
     TransformSetMessage::ShPtr m = boost::static_pointer_cast<TransformSetMessage>(msg);
     scale_ = m->scale;
     quat_ = m->quaternion;
-    transform_ = m->translation;
+    translate_ = m->translation;
   } else if (msg->type() == MESSAGE_TRANSFORM_UPDATE) {
     TransformUpdateMessage::ShPtr m = boost::static_pointer_cast<TransformUpdateMessage>(msg);
     // TODO Need to multiply the components, not add
     scale_ += m->scale;
-    quat_ = m->quaternion * quat_;
-    transform_ += m->translation;
+    quat_ = (m->local_rotation * m->global_rotation) * quat_;
+    translate_ += m->translation;
   } else if (msg->type() == MESSAGE_TRANSFORM_LOOKAT) {
     TransformLookatMessage::ShPtr m = boost::static_pointer_cast<TransformLookatMessage>(msg);
     set_direction(m->direction);

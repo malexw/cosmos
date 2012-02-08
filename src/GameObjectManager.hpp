@@ -12,7 +12,7 @@
 #include "InputHandler.hpp"
 // end of Components
 
-#include "message.hpp"
+#include "Message.hpp"
 #include "util.hpp"
 
 
@@ -56,7 +56,7 @@ class GameObjectManager {
   std::list<InputHandler::ShPtr> input_handlers_;
 
   template<typename T>
-  T find(std::list<T> list, unsigned int id);
+  T find_component(std::list<T> list, unsigned int id);
 
   DISALLOW_COPY_AND_ASSIGN(GameObjectManager);
 };

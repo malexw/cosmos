@@ -91,13 +91,15 @@ void CosmosSimulation::run() {
   // -------------- OBJECTS --------------------------------------------
 
   // TODO Skybox should be part of the terrain, not an object
+  unsigned int skybox_id;
   {
-    unsigned int skybox_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
-    RenderableSetMessage::ShPtr = rsm(new RenderableSetMessage());
-    rsm.mesh = mesh_manager_->get_mesh("res/meshes/skybox.obj");
-    rsm.material = material_manager_->get_material("res/materials/skybox.mtl");
+    skybox_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
+    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
+    rsm->mesh = mesh_manager_->get_mesh("res/meshes/skybox.obj");
+    rsm->material = material_manager_->get_material("res/materials/skybox.mtl");
     gob_manager_->message_renderable(skybox_id, boost::static_pointer_cast<Message>(rsm));
   }
+  Renderable::ShPtr skybox_renderable = gob_manager_->get_renderable(skybox_id);
 
   // -- old camera code --
   //Camera::ShPtr cam(new Camera());
@@ -108,57 +110,63 @@ void CosmosSimulation::run() {
   //cam->set_direction(Vector3f(2, 0, -10)-Vector3f(32, 20, 0));
   //cam->set_translate(Vector3f(32, 20, 0));
   // TODO The camera probably shouldn't be an object
+  unsigned int camera_id;
   {
-    unsigned int camera_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
-    TransformSetMessage::ShPtr = tsm(new TransformSetMessage());
-    tsm.scale = Vector3f(1.0f, 1.0f, 1.0f);
+    camera_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
+    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
+    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
     // use default quaternion value
-    tsm.translation = Vector3f(2.0f, 1.0f, -2.0f);
+    tsm->translation = Vector3f(2.0f, 1.0f, -2.0f);
     gob_manager_->message_transform(camera_id, boost::static_pointer_cast<Message>(tsm));
-    TransformLookatMessage::ShPtr = tlm(new TransformLookatMessage());
-    tlm.direction = Vector3f(0.0f, 0.0f, -1.0f);
+    TransformLookatMessage::ShPtr tlm(new TransformLookatMessage());
+    tlm->direction = Vector3f(0.0f, 0.0f, -1.0f);
     gob_manager_->message_transform(camera_id, boost::static_pointer_cast<Message>(tlm));
-    CollidableScaleMessage::ShPtr = csm(new CollidableScaleMessage());
-    csm.scale = Vector3f(3.0f, 3.0f, 3.0f);
+    CollidableScaleMessage::ShPtr csm(new CollidableScaleMessage());
+    csm->scale = Vector3f(3.0f, 3.0f, 3.0f);
     gob_manager_->message_collidable(camera_id, boost::static_pointer_cast<Message>(csm));
   }
+  Transform::ShPtr camera_transform = gob_manager_->get_transform(camera_id);
 
   Mesh::ShPtr c = mesh_manager_->get_mesh("res/meshes/cube.obj");
   Mesh::ShPtr q = mesh_manager_->get_mesh("res/meshes/face-center-quad.obj");
   Material::ShPtr m = material_manager_->get_material("res/materials/default.mtl");
   float r = 0.0f;
+  unsigned int cube_id;
   // The cube
   {
-    unsigned int cube_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE | GameObjectManager::COMPONENT_COLLIDABLE);
-    TransformSetMessage::ShPtr = tsm(new TransformSetMessage());
-    tsm.scale = Vector3f(1.0f, 1.0f, 1.0f);
+    cube_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE | GameObjectManager::COMPONENT_COLLIDABLE);
+    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
+    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
     // use default quaternion value
-    tsm.translation = Vector3f(2.0f, 1.0f, -12.0f);
+    tsm->translation = Vector3f(2.0f, 1.0f, -12.0f);
     gob_manager_->message_transform(cube_id, boost::static_pointer_cast<Message>(tsm));
-    RenderableSetMessage::ShPtr = rsm(new RenderableSetMessage());
-    rsm.mesh = c;
-    rsm.material = m;
+    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
+    rsm->mesh = c;
+    rsm->material = m;
     gob_manager_->message_renderable(cube_id, boost::static_pointer_cast<Message>(rsm));
-    CollidableScaleMessage::ShPtr = csm(new CollidableScaleMessage());
-    csm.scale = Vector3f(1.732f, 1.732f, 10f);
+    CollidableScaleMessage::ShPtr csm(new CollidableScaleMessage());
+    csm->scale = Vector3f(1.732f, 1.732f, 10.0f);
     gob_manager_->message_collidable(cube_id, boost::static_pointer_cast<Message>(csm));
   }
+  // Pull these out so we have direct control while testing
+  Renderable::ShPtr cube_renderable = gob_manager_->get_renderable(cube_id);
+  Transform::ShPtr cube_transform = gob_manager_->get_transform(cube_id);
   
   // The particle emitter
   ParticleEmitter::ShPtr emitter;
   {
     unsigned int pe_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
-    TransformSetMessage::ShPtr = tsm(new TransformSetMessage());
-    tsm.scale = Vector3f(1.0f, 1.0f, 1.0f);
+    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
+    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
     // use default quaternion value
-    tsm.translation = Vector3f(7.0f, 1.0f, -20.0f);
+    tsm->translation = Vector3f(7.0f, 1.0f, -20.0f);
     gob_manager_->message_transform(pe_id, boost::static_pointer_cast<Message>(tsm));
-    RenderableSetMessage::ShPtr = rsm(new RenderableSetMessage());
-    rsm.mesh = q;
-    rsm.material = material_manager_->get_material("res/materials/ion.mtl");
+    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
+    rsm->mesh = q;
+    rsm->material = material_manager_->get_material("res/materials/ion.mtl");
     gob_manager_->message_renderable(pe_id, boost::static_pointer_cast<Message>(rsm));
     
-    emitter.reset(new ParticleEmitter(particle_transform, particle_renderable, 3.0f, 2.0f, 20, 30));
+    emitter.reset(new ParticleEmitter(gob_manager_->get_transform(pe_id), gob_manager_->get_renderable(pe_id), 3.0f, 2.0f, 20, 30));
   }
 
   Sound::ShPtr part_sound = audio_manager_->get_sound("res/sounds/starshipmono.wav");
@@ -171,7 +179,7 @@ void CosmosSimulation::run() {
   // ----------------- INPUT -------------------------------------------
   // TODO Don't subclass InputHandlers, create generic ones and assign a callback
   InputManager im;
-  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(camera->id()));
+  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(gob_manager_, camera_id));
   InputHandler::ShPtr ih(boost::static_pointer_cast<InputHandler>(pih));
   im.pushHandler(ih);
 
@@ -227,7 +235,7 @@ void CosmosSimulation::run() {
 
     // Collisions
     if (config.is_collisions()) {
-      gob_manager_->check_collisions();
+      //gob_manager_->check_collisions();
       //camera_collidable->check(cube_collidable);
     }
 
@@ -257,15 +265,17 @@ void CosmosSimulation::run() {
       world->draw_geometry();
 
       glPushMatrix();
-      glTranslatef(2.0f,1.0f,-12.0f);
-      glRotatef(r, 0.0f, 1.0f, 0.0f);
-      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+      //glTranslatef(2.0f,1.0f,-12.0f);
+      //glRotatef(r, 0.0f, 1.0f, 0.0f);
+      //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+      cube_transform->apply();
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
-      glTranslatef(2.0f,1.0f,-12.0f);
-      glRotatef(r, 0.0f, 1.0f, 0.0f);
-      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+      //glTranslatef(2.0f,1.0f,-12.0f);
+      //glRotatef(r, 0.0f, 1.0f, 0.0f);
+      //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
       //
+      cube_transform->apply();
       cube_renderable->draw_geometry();
       //
       glPopMatrix();
@@ -373,18 +383,20 @@ void CosmosSimulation::run() {
     world->draw();
 
     glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
-    if (config.is_collidables()) {
-      cube_collidable->render_collision();
-    }
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    //glTranslatef(2.0f,1.0f,-12.0f);
+    //if (config.is_collidables()) {
+      //cube_collidable->render_collision();
+    //}
+    //glRotatef(r, 0.0f, 1.0f, 0.0f);
+    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    cube_transform->apply();
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
+    //glTranslatef(2.0f,1.0f,-12.0f);
+    //glRotatef(r, 0.0f, 1.0f, 0.0f);
+    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
     //
+    cube_transform->apply();
     cube_renderable->render();
     //
     glPopMatrix();

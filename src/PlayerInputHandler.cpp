@@ -2,29 +2,29 @@
 #include "PlayerInputHandler.hpp"
 #include "ResourceManager/ShaderManager.hpp"
 
-PlayerInputHandler::PlayerInputHandler(unsigned int id)
- : InputHandler(id), grabbing_(false), rot_(0, -1, -1), config_(CosmosConfig::get()) {
-  collidable_ = GameObjectManager::get().get_object(id)->get_collidable();
-  transform_ = GameObjectManager::get().get_object(id)->get_transform();
-  //hdr_program_ = ShaderManager::get().get_shader_program("hdr");
+PlayerInputHandler::PlayerInputHandler(GameObjectManager::ShPtr gob_man, unsigned int id)
+ : InputHandler(id), gob_man_(gob_man), camera_id_(id), grabbing_(false), rot_(0, -1, -1), config_(CosmosConfig::get()) {
 }
 
 void PlayerInputHandler::handleInput(SDL_Event e) {
+  CollidableVelocityMessage::ShPtr cvm(new CollidableVelocityMessage());
+  TransformUpdateMessage::ShPtr tum(new TransformUpdateMessage());
   switch (e.type) {
     case SDL_KEYDOWN:
       switch(e.key.keysym.sym) {
-        case SDLK_w: velo_.z() = -10; collidable_->set_velocity(velo_); break;
-        case SDLK_a: velo_.x() = -10; collidable_->set_velocity(velo_); break;
-        case SDLK_s: velo_.z() = 10; collidable_->set_velocity(velo_); break;
-        case SDLK_d: velo_.x() = 10; collidable_->set_velocity(velo_); break;
+        case SDLK_w: velo_.z() = -10; cvm->velocity = velo_; break;
+        case SDLK_a: velo_.x() = -10; cvm->velocity = velo_; break;
+        case SDLK_s: velo_.z() = 10; cvm->velocity = velo_; break;
+        case SDLK_d: velo_.x() = 10; cvm->velocity = velo_; break;
       };
+      gob_man_->message_collidable(camera_id_, cvm);
       break;
     case SDL_KEYUP:
       switch(e.key.keysym.sym) {
-        case SDLK_w: velo_.z() = 0; collidable_->set_velocity(velo_); break;
-        case SDLK_a: velo_.x() = 0; collidable_->set_velocity(velo_); break;
-        case SDLK_s: velo_.z() = 0; collidable_->set_velocity(velo_); break;
-        case SDLK_d: velo_.x() = 0; collidable_->set_velocity(velo_); break;
+        case SDLK_w: velo_.z() = 0; cvm->velocity = velo_; break;
+        case SDLK_a: velo_.x() = 0; cvm->velocity = velo_; break;
+        case SDLK_s: velo_.z() = 0; cvm->velocity = velo_; break;
+        case SDLK_d: velo_.x() = 0; cvm->velocity = velo_; break;
         // Config stuff
         case SDLK_v: config_.set_collidables(!config_.is_collidables()); break;
         case SDLK_c: config_.set_collisions(!config_.is_collisions()); break;
@@ -44,12 +44,18 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
         //case SDLK_4: hdr_program_->setf(std::string("exposure"), 8.0f); break;
         //case SDLK_5: hdr_program_->setf(std::string("exposure"), 10.0f); break;
       };
+      gob_man_->message_collidable(camera_id_, cvm);
       break;
     case SDL_MOUSEMOTION:
       if (grabbing_) {
         //std::cout << "Mouse " << e.motion.xrel << " " << e.motion.yrel << std::endl;
-        transform_->rotate(Vector3f::NEGATIVE_Y, e.motion.xrel);
-        transform_->rotate_relative(Vector3f::NEGATIVE_X, e.motion.yrel);
+        //transform_->rotate(Vector3f::NEGATIVE_Y, e.motion.xrel);
+        //transform_->rotate_relative(Vector3f::NEGATIVE_X, e.motion.yrel);
+        //Quaternion q1 = Quaternion(Vector3f::NEGATIVE_Y, e.motion.xrel);
+        //Quaternion q2 = Quaternion((q1 * Vector3f::NEGATIVE_X), e.motion.yrel);
+        tum->global_rotation = Quaternion(Vector3f::NEGATIVE_Y, e.motion.xrel);
+        tum->local_rotation = Quaternion(Vector3f::NEGATIVE_X, e.motion.yrel);
+        gob_man_->message_transform(camera_id_, tum);
       }
       break;
     case SDL_MOUSEBUTTONDOWN:

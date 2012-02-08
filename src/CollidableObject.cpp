@@ -1,4 +1,4 @@
-#include <boost::pointer_cast.hpp>
+#include <boost/pointer_cast.hpp>
 
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"

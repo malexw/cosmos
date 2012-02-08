@@ -8,11 +8,11 @@
 #include "SDL/SDL.h"
 //#include "SDL/SDL_opengl.h"
 
-#include "CollidableObject.hpp"
 #include "CosmosConfig.hpp"
+#include "GameObjectManager.hpp"
 #include "InputHandler.hpp"
+#include "Message.hpp"
 #include "Shaders/ShaderProgram.hpp"
-#include "Transform.hpp"
 #include "util.hpp"
 //#include "Vector2f.hpp"
 #include "Vector3f.hpp"
@@ -22,22 +22,23 @@
  */
 class PlayerInputHandler : public InputHandler {
  public:
-	typedef boost::shared_ptr<PlayerInputHandler> ShPtr;
-  
-  PlayerInputHandler(unsigned int id);
-  
+  typedef boost::shared_ptr<PlayerInputHandler> ShPtr;
+
+  PlayerInputHandler(GameObjectManager::ShPtr gob_man, unsigned int id);
+
   virtual void handleInput(SDL_Event e);
 
  private:
   Vector3f velo_;
   Vector3f rot_;
-  CollidableObject::ShPtr collidable_;
-  Transform::ShPtr transform_;
+  unsigned int camera_id_;
+  GameObjectManager::ShPtr gob_man_;
   bool grabbing_;
-  
+  int heading_, attitude_;
+
   ShaderProgram::ShPtr hdr_program_;
   CosmosConfig& config_;
-  
+
   DISALLOW_COPY_AND_ASSIGN(PlayerInputHandler);
 };
 

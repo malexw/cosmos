@@ -14,6 +14,7 @@
 #include "ResourceManager/ShaderManager.hpp"
 #include "ResourceManager/TextureManager.hpp"
 
+#include "Camera.hpp"
 #include "GameObjectManager.hpp"
 #include "Timer.hpp"
 
@@ -44,6 +45,9 @@ class CosmosSimulation {
   static const int FRAMES_PER_SECOND;
   static const float US_PER_FRAME;
   static const float TEN_FPS;
+
+  // TODO Camera should likely be moved out to a "Renderer" class along with all the GL-specific code
+  Camera::ShPtr camera_;
 
  private:
   void init_resource_managers();

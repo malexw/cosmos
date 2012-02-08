@@ -7,6 +7,7 @@
 #include "SDL/SDL_opengl.h"
 
 #include "CollidableObject.hpp"
+#include "GameObjectManager.hpp"
 #include "Matrix4f.hpp"
 #include "Quaternion.hpp"
 #include "util.hpp"
@@ -17,20 +18,22 @@
  */
 class Camera {
  public:
-	typedef boost::shared_ptr<Camera> ShPtr;
+  typedef boost::shared_ptr<Camera> ShPtr;
 
-	Camera(): scale_(Vector3f::ONES), collision_radius_(3.0f) {}
-  
-  Camera& set_collidable(CollidableObject::ShPtr c) { collidable_ = c; return *this; }
-  CollidableObject::ShPtr get_collidable() { return collidable_; }
+  Camera(GameObjectManager::ShPtr gob_man);
+
+  //Camera& set_collidable(CollidableObject::ShPtr c) { collidable_ = c; return *this; }
+  //CollidableObject::ShPtr get_collidable() { return collidable_; }
 
   static Matrix4f matrixFromPositionDirection(Vector3f position, Vector3f direction);
 
  private:
+  GameObjectManager::ShPtr gob_man_;
+  Transform::ShPtr transform_;
   CollidableObject::ShPtr collidable_;
   float collision_radius_;
   Vector3f scale_;
-  
+
   DISALLOW_COPY_AND_ASSIGN(Camera);
 };
 
