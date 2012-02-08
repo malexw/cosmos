@@ -4,20 +4,48 @@
 
 void Transform::handle_message(Message::ShPtr msg) {
 
-  if (msg->type() == MESSAGE_TRANSFORM_SET) {
-    TransformSetMessage::ShPtr m = boost::static_pointer_cast<TransformSetMessage>(msg);
-    scale_ = m->scale;
-    quat_ = m->quaternion;
-    translate_ = m->translation;
-  } else if (msg->type() == MESSAGE_TRANSFORM_UPDATE) {
-    TransformUpdateMessage::ShPtr m = boost::static_pointer_cast<TransformUpdateMessage>(msg);
-    // TODO Need to multiply the components, not add
-    scale_ += m->scale;
-    quat_ = (m->local_rotation * m->global_rotation) * quat_;
-    translate_ += m->translation;
-  } else if (msg->type() == MESSAGE_TRANSFORM_LOOKAT) {
-    TransformLookatMessage::ShPtr m = boost::static_pointer_cast<TransformLookatMessage>(msg);
-    set_direction(m->direction);
+  if (msg->type_ == Message::TRANSFORM_SET) {
+    
+    if (msg->has_key("scale_x")) {
+      scale_ = Vector3f(msg->get_float("scale_x"), msg->get_float("scale_y"), msg->get_float("scale_z"));
+    } else {
+      scale_ = Vector3f::ONES;
+    }
+    if (msg->has_key("quaternion_x")) {
+      quat_ = Quaternion(msg->get_float("quaternion_x"), msg->get_float("quaternion_y"), msg->get_float("quaternion_z"), msg->get_float("quaternion_w"));
+    } else {
+      quat_ = Quaternion();
+    }
+    if (msg->has_key("translation_x")) {
+      translate_ = Vector3f(msg->get_float("translation_x"), msg->get_float("translation_y"), msg->get_float("translation_z"));
+    } else {
+      translate_ = Vector3f::ZEROS;
+    }
+  
+  } else if (msg->type_ == Message::TRANSFORM_UPDATE) {
+    
+    if (msg->has_key("scale_x")) {
+      scale_.x() *= msg->get_float("scale_x");
+      scale_.y() *= msg->get_float("scale_y");
+      scale_.z() *= msg->get_float("scale_z");
+    }
+    if (msg->has_key("yaw")) {
+      // TODO Need to be able to choose to yaw around local Y
+      rotate(Vector3f::NEGATIVE_Y, msg->get_int("yaw"));
+    }
+    if (msg->has_key("pitch")) {
+      rotate_relative(Vector3f::NEGATIVE_X, msg->get_int("pitch"));
+    }
+    if (msg->has_key("translation_x")) {
+      translate_.x() += msg->get_float("translation_x");
+      translate_.y() += msg->get_float("translation_y");
+      translate_.z() += msg->get_float("translation_z");
+    }
+  
+  } else if (msg->type_ == Message::TRANSFORM_LOOKAT) {
+  
+    set_direction(Vector3f(msg->get_float("direction_x"), msg->get_float("direction_y"), msg->get_float("direction_z")));
+  
   }
 }
 

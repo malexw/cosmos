@@ -94,10 +94,9 @@ void CosmosSimulation::run() {
   unsigned int skybox_id;
   {
     skybox_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
-    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
-    rsm->mesh = mesh_manager_->get_mesh("res/meshes/skybox.obj");
-    rsm->material = material_manager_->get_material("res/materials/skybox.mtl");
-    gob_manager_->message_renderable(skybox_id, boost::static_pointer_cast<Message>(rsm));
+    Message::ShPtr msg(new Message(Message::RENDERABLE_SET));
+    msg->add_arg("material", "res/materials/skybox.mtl").add_arg("mesh", "res/meshes/skybox.obj");
+    gob_manager_->message_renderable(skybox_id, msg);
   }
   Renderable::ShPtr skybox_renderable = gob_manager_->get_renderable(skybox_id);
 
@@ -109,21 +108,20 @@ void CosmosSimulation::run() {
 
   //cam->set_direction(Vector3f(2, 0, -10)-Vector3f(32, 20, 0));
   //cam->set_translate(Vector3f(32, 20, 0));
-  // TODO The camera probably shouldn't be an object
+  // TODO Let the camera construct its own components and make sure the renderer has a reference to it
   unsigned int camera_id;
   {
     camera_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
-    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
-    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
-    // use default quaternion value
-    tsm->translation = Vector3f(2.0f, 1.0f, -2.0f);
-    gob_manager_->message_transform(camera_id, boost::static_pointer_cast<Message>(tsm));
-    TransformLookatMessage::ShPtr tlm(new TransformLookatMessage());
-    tlm->direction = Vector3f(0.0f, 0.0f, -1.0f);
-    gob_manager_->message_transform(camera_id, boost::static_pointer_cast<Message>(tlm));
-    CollidableScaleMessage::ShPtr csm(new CollidableScaleMessage());
-    csm->scale = Vector3f(3.0f, 3.0f, 3.0f);
-    gob_manager_->message_collidable(camera_id, boost::static_pointer_cast<Message>(csm));
+    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+    // use default scale and quaternion value
+    mts->add_arg("translation_x", 2.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -2.0f);
+    gob_manager_->message_transform(camera_id, mts);
+    Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
+    mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", 0.0f).add_arg("direction_z", -1.0f);
+    gob_manager_->message_transform(camera_id, mtl);
+    Message::ShPtr mcs(new Message(Message::COLLIDABLE_SCALE));
+    mcs->add_arg("scale_x", 3.0f).add_arg("scale_y", 3.0f).add_arg("scale_z", 3.0f);
+    gob_manager_->message_collidable(camera_id, mcs);
   }
   Transform::ShPtr camera_transform = gob_manager_->get_transform(camera_id);
 
@@ -135,18 +133,16 @@ void CosmosSimulation::run() {
   // The cube
   {
     cube_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE | GameObjectManager::COMPONENT_COLLIDABLE);
-    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
-    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
-    // use default quaternion value
-    tsm->translation = Vector3f(2.0f, 1.0f, -12.0f);
-    gob_manager_->message_transform(cube_id, boost::static_pointer_cast<Message>(tsm));
-    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
-    rsm->mesh = c;
-    rsm->material = m;
-    gob_manager_->message_renderable(cube_id, boost::static_pointer_cast<Message>(rsm));
-    CollidableScaleMessage::ShPtr csm(new CollidableScaleMessage());
-    csm->scale = Vector3f(1.732f, 1.732f, 10.0f);
-    gob_manager_->message_collidable(cube_id, boost::static_pointer_cast<Message>(csm));
+    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+    // use default scale and quaternion value
+    mts->add_arg("translation_x", 2.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -12.0f);
+    gob_manager_->message_transform(cube_id, mts);
+    Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
+    mrs->add_arg("material", "res/materials/default.mtl").add_arg("mesh", "res/meshes/cube.obj");
+    gob_manager_->message_renderable(cube_id, mrs);
+    Message::ShPtr mcs(new Message(Message::COLLIDABLE_SCALE));
+    mcs->add_arg("scale_x", 1.732f).add_arg("scale_y", 1.732f).add_arg("scale_z", 10.0f);
+    gob_manager_->message_collidable(cube_id, mcs);
   }
   // Pull these out so we have direct control while testing
   Renderable::ShPtr cube_renderable = gob_manager_->get_renderable(cube_id);
@@ -156,15 +152,13 @@ void CosmosSimulation::run() {
   ParticleEmitter::ShPtr emitter;
   {
     unsigned int pe_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
-    TransformSetMessage::ShPtr tsm(new TransformSetMessage());
-    tsm->scale = Vector3f(1.0f, 1.0f, 1.0f);
-    // use default quaternion value
-    tsm->translation = Vector3f(7.0f, 1.0f, -20.0f);
-    gob_manager_->message_transform(pe_id, boost::static_pointer_cast<Message>(tsm));
-    RenderableSetMessage::ShPtr rsm(new RenderableSetMessage());
-    rsm->mesh = q;
-    rsm->material = material_manager_->get_material("res/materials/ion.mtl");
-    gob_manager_->message_renderable(pe_id, boost::static_pointer_cast<Message>(rsm));
+    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+    // use default scale and quaternion value
+    mts->add_arg("translation_x", 7.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -20.0f);
+    gob_manager_->message_transform(pe_id, mts);
+    Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
+    mrs->add_arg("material", "res/materials/ion.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
+    gob_manager_->message_renderable(pe_id, mrs);
     
     emitter.reset(new ParticleEmitter(gob_manager_->get_transform(pe_id), gob_manager_->get_renderable(pe_id), 3.0f, 2.0f, 20, 30));
   }
@@ -439,7 +433,7 @@ void CosmosSimulation::init_resource_managers() {
   shader_manager_.reset(new ShaderManager());
   audio_manager_.reset(new AudioManager());
 
-  gob_manager_.reset(new GameObjectManager());
+  gob_manager_.reset(new GameObjectManager(material_manager_, mesh_manager_));
 
   std::cout << "Resources initialized" << std::endl;
 }

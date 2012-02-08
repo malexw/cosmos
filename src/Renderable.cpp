@@ -1,3 +1,4 @@
+#include <string>
 #include <vector>
 
 #include <boost/pointer_cast.hpp>
@@ -11,10 +12,15 @@
 #include "Vector2f.hpp"
 
 void Renderable::handle_message(Message::ShPtr msg) {
-  // Only one kind of message defined so far
-  RenderableSetMessage::ShPtr m = boost::static_pointer_cast<RenderableSetMessage>(msg);
-  set_mesh(m->mesh);
-  set_material(m->material);
+
+  if (msg->type_ == Message::RENDERABLE_SET) {
+    if (msg->has_key("material")) {
+      material_ = mat_man_->get_material(msg->get_string("material"));
+    }
+    if (msg->has_key("mesh")) {
+      mesh_ = mesh_man_->get_mesh(msg->get_string("mesh"));
+    }
+  }
 }
 
 void Renderable::render() const {

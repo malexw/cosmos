@@ -1,11 +1,15 @@
 struct Variant {
   enum Type {
+    TYPE_INT,
+    TYPE_UINT,
     TYPE_FLOAT
   };
   
-  Type type_;
+  Type type;
   
   union {
-    float t_float;
+    int int_t;
+    unsigned int uint_t;
+    float float_t;
   };
-}
+};

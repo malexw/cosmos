@@ -13,12 +13,10 @@ CollidableObject::CollidableObject(unsigned int id, unsigned int type, Transform
 }
 
 void CollidableObject::handle_message(Message::ShPtr msg) {
-  if (msg->type() == MESSAGE_COLLIDABLE_SCALE) {
-    CollidableScaleMessage::ShPtr m = boost::static_pointer_cast<CollidableScaleMessage>(msg);
-    set_scale(m->scale);
-  } else if (msg->type() == MESSAGE_COLLIDABLE_VELOCITY) {
-    CollidableVelocityMessage::ShPtr m = boost::static_pointer_cast<CollidableVelocityMessage>(msg);
-    set_velocity(m->velocity);
+  if (msg->type_ == Message::COLLIDABLE_SCALE) {
+    scale_ = Vector3f(msg->get_float("scale_x"), msg->get_float("scale_y"), msg->get_float("scale_z"));
+  } else if (msg->type_ == Message::COLLIDABLE_VELOCITY) {
+    velo_ = Vector3f(msg->get_float("velocity_x"), msg->get_float("velocity_y"), msg->get_float("velocity_z"));
   }
 }
 

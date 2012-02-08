@@ -6,8 +6,9 @@
 
 #include "SDL/SDL_opengl.h"
 
-#include "Material.hpp"
-#include "Mesh.hpp"
+#include "ResourceManager/MaterialManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
+
 #include "Message.hpp"
 #include "Transform.hpp"
 #include "util.hpp"
@@ -19,7 +20,8 @@ class Renderable {
  public:
   typedef boost::shared_ptr<Renderable> ShPtr;
 
-  Renderable(unsigned int id, Transform::ShPtr transform): id_(id), transform_(transform) {}
+  Renderable(unsigned int id, Transform::ShPtr transform, MaterialManager::ShPtr mat_man, MeshManager::ShPtr mesh_man)
+   : id_(id), transform_(transform), mat_man_(mat_man), mesh_man_(mesh_man) {}
   const unsigned int id() const { return id_; }
 
   void handle_message(Message::ShPtr msg);
@@ -39,6 +41,9 @@ class Renderable {
  private:
   bool textured_;
   const unsigned int id_;
+  
+  MaterialManager::ShPtr mat_man_;
+  MeshManager::ShPtr mesh_man_;
 
   DISALLOW_COPY_AND_ASSIGN(Renderable);
 };

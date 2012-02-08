@@ -24,7 +24,7 @@ unsigned int GameObjectManager::spawn(char components) {
   }
 
   if (components & COMPONENT_RENDERABLE) {
-    Renderable::ShPtr r(new Renderable(id, transform));
+    Renderable::ShPtr r(new Renderable(id, transform, mat_man_, mesh_man_));
     renderables_.push_back(r);
   }
 

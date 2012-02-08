@@ -5,6 +5,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ResourceManager/MaterialManager.hpp"
+#include "ResourceManager/MeshManager.hpp"
+
 // Components
 #include "Transform.hpp"
 #include "Renderable.hpp"
@@ -28,7 +31,8 @@ class GameObjectManager {
   static const char COMPONENT_COLLIDABLE;
   static const char COMPONENT_INPUTHANDLER;
 
-  GameObjectManager() {}
+  GameObjectManager(MaterialManager::ShPtr mat_man, MeshManager::ShPtr mesh_man)
+   : mat_man_(mat_man), mesh_man_(mesh_man) {}
 
   unsigned int spawn(char components);
 
@@ -49,6 +53,9 @@ class GameObjectManager {
 
  private:
   static unsigned int s_next_id;
+
+  MaterialManager::ShPtr mat_man_;
+  MeshManager::ShPtr mesh_man_;
 
   std::list<Transform::ShPtr> transforms_;
   std::list<Renderable::ShPtr> renderables_;
