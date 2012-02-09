@@ -68,7 +68,7 @@ void ShaderManager::load_shaders() {
   glAttachShader(p,f);
   
   glLinkProgram(p);
-  print_program_log(p);
+  //print_program_log(p);
   ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
   programs_.push_back(program);
   glUseProgram(p);
@@ -88,7 +88,7 @@ void ShaderManager::load_shaders() {
   glAttachShader(p, v);
   glAttachShader(p, f);
   glLinkProgram(p);
-  print_program_log(p);
+  //print_program_log(p);
   ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
   programs_.push_back(shadow);
   glUseProgram(p);
@@ -105,7 +105,7 @@ void ShaderManager::load_shaders() {
   glAttachShader(p, v);
   glAttachShader(p, f);
   glLinkProgram(p);
-  print_program_log(p);
+  //print_program_log(p);
   ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
   programs_.push_back(hdr);
   glUseProgram(p);
@@ -123,7 +123,7 @@ void ShaderManager::load_shaders() {
   glAttachShader(p,f);
   
   glLinkProgram(p);
-  print_program_log(p);
+  //print_program_log(p);
   ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
   programs_.push_back(bump);
   glUseProgram(p);

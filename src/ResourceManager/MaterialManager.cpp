@@ -43,7 +43,7 @@ void MaterialManager::load_materials() {
     
   for (int j = 0; j < mat_count; ++j) {
     // For now, assuming one material per .mat file.
-    std::cout << "Decoding " << mat_names_[j] << std::endl;
+    //std::cout << "Decoding " << mat_names_[j] << std::endl;
     FileBlob::ShPtr file(new FileBlob(mat_names_[j]));
     mats_.push_back(decode(*file));
   }

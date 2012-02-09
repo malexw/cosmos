@@ -38,7 +38,7 @@ void MeshManager::load_meshes() {
     
   for (int j = 0; j < mesh_count; ++j) {
     FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
-    std::cout << "Decoding " << file->path() << std::endl;
+    //std::cout << "Decoding " << file->path() << std::endl;
     meshes_.push_back(decode(*file));
   }
 }
@@ -121,7 +121,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
   }
   
   //mesh->uploadToGpu();
-  std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
+  //std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
   return mesh;
 }
 

@@ -431,6 +431,13 @@ void CosmosSimulation::init_sdl() {
 }
 
 void CosmosSimulation::init_gl() {
+  const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+  const char* version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+  const char* glsl_version = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+  std::cout << vendor << " GL version:" << version << " GLSL version:" << glsl_version << std::endl;
+  //const char* extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+  //std::cout << extensions << std::endl;
+  
   glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 
   glEnable(GL_TEXTURE_2D);
