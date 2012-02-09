@@ -27,7 +27,7 @@ class Message {
 
   const MessageType type_;
 
-  Message(MessageType mt) : type_(mt) {}
+  explicit Message(MessageType mt) : type_(mt) {}
 
   Message& add_arg(std::string ref, int val) {
     Variant nv;

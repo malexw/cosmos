@@ -8,77 +8,60 @@
 #include "MaterialManager.hpp"
 #include "TextureManager.hpp"
 
-MaterialManager::MaterialManager(TextureManager::ShPtr texture_manager) 
-  : texture_manager_(texture_manager), loaded_(false) {
+MaterialManager::MaterialManager(TextureManager::ShPtr texture_manager)
+  : texture_manager_(texture_manager) {
   init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' textures list.
- * In the future, TextureMan should read from some kind of resource file so we don't need to specify these by
- * hand
- */
 void MaterialManager::init() {
-  //mat_names_.push_back(std::string("res/textures/default.png"));
-  //mat_names_.push_back(std::string("res/textures/terminal.png"));
-  mat_names_.push_back(std::string("res/materials/default.mtl"));
-  mat_names_.push_back(std::string("res/materials/terminal.mtl"));
-  mat_names_.push_back(std::string("res/materials/tronish.mtl"));
-  mat_names_.push_back(std::string("res/materials/skybox.mtl"));
-  mat_names_.push_back(std::string("res/materials/ion.mtl"));
-  mat_names_.push_back(std::string("res/materials/hdrbox.mtl"));
-  load_materials();
 }
 
-/*
- *
- */
-void MaterialManager::load_materials() {
-  if (loaded_) {
-    std::cout << "TextureMan: Error - textures already loaded" << std::endl;
-    return;
-  }
-  
-  int mat_count = mat_names_.size();
-    
-  for (int j = 0; j < mat_count; ++j) {
-    // For now, assuming one material per .mat file.
-    //std::cout << "Decoding " << mat_names_[j] << std::endl;
-    FileBlob::ShPtr file(new FileBlob(mat_names_[j]));
-    mats_.push_back(decode(*file));
-  }
-  
-  loaded_ = true; 
-}
+const Material::ShPtr MaterialManager::get_material(const std::string& path) {
+  Material::ShPtr ret;
+  MaterialTable::iterator iter = materials_.find(path);
 
-/*
- * Uses a dumb linear search to find a texture with the same name. Optimizations welcome!
- */
-const Material::ShPtr MaterialManager::get_material(std::string name) const {
-  foreach (Material::ShPtr mat, mats_) {
-    if (mat->is_name(name)) {
-      return mat;
+  if (iter != materials_.end()) {
+    ret = iter->second;
+  } else {
+    if (load_material(path)) {
+      ret = materials_.find(path)->second;
+    } else {
+      // ret = Material::DEFAULT;
+      ret = Material::ShPtr();
     }
   }
-  
-  std::cout << "Error: material <" << name << "> not found" << std::endl;
-  return Material::ShPtr();
+
+  return ret;
+}
+
+const bool MaterialManager::load_material(const std::string& path) {
+  // For now, assuming one material per .mat file.
+  FileBlob::ShPtr file(new FileBlob(path));
+  bool ret = file->is_valid();
+
+  if (ret) {
+    materials_.insert(MaterialTable::value_type(path, decode(*file)));
+  } else {
+    std::cout << "Error: material file <" << path << "> not found" << std::endl;
+  }
+
+  return ret;
 }
 
 Material::ShPtr MaterialManager::decode(FileBlob& b) {
-   
+
   int index = 0;
-  
+
   //std::vector<Vector3f> verts;
   //std::vector<Vector2f> uvs;
   //std::vector<Vector3f> norms;
   Material::ShPtr mat(new Material(b.path()));
-  
+
   std::vector<std::string> tokens;
-  
+
   while (index < b.size()) {
     tokens = Tokenize(b, index);
-    
+
     if (tokens.size() > 0) {
       if (tokens[0] == "#") {
         // this line is a comment - skip it
@@ -112,11 +95,11 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         // ambient texture map
       } else if (tokens[0] == "map_Kd") {
         // diffuse texture map
-        mat->set_texture(texture_manager_->get_texture("res/textures/" + tokens[1]));  
+        mat->set_texture(texture_manager_->get_texture("res/textures/" + tokens[1]));
       } else if (tokens[0] == "map_Ks") {
-        // specular texture map 
+        // specular texture map
       } else if (tokens[0] == "map_d") {
-        // dissolve texture map 
+        // dissolve texture map
       } else if (tokens[0] == "map_bump") {
         mat->set_bump_tex(texture_manager_->get_texture("res/textures/" + tokens[1]));
         //mat->set_n11n_tex(TextureManager::get().get_texture("normalization_map");
@@ -130,22 +113,22 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
       break;
     }
   }
-  
+
   return mat;
 }
 
 // Returns the index of the first character following a group of newline characters after the offset
 const unsigned int MaterialManager::newline_index(const FileBlob& b, const unsigned int offset) const {
-  
+
   int ni = offset;
-  
+
   while (!(b[ni] == '\n' || b[ni] == '\r')) {
     ni++;
   }
   while (b[ni] == '\n' || b[ni] == '\r') {
     ni++;
   }
-  
+
   return ni++;
 }
 
@@ -153,10 +136,10 @@ const unsigned int MaterialManager::newline_index(const FileBlob& b, const unsig
 // line
 const std::vector<std::string> MaterialManager::Tokenize(const FileBlob& b, const unsigned int offset) const {
   std::vector<std::string> tokens;
-  
+
   std::string line;
   line.assign(&b[offset], &b[newline_index(b, offset)]);
   boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
-  
+
   return tokens;
 }
