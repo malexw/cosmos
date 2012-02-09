@@ -10,6 +10,7 @@
 
 #include "CosmosSimulation.hpp"
 #include "Material.hpp"
+#include "Mesh.hpp"
 #include "util.hpp"
 #include "Vector2f.hpp"
 #include "Vector3f.hpp"
@@ -33,6 +34,8 @@ class World {
   // Called by the engine to submit the geometry to the GPU
   void draw() const;
   void draw_geometry() const;
+  void draw_skybox() const;
+  
   // The number of triangles in the World
   const unsigned int triangle_count() const { return triangle_count_; }
 
@@ -40,6 +43,8 @@ class World {
   typedef std::pair<Material::ShPtr, int> MatPair;
 
   CosmosSimulation& sim_;
+  Material::ShPtr skybox_material_;
+  Mesh::ShPtr skybox_mesh_;
 
   unsigned int triangle_count_;
   std::vector<Vector3f> verticies_;

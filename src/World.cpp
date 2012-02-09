@@ -17,6 +17,9 @@ void World::init() {
   FileBlob::ShPtr file(new FileBlob(path_));
   std::cout << "Loading world " << path_ << std::endl;
   decode(*file);
+
+  skybox_material_ = sim_.material_manager_->get_material("res/materials/skybox.mtl");
+  skybox_mesh_ = sim_.mesh_manager_->get_mesh("res/meshes/skybox.obj");
 }
 
 void World::add_triangle( Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
@@ -77,6 +80,18 @@ void World::draw_geometry() const {
   glNormalPointer(GL_FLOAT, 0, &normals_[0]);
   glColorPointer(3, GL_FLOAT, 0, &colors_[0]);
   glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+}
+
+void World::draw_skybox() const {
+  if (!CosmosConfig::get().is_textures()) {
+    return;
+  }
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, skybox_material_->get_texture()->get_index());
+  skybox_mesh_->draw();
+  glDrawArrays(GL_TRIANGLES, 0, skybox_mesh_->triangle_count() * 3);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void World::decode(FileBlob& b) {

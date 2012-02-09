@@ -107,16 +107,6 @@ void CosmosSimulation::run() {
 
   // -------------- OBJECTS --------------------------------------------
 
-  // TODO Skybox should be part of the terrain, not an object
-  unsigned int skybox_id;
-  {
-    skybox_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
-    Message::ShPtr msg(new Message(Message::RENDERABLE_SET));
-    msg->add_arg("material", "res/materials/skybox.mtl").add_arg("mesh", "res/meshes/skybox.obj");
-    gob_manager_->message_renderable(skybox_id, msg);
-  }
-  Renderable::ShPtr skybox_renderable = gob_manager_->get_renderable(skybox_id);
-
   unsigned int cube_id;
   // The cube
   {
@@ -308,7 +298,7 @@ void CosmosSimulation::run() {
     }
     glPushMatrix();
     glRotatef(180, 0.0, 1.0f, 0.0);
-    skybox_renderable->render();
+    world->draw_skybox();
     glPopMatrix();
     glUseProgram(0);
     glFrontFace(GL_CCW);
