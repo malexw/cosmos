@@ -2,7 +2,7 @@
 
 #include "AudioManager.hpp"
 
-AudioManager::AudioManager() 
+AudioManager::AudioManager()
   : loaded_(false) {
   init();
 }
@@ -19,27 +19,27 @@ void AudioManager::init() {
 }
 
 /*
- * 
+ *
  */
 void AudioManager::load_sounds() {
   if (loaded_) {
     std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
     return;
   }
-  
+
   // For now, assuming one sound (buffer) per source
   int sound_count = sound_names_.size();
   unsigned int source_indicies[sound_count];
   unsigned int buffer_indicies[sound_count];
   alGenBuffers(sound_count, buffer_indicies);
   alGenSources(sound_count, source_indicies);
-  
+
   ALenum     format;
   ALsizei    size;
   ALsizei    freq;
   ALboolean  loop;
   ALvoid*    data;
-    
+
   for (int j = 0; j < sound_count; ++j) {
     // TODO Evil, evil casting here
     alutLoadWAVFile(reinterpret_cast<ALbyte*>(const_cast<char*>(sound_names_[j].c_str())), &format, &data, &size, &freq, &loop);
@@ -68,7 +68,7 @@ Sound::ShPtr AudioManager::get_sound(std::string name) {
       return sound;
     }
   }
-  
+
   std::cout << "Error: sound <" << name << "> not found" << std::endl;
   return Sound::ShPtr();
 }

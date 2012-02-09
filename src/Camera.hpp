@@ -22,17 +22,22 @@ class Camera {
 
   Camera(GameObjectManager::ShPtr gob_man);
 
-  //Camera& set_collidable(CollidableObject::ShPtr c) { collidable_ = c; return *this; }
-  //CollidableObject::ShPtr get_collidable() { return collidable_; }
+  // These are essentially aliases to make the code look cleaner
+  void apply() const { transform_->apply(); } 
+  void apply_inverse() const { transform_->apply_inverse(); } 
+  void apply_rotation() const { transform_->apply_rotation(); } 
+  
+  const unsigned int get_id() const { return id_; }
+  Transform::ShPtr get_transform() { return transform_; }
 
   static Matrix4f matrixFromPositionDirection(Vector3f position, Vector3f direction);
 
  private:
+  unsigned int id_;
+  
   GameObjectManager::ShPtr gob_man_;
   Transform::ShPtr transform_;
   CollidableObject::ShPtr collidable_;
-  float collision_radius_;
-  Vector3f scale_;
 
   DISALLOW_COPY_AND_ASSIGN(Camera);
 };

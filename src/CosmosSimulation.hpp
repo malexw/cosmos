@@ -46,9 +46,6 @@ class CosmosSimulation {
   static const float US_PER_FRAME;
   static const float TEN_FPS;
 
-  // TODO Camera should likely be moved out to a "Renderer" class along with all the GL-specific code
-  Camera::ShPtr camera_;
-
  private:
   void init_resource_managers();
   void init_sdl();
@@ -57,6 +54,9 @@ class CosmosSimulation {
   SDL_Surface* surface_;
 
   Timer::ShPtr fps_;
+
+  // TODO Camera should likely be moved out to a "Renderer" class along with all the GL-specific code
+  Camera::ShPtr camera_;
 
   DISALLOW_COPY_AND_ASSIGN(CosmosSimulation);
 };

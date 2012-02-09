@@ -45,6 +45,23 @@ CosmosSimulation::~CosmosSimulation() {
 }
 
 void CosmosSimulation::run() {
+  // ---------- CAMERA ------------------------------
+  camera_.reset(new Camera(gob_manager_));
+
+  {
+    unsigned int camera_id = camera_->get_id();
+    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+    // use default scale and quaternion value
+    mts->add_arg("translation_x", 2.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -2.0f);
+    gob_manager_->message_transform(camera_id, mts);
+    Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
+    mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", 0.0f).add_arg("direction_z", -1.0f);
+    gob_manager_->message_transform(camera_id, mtl);
+    Message::ShPtr mcs(new Message(Message::COLLIDABLE_SCALE));
+    mcs->add_arg("scale_x", 3.0f).add_arg("scale_y", 3.0f).add_arg("scale_z", 3.0f);
+    gob_manager_->message_collidable(camera_id, mcs);
+  }
+  
   // ----------- LIGHTING ----------------------------------------------
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
@@ -100,34 +117,6 @@ void CosmosSimulation::run() {
   }
   Renderable::ShPtr skybox_renderable = gob_manager_->get_renderable(skybox_id);
 
-  // -- old camera code --
-  //Camera::ShPtr cam(new Camera());
-  //cam->set_direction(Vector3f(0.0f, 0.0f, -1.0f));
-  //cam->set_translate(Vector3f(5.0f, 3.0f, -3.0f));
-  //cam->set_translate(Vector3f(6.732f, 1.0f, -12.0f));
-
-  //cam->set_direction(Vector3f(2, 0, -10)-Vector3f(32, 20, 0));
-  //cam->set_translate(Vector3f(32, 20, 0));
-  // TODO Let the camera construct its own components and make sure the renderer has a reference to it
-  unsigned int camera_id;
-  {
-    camera_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
-    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
-    // use default scale and quaternion value
-    mts->add_arg("translation_x", 2.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -2.0f);
-    gob_manager_->message_transform(camera_id, mts);
-    Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
-    mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", 0.0f).add_arg("direction_z", -1.0f);
-    gob_manager_->message_transform(camera_id, mtl);
-    Message::ShPtr mcs(new Message(Message::COLLIDABLE_SCALE));
-    mcs->add_arg("scale_x", 3.0f).add_arg("scale_y", 3.0f).add_arg("scale_z", 3.0f);
-    gob_manager_->message_collidable(camera_id, mcs);
-  }
-  Transform::ShPtr camera_transform = gob_manager_->get_transform(camera_id);
-
-  Mesh::ShPtr c = mesh_manager_->get_mesh("res/meshes/cube.obj");
-  Mesh::ShPtr q = mesh_manager_->get_mesh("res/meshes/face-center-quad.obj");
-  Material::ShPtr m = material_manager_->get_material("res/materials/default.mtl");
   float r = 0.0f;
   unsigned int cube_id;
   // The cube
@@ -173,7 +162,7 @@ void CosmosSimulation::run() {
   // ----------------- INPUT -------------------------------------------
   // TODO Don't subclass InputHandlers, create generic ones and assign a callback
   InputManager im;
-  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(gob_manager_, camera_id));
+  PlayerInputHandler::ShPtr pih(new PlayerInputHandler(gob_manager_, camera_->get_id()));
   InputHandler::ShPtr ih(boost::static_pointer_cast<InputHandler>(pih));
   im.pushHandler(ih);
 
@@ -229,6 +218,7 @@ void CosmosSimulation::run() {
 
     // Collisions
     if (config.is_collisions()) {
+      // TODO Fix the collision checker
       //gob_manager_->check_collisions();
       //camera_collidable->check(cube_collidable);
     }
@@ -236,7 +226,7 @@ void CosmosSimulation::run() {
     // Reupdate
 
     // With final positions, we can update the sound
-    audio_manager_->set_listener_transform(camera_transform);
+    audio_manager_->set_listener_transform(camera_->get_transform());
 
     //-------------- First pass for shadows
     if (config.is_shadows()) {
@@ -319,7 +309,7 @@ void CosmosSimulation::run() {
     glDisable(GL_LIGHTING);
     glFrontFace(GL_CW);
     //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
-    camera_transform->apply_rotation();
+    camera_->apply_rotation();
     if (config.is_hdr()) {
       shader_manager_->get_shader_program("hdr")->run();
     }
@@ -366,9 +356,9 @@ void CosmosSimulation::run() {
       glActiveTexture(GL_TEXTURE0);
     }
 
-    camera_transform->apply_inverse();
+    camera_->apply_inverse();
     //glPushMatrix();
-    //camera_transform->apply();
+    //camera_->apply();
     //camera_collidable->render_collision();
     //glPopMatrix();
     // Remember kids, always apply your lights *after* the camera transform
@@ -402,7 +392,7 @@ void CosmosSimulation::run() {
       glDisable(GL_LIGHTING);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
-      emitter->render(camera_transform);
+      emitter->render(camera_->get_transform());
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_LIGHTING);
@@ -429,7 +419,7 @@ void CosmosSimulation::init_resource_managers() {
   texture_manager_.reset(new TextureManager());
   font_manager_.reset(new FontManager(texture_manager_)); // Requires textures
   material_manager_.reset(new MaterialManager(texture_manager_)); // Requires textures
-  mesh_manager_.reset(new MeshManager()); // Requires materials
+  mesh_manager_.reset(new MeshManager());
   shader_manager_.reset(new ShaderManager());
   audio_manager_.reset(new AudioManager());
 

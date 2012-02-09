@@ -31,7 +31,6 @@ class Transform {
   void apply_inverse();
   void apply_rotation();
   void set_direction(const Vector3f& dir);
-  void load();
 
   // S Q T
   Transform& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }

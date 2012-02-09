@@ -1,12 +1,12 @@
 #include "Camera.hpp"
 
 Camera::Camera(GameObjectManager::ShPtr gob_man)
- : gob_man_(gob_man), scale_(Vector3f::ONES), collision_radius_(3.0f) {
+ : gob_man_(gob_man) {
   // Still not sure if we should be constructing the camera components in the GobManager.
   // Or if the camera should even use the same components as GameObjects
-  unsigned int cam_id = gob_man_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
-  transform_ = gob_man_->get_transform(cam_id);
-  collidable_ = gob_man_->get_collidable(cam_id);
+  id_ = gob_man_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
+  transform_ = gob_man_->get_transform(id_);
+  collidable_ = gob_man_->get_collidable(id_);
 } 
 
 // TODO move this to the matrix class

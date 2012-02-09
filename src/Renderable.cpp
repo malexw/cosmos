@@ -15,10 +15,10 @@ void Renderable::handle_message(Message::ShPtr msg) {
 
   if (msg->type_ == Message::RENDERABLE_SET) {
     if (msg->has_key("material")) {
-      material_ = mat_man_->get_material(msg->get_string("material"));
+      set_material(mat_man_->get_material(msg->get_string("material")));
     }
     if (msg->has_key("mesh")) {
-      mesh_ = mesh_man_->get_mesh(msg->get_string("mesh"));
+      set_mesh(mesh_man_->get_mesh(msg->get_string("mesh")));
     }
   }
 }
