@@ -117,7 +117,6 @@ void CosmosSimulation::run() {
   }
   Renderable::ShPtr skybox_renderable = gob_manager_->get_renderable(skybox_id);
 
-  float r = 0.0f;
   unsigned int cube_id;
   // The cube
   {
@@ -214,7 +213,9 @@ void CosmosSimulation::run() {
     gob_manager_->update_collidables(update_delta);
     //camera_collidable->update(updateDelta);    
     emitter->update(update_delta);
-    r += 1.0f;
+    Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
+    tum->add_arg("yaw", 2).add_arg("pitch", 1);
+    gob_manager_->message_transform(cube_id, tum);
 
     // Collisions
     if (config.is_collisions()) {
@@ -249,19 +250,11 @@ void CosmosSimulation::run() {
       world->draw_geometry();
 
       glPushMatrix();
-      //glTranslatef(2.0f,1.0f,-12.0f);
-      //glRotatef(r, 0.0f, 1.0f, 0.0f);
-      //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
       cube_transform->apply();
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
-      //glTranslatef(2.0f,1.0f,-12.0f);
-      //glRotatef(r, 0.0f, 1.0f, 0.0f);
-      //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-      //
       cube_transform->apply();
       cube_renderable->draw_geometry();
-      //
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
@@ -367,22 +360,14 @@ void CosmosSimulation::run() {
     world->draw();
 
     glPushMatrix();
-    //glTranslatef(2.0f,1.0f,-12.0f);
     //if (config.is_collidables()) {
       //cube_collidable->render_collision();
     //}
-    //glRotatef(r, 0.0f, 1.0f, 0.0f);
-    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
     cube_transform->apply();
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
-    //glTranslatef(2.0f,1.0f,-12.0f);
-    //glRotatef(r, 0.0f, 1.0f, 0.0f);
-    //glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    //
     cube_transform->apply();
     cube_renderable->render();
-    //
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
