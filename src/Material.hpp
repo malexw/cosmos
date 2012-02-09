@@ -13,13 +13,17 @@ class Material {
 public:
   typedef boost::shared_ptr<Material> ShPtr;
 
-  explicit Material(std::string name);
+  explicit Material(std::string path) : path_(path), textured_(false) {}
 
-  // Returns the name of the Material
-  const std::string get_name() const;
+  std::string get_path() const { return path_; }
+  std::string get_name() const { return name_; }
+  void set_name(std::string name) { name_ = name; }
+  
+  void apply() const;
+  void tidy() const;
 
   // Compare the name of this Material with another name. Returns true if they're equal, false otherwise.
-  const bool is_name(const std::string& rhs) const;
+  const bool is_name(const std::string& rhs) const { return name_.compare(rhs) == 0; }
 
   Material& set_texture(Texture::ShPtr tex) { diff_tex_ = tex; textured_ = true; return *this; }
   const Texture::ShPtr get_texture() const { return diff_tex_; }
@@ -37,8 +41,9 @@ public:
   const bool is_bump_mapped() const { return bump_tex_; }
 
 private:
-  bool textured_;
+  const std::string path_;
   std::string name_;
+  bool textured_;
   Vector3f diff_color_;
   Texture::ShPtr diff_tex_;
   Texture::ShPtr bump_tex_;

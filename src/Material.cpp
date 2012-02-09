@@ -1,12 +1,34 @@
 #include "Material.hpp"
 
-Material::Material(std::string name)
-  : textured_(false), name_(name) { }
+#include "SDL/SDL_opengl.h"
 
-const std::string Material::get_name() const {
-  return name_;
+void Material::apply() const {
+  if (diff_tex_) {
+    // TODO Figure out which one I need to be using
+    glActiveTexture(GL_TEXTURE0);
+    glClientActiveTexture(GL_TEXTURE0);
+    //
+    
+    glBindTexture(GL_TEXTURE_2D, diff_tex_->get_index());
+  }
+  if (false) {
+  //if (bump_tex_) {
+    // TODO See above
+    glActiveTexture(GL_TEXTURE1);
+    glClientActiveTexture(GL_TEXTURE1);
+    //
+    glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glBindTexture(GL_TEXTURE_2D, bump_tex_->get_index());
+  }
+  
+  //glUseProgram(glsl_program_);
 }
 
-const bool Material::is_name(const std::string& rhs) const {
-  return name_.compare(rhs) == 0;
+void Material::tidy() const {
+  //glUseProgram(0);
+  glActiveTexture(GL_TEXTURE1);
+  glDisable(GL_TEXTURE_2D);
+  glClientActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE0);
 }

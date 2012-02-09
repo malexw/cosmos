@@ -67,6 +67,7 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         // this line is a comment - skip it
       } else if (tokens[0] == "newmtl") {
         // the name of the material is tokens[1]
+        mat->set_name(tokens[1]);
       } else if (tokens[0] == "Ka") {
         // Ambient lighting color
         /*float r = boost::lexical_cast<float>(tokens[1]);

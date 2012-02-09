@@ -29,19 +29,11 @@ void Renderable::render() const {
     return;
   }
 
-  if (textured_) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
-  }
+  material_->apply();
   mesh_->draw();
+  material_->tidy();
   //if (material_->is_bump_mapped() && CosmosConfig::get().is_bump_mapping()) {
   if (false) {
-    glActiveTexture(GL_TEXTURE1);
-    glClientActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glBindTexture(GL_TEXTURE_2D, material_->get_bump_tex()->get_index());
-
     /// Decals disabled until I can figure out how to write a proper decal system
     /*
     // assume true for now
@@ -56,22 +48,6 @@ void Renderable::render() const {
       ShaderManager::get().get_shader_program("bump")->run();
     } */
     //std::cout << "Tex " << material_->get_texture()->get_index() << " Bump " << material_->get_bump_tex()->get_index() << std::endl;
-
-    mesh_->set_tex_pointer();
-
-    glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
-
-    glUseProgram(0);
-    //glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glClientActiveTexture(GL_TEXTURE0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-  } else {
-    glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 }
 
@@ -81,6 +57,4 @@ void Renderable::draw_geometry() const {
     glBindTexture(GL_TEXTURE_2D, material_->get_texture()->get_index());
   }
   mesh_->draw();
-  glDrawArrays(GL_TRIANGLES, 0, mesh_->triangle_count() * 3);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
