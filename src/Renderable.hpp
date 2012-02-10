@@ -4,7 +4,11 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
 #include "ResourceManager/MaterialManager.hpp"
 #include "ResourceManager/MeshManager.hpp"
@@ -26,7 +30,7 @@ class Renderable {
 
   void handle_message(Message::ShPtr msg);
 
-  Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->is_textured(); return *this; }
+  Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->get_texture(); return *this; }
   Renderable& set_mesh(Mesh::ShPtr mesh) { mesh_ = mesh; return *this; }
 
   void render() const;

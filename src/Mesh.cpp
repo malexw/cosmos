@@ -1,5 +1,8 @@
 #include "Mesh.hpp"
 
+#include <iostream>
+#include <assert.h>
+
 void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                         Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
                         Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3) {
@@ -25,29 +28,61 @@ void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
 
 void Mesh::uploadToGpu() {
   int fsize = sizeof(GLfloat);
+  int vertex_count = triangle_count_ * 3;
   offsets_[0] = 0;
-  int vertsize = verticies_.size() * 3 * fsize;
+  int vertsize = vertex_count * 3;
   offsets_[1] = vertsize;
-  int texsize = tex_coords_.size() * 2 * fsize;
+  int texsize = vertex_count * 2;
   offsets_[2] = offsets_[1] + texsize;
-  int normsize = normals_.size() * 3 * fsize;
-  offsets_[3] = offsets_[2] + normsize;
-  int colsize = colors_.size() * 3 * fsize;
+  int normsize = vertex_count * 3;
+  //offsets_[3] = offsets_[2] + normsize;
+  //int colsize = colors_.size() * 3 * fsize;
+  
+  int array_size = vertsize + texsize + normsize;
 
+  // Build the array we're going to upload
+  float attrib_array[array_size];
+  for (int i = 0; i < triangle_count_ * 3; ++i) {
+    unsigned int vertex_start = i * ELEMENTS_PER_VERTEX;
+    assert ((vertex_start+7) <= array_size);
+    Vector3f pos = verticies_.at(i);
+    attrib_array[vertex_start] = pos.x();
+    attrib_array[vertex_start+1] = pos.y();
+    attrib_array[vertex_start+2] = pos.z();
+    Vector2f tex = tex_coords_.at(i);
+    attrib_array[vertex_start+3] = tex.u();
+    attrib_array[vertex_start+4] = tex.v();
+    Vector3f norm = normals_.at(i);
+    attrib_array[vertex_start+5] = norm.x();
+    attrib_array[vertex_start+6] = norm.y();
+    attrib_array[vertex_start+7] = norm.z();
+  }
+  std::cout << "Sample: " << 2.0f;
+  for (int i = 0; i < 8; ++i) {
+    std::cout << attrib_array[i];
+  }
+  std::cout << std::endl;
+
+  std::cout << "Uploading <" << name_ << "> to GPU... ";
   glGenBuffers(1, &vbo_address_);
+  //GLenum err = glGetError();
+  //if (err != GL_NO_ERROR) {
+  //  std::cout << "GL_Error: " << err << std::endl;
+  //}
   glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
-  glBufferData(GL_ARRAY_BUFFER, vertsize + texsize + normsize + colsize, 0, GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, offsets_[0], vertsize, &verticies_[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, offsets_[1], texsize, &tex_coords_[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, offsets_[2], normsize, &normals_[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, offsets_[3], colsize, &colors_[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(attrib_array), attrib_array, GL_STATIC_DRAW);
+  //glBufferSubData(GL_ARRAY_BUFFER, offsets_[0], vertsize, &verticies_[0]);
+  //glBufferSubData(GL_ARRAY_BUFFER, offsets_[1], texsize, &tex_coords_[0]);
+  //glBufferSubData(GL_ARRAY_BUFFER, offsets_[2], normsize, &normals_[0]);
+  //glBufferSubData(GL_ARRAY_BUFFER, offsets_[3], colsize, &colors_[0]);
 
-  glVertexPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[0]));
-  glTexCoordPointer(2, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[1]));
-  glNormalPointer(GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[2]));
-  glColorPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[3]));
+  //glVertexPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[0]));
+  //glTexCoordPointer(2, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[1]));
+  //glNormalPointer(GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[2]));
+  //glColorPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[3]));
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  std::cout << " Done." << std::endl;
   on_gpu_ = true;
 }
 
@@ -55,20 +90,36 @@ void Mesh::draw() const {
   if (on_gpu_) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
 
-    glClientActiveTexture(GL_TEXTURE0);
-    glVertexPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[0]));
-    glTexCoordPointer(2, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[1]));
-    glNormalPointer(GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[2]));
-    glColorPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[3]));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
+    glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
+    glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
+    //glClientActiveTexture(GL_TEXTURE0);
+    //glVertexPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[0]));  // DEPRECATED
+    //glTexCoordPointer(2, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[1]));  // DEPRECATED
+    //glNormalPointer(GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[2]));  // DEPRECATED
+    //glColorPointer(3, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[3]));  // DEPRECATED
 
     //glClientActiveTexture(GL_TEXTURE1);
     //glTexCoordPointer(2, GL_FLOAT, 0, reinterpret_cast<GLbyte*>(offsets_[1]));
-
     glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+    
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   } else {
     glClientActiveTexture(GL_TEXTURE0);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
+    //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    
     glVertexPointer(3, GL_FLOAT, 0, &verticies_[0]);
     glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
     glNormalPointer(GL_FLOAT, 0, &normals_[0]);
@@ -78,6 +129,11 @@ void Mesh::draw() const {
     //glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
 
     glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
   }
 }
 

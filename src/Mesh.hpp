@@ -6,7 +6,11 @@
 #include <string>
 
 #include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
 #include "util.hpp"
 #include "Vector2f.hpp"
@@ -18,6 +22,8 @@
 class Mesh {
  public:
   typedef boost::shared_ptr<Mesh> ShPtr;
+
+  static const unsigned int ELEMENTS_PER_VERTEX = 8;
 
   Mesh(std::string name): name_(name), triangle_count_(0), on_gpu_(false) {}
 

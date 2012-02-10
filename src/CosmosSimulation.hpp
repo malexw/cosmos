@@ -4,7 +4,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
 #include "ResourceManager/AudioManager.hpp"
 #include "ResourceManager/FontManager.hpp"

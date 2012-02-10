@@ -27,7 +27,7 @@ const int CosmosSimulation::SCREEN_HEIGHT = 600;
 const int CosmosSimulation::SCREEN_BPP = 32;
 
 // Frame rate
-const int CosmosSimulation::FRAMES_PER_SECOND = 60;
+const int CosmosSimulation::FRAMES_PER_SECOND = 70;
 const float CosmosSimulation::US_PER_FRAME = 1000000/FRAMES_PER_SECOND;
 const float CosmosSimulation::TEN_FPS = 100000;
 
@@ -155,12 +155,6 @@ void CosmosSimulation::run() {
   InputHandler::ShPtr ih(boost::static_pointer_cast<InputHandler>(pih));
   im.pushHandler(ih);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
-
   CosmosConfig& config = CosmosConfig::get();
 
   while(1) {
@@ -244,7 +238,9 @@ void CosmosSimulation::run() {
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
       cube_transform->apply();
+      shader_manager_->get_shader_program("default")->run();
       cube_renderable->draw_geometry();
+      glUseProgram(0);
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
@@ -357,7 +353,9 @@ void CosmosSimulation::run() {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
     cube_transform->apply();
+    shader_manager_->get_shader_program("default")->run();
     cube_renderable->render();
+    glUseProgram(0);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
@@ -392,10 +390,10 @@ void CosmosSimulation::run() {
 void CosmosSimulation::init_resource_managers() {
   //resource_manager_.reset(new ResourceManager());
   texture_manager_.reset(new TextureManager());
-  font_manager_.reset(new FontManager(texture_manager_)); // Requires textures
-  material_manager_.reset(new MaterialManager(texture_manager_)); // Requires textures
-  mesh_manager_.reset(new MeshManager());
   shader_manager_.reset(new ShaderManager());
+  font_manager_.reset(new FontManager(texture_manager_));
+  material_manager_.reset(new MaterialManager(shader_manager_, texture_manager_));
+  mesh_manager_.reset(new MeshManager());
   audio_manager_.reset(new AudioManager());
 
   gob_manager_.reset(new GameObjectManager(material_manager_, mesh_manager_));
@@ -419,6 +417,23 @@ void CosmosSimulation::init_sdl() {
 
   std::cout << "SDL initialized" << std::endl;
 }
+
+/*void CosmosSimulation::init_gl() {
+  const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+  const char* version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+  const char* glsl_version = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+  std::cout << vendor << " GL version:" << version << " GLSL version:" << glsl_version << std::endl;
+  glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  if( glGetError() != GL_NO_ERROR )
+  {
+    std::cout << "OpenGL Error" << std::endl;
+  }
+  std::cout << "OpenGL initialized" << std::endl;
+}*/
 
 void CosmosSimulation::init_gl() {
   const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));

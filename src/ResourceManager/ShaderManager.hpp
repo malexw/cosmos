@@ -5,7 +5,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
 #include "Shaders/VertexShader.hpp"
 #include "Shaders/FragmentShader.hpp"
@@ -29,7 +33,10 @@ class ShaderManager {
   std::vector<ShaderProgram::ShPtr> programs_;
   std::vector<VertexShader::ShPtr> vshaders_;
   std::vector<FragmentShader::ShPtr> fshaders_;
-  
+
+  static const char* default_frag[];
+  static const char* default_vert[];
+
   void init();
   
   // Iterates through the list of shaders that need to be loaded and loads them. First checks to see if

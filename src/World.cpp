@@ -57,6 +57,11 @@ void World::draw() const {
     //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
     //
     foreach (World::MatPair mat, mats_) {
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_COLOR_ARRAY);
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
+      
       glBindTexture(GL_TEXTURE_2D, mat.first->get_texture()->get_index());
       //glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
       glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
@@ -65,6 +70,11 @@ void World::draw() const {
       glColorPointer(3, GL_FLOAT, 0, &colors_[drawn]);
       glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
       drawn += mat.second * 3;
+      
+      glDisableClientState(GL_VERTEX_ARRAY);
+      glDisableClientState(GL_COLOR_ARRAY);
+      glDisableClientState(GL_NORMAL_ARRAY);
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
     }
     //
     //glUseProgram(0);
@@ -75,11 +85,21 @@ void World::draw() const {
 }
 
 void World::draw_geometry() const {
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_COLOR_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
+    
   glVertexPointer(3, GL_FLOAT, 0, &verticies_[0]);
   glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
   glNormalPointer(GL_FLOAT, 0, &normals_[0]);
   glColorPointer(3, GL_FLOAT, 0, &colors_[0]);
   glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_COLOR_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
 }
 
 void World::draw_skybox() const {

@@ -1,6 +1,10 @@
 #include "Material.hpp"
 
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
 void Material::apply() const {
   if (diff_tex_) {
@@ -22,7 +26,7 @@ void Material::apply() const {
     glBindTexture(GL_TEXTURE_2D, bump_tex_->get_index());
   }
   
-  //glUseProgram(glsl_program_);
+  //shader_program_->run();
 }
 
 void Material::tidy() const {

@@ -41,6 +41,9 @@ void MeshManager::load_meshes() {
     //std::cout << "Decoding " << file->path() << std::endl;
     meshes_.push_back(decode(*file));
   }
+  
+  // TODO Hack to test out vertex buffers
+  meshes_[0]->uploadToGpu();
 }
 
 /*

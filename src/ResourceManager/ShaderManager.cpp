@@ -33,7 +33,25 @@ void ShaderManager::load_shaders() {
     std::cout << "ShaderManager error: shaders already loaded" << std::endl;
     return;
   }
-    
+
+  // Add the default shader
+  std::cout << "Processing default vertex shader" << std::endl;
+  int default_vname = glCreateShader(GL_VERTEX_SHADER);
+  VertexShader::ShPtr default_vshader(new VertexShader("default", default_vname));
+  vshaders_.push_back(default_vshader);
+  glShaderSource(default_vname, 1, default_vert, 0);
+  glCompileShader(default_vname);
+  print_shader_log(default_vname);
+  
+  std::cout << "Processing default fragment shader" << std::endl;
+  int default_fname = glCreateShader(GL_FRAGMENT_SHADER);
+  FragmentShader::ShPtr default_fshader(new FragmentShader("default", default_fname));
+  fshaders_.push_back(default_fshader);
+  glShaderSource(default_fname, 1, default_frag, 0);
+  glCompileShader(default_fname);
+  print_shader_log(default_fname);
+
+  // The rest of the shaders
   int shader_count = shader_names_.size();
     
   for (int j = 0; j < shader_count; ++j) {
@@ -59,10 +77,23 @@ void ShaderManager::load_shaders() {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
   }
-  // The bumpdec program
+  
+  // The default program
   int p = glCreateProgram();
   int v = vshaders_[0]->get_id();
   int f = fshaders_[0]->get_id();
+  
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr default_program(new ShaderProgram("default", p));
+  programs_.push_back(default_program);
+  
+  // The bumpdec program
+  p = glCreateProgram();
+  v = vshaders_[1]->get_id();
+  f = fshaders_[1]->get_id();
   
   glAttachShader(p,v);
   glAttachShader(p,f);
@@ -82,8 +113,8 @@ void ShaderManager::load_shaders() {
 
   // The shadow program
   p = glCreateProgram();
-  v = vshaders_[1]->get_id();
-  f = fshaders_[1]->get_id();
+  v = vshaders_[2]->get_id();
+  f = fshaders_[2]->get_id();
   
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -99,8 +130,8 @@ void ShaderManager::load_shaders() {
   
   // HDR program
   p = glCreateProgram();
-  v = vshaders_[2]->get_id();
-  f = fshaders_[2]->get_id();
+  v = vshaders_[3]->get_id();
+  f = fshaders_[3]->get_id();
   
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -116,8 +147,8 @@ void ShaderManager::load_shaders() {
   
   // The bump program
   p = glCreateProgram();
-  v = vshaders_[3]->get_id();
-  f = fshaders_[3]->get_id();
+  v = vshaders_[4]->get_id();
+  f = fshaders_[4]->get_id();
   
   glAttachShader(p,v);
   glAttachShader(p,f);
@@ -177,3 +208,7 @@ void ShaderManager::print_program_log(int id) {
     std::cout << data;
   }
 }
+
+const char* ShaderManager::default_frag[] = {"void main() { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }"};
+const char* ShaderManager::default_vert[] = {"layout (location = 0) in vec3 pos; void main() { gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0); }"};
+//const char* ShaderManager::default_vert[] = {"layout (location = 0) in vec3 pos; void main() { gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0); }"};

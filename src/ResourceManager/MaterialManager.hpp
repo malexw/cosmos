@@ -7,8 +7,13 @@
 #include <boost/shared_ptr.hpp>
 
 #include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+//#include "SDL/SDL_opengl.h"
+#define GL_GLEXT_PROTOTYPES
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "GL/glext.h"
 
+#include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 #include "FileBlob.hpp"
 #include "Material.hpp"
@@ -19,7 +24,7 @@ class MaterialManager {
   typedef boost::shared_ptr<MaterialManager> ShPtr;
   typedef std::map<std::string, Material::ShPtr> MaterialTable;
 
-  explicit MaterialManager(TextureManager::ShPtr texture_manager);
+  MaterialManager(ShaderManager::ShPtr shader_manager, TextureManager::ShPtr texture_manager);
 
   /*
    * Look up the requested material in the materials table. If the material isn't there, try to load it.
@@ -27,6 +32,7 @@ class MaterialManager {
   const Material::ShPtr get_material(const std::string& path);
 
  private:
+  ShaderManager::ShPtr shader_manager_;
   TextureManager::ShPtr texture_manager_;
   MaterialTable materials_;
 

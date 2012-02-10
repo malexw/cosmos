@@ -1,11 +1,11 @@
 #include "ShaderProgram.hpp"
 
 const std::string ShaderProgram::get_name() const {
-	return name_;
+  return name_;
 }
 
 const bool ShaderProgram::is_name(const std::string& rhs) const {
-	return name_.compare(rhs) == 0;
+  return name_.compare(rhs) == 0;
 }
 
 void ShaderProgram::setf(std::string varname, float value) {

@@ -8,8 +8,8 @@
 #include "MaterialManager.hpp"
 #include "TextureManager.hpp"
 
-MaterialManager::MaterialManager(TextureManager::ShPtr texture_manager)
-  : texture_manager_(texture_manager) {
+MaterialManager::MaterialManager(ShaderManager::ShPtr shader_manager, TextureManager::ShPtr texture_manager)
+  : shader_manager_(shader_manager), texture_manager_(texture_manager) {
   init();
 }
 
@@ -103,8 +103,6 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         // dissolve texture map
       } else if (tokens[0] == "map_bump") {
         mat->set_bump_tex(texture_manager_->get_texture("res/textures/" + tokens[1]));
-        //mat->set_n11n_tex(TextureManager::get().get_texture("normalization_map");
-        // bump map
       } else {
         std::cout << ".mtl processing warning: unknown token <" << tokens[0] << ">" << std::endl;
       }
