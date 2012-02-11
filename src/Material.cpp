@@ -1,10 +1,6 @@
 #include "Material.hpp"
 
-//#include "SDL/SDL_opengl.h"
-#define GL_GLEXT_PROTOTYPES
-#include "GL/gl.h"
-#include "GL/glu.h"
-#include "GL/glext.h"
+#include "Renderer.hpp"
 
 void Material::apply() const {
   if (diff_tex_) {

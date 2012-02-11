@@ -4,11 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 
-//#include "SDL/SDL_opengl.h"
-#define GL_GLEXT_PROTOTYPES
-#include "GL/gl.h"
-#include "GL/glu.h"
-#include "GL/glext.h"
+#include "Renderer.hpp"
 
 #include "CollidableObject.hpp"
 #include "GameObjectManager.hpp"

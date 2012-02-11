@@ -5,11 +5,7 @@
 #include <iostream>
 #include <string>
 
-//#include "SDL/SDL_opengl.h"
-#define GL_GLEXT_PROTOTYPES
-#include "GL/gl.h"
-#include "GL/glu.h"
-#include "GL/glext.h"
+#include "Renderer.hpp"
 
 #include "Material.hpp"
 #include "Matrix4f.hpp"

@@ -5,11 +5,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-//#include "SDL/SDL_opengl.h"
-#define GL_GLEXT_PROTOTYPES
-#include "GL/gl.h"
-#include "GL/glu.h"
-#include "GL/glext.h"
+#include "Shaders/FragmentShader.hpp"
+#include "Shaders/VertexShader.hpp"
+#include "Renderer.hpp"
 
 #include "util.hpp"
 
@@ -17,23 +15,35 @@ class ShaderProgram {
 public:
   typedef boost::shared_ptr<ShaderProgram> ShPtr;
 
-  ShaderProgram(std::string name, int id): name_(name), shader_id_(id) {}
+  ShaderProgram(std::string name);
+  ~ShaderProgram();
 
   // Returns the name of the ShaderProgram
-  const std::string get_name() const;
+  std::string get_name() const { return name_; }
 
   // Compares the name of this ShaderProgram with another name. Returns true if they're equal, false otherwise.
-  const bool is_name(const std::string& rhs) const;
+  const bool is_name(const std::string& rhs) const { return name_.compare(rhs) == 0; }
 
-  const int get_id() const { return shader_id_; }
+  // Return the id assigned by glCreateShader
+  const unsigned int get_id() const { return shader_id_; }
+
+  void attach_shader(FragmentShader::ShPtr frag);
+  void attach_shader(VertexShader::ShPtr vert);
+
+  const bool link() const;
 
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);
   void seti(std::string varname, int value);
 
 private:
-  std::string name_;
-  int shader_id_;
+  const std::string name_;
+  const unsigned int shader_id_;
+
+  unsigned int vert_count_;
+  unsigned int frag_count_;
+
+  void init();
 
   DISALLOW_COPY_AND_ASSIGN(ShaderProgram);
 };

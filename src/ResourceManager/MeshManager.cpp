@@ -38,8 +38,9 @@ void MeshManager::load_meshes() {
     
   for (int j = 0; j < mesh_count; ++j) {
     FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
-    //std::cout << "Decoding " << file->path() << std::endl;
-    meshes_.push_back(decode(*file));
+    Mesh::ShPtr new_mesh = decode(*file);
+    //new_mesh->uploadToGpu();
+    meshes_.push_back(new_mesh);
   }
   
   // TODO Hack to test out vertex buffers

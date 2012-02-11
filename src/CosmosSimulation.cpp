@@ -238,7 +238,7 @@ void CosmosSimulation::run() {
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
       cube_transform->apply();
-      shader_manager_->get_shader_program("default")->run();
+      shader_manager_->get_program("default")->run();
       cube_renderable->draw_geometry();
       glUseProgram(0);
       glPopMatrix();
@@ -287,10 +287,10 @@ void CosmosSimulation::run() {
 
     glDisable(GL_LIGHTING);
     glFrontFace(GL_CW);
-    //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
+    //glUseProgram(ShaderManager::get().get_program("hdr")->get_id());
     camera_->apply_rotation();
     if (config.is_hdr()) {
-      shader_manager_->get_shader_program("hdr")->run();
+      shader_manager_->get_program("hdr")->run();
     }
     glPushMatrix();
     glRotatef(180, 0.0, 1.0f, 0.0);
@@ -329,7 +329,7 @@ void CosmosSimulation::run() {
     glClear(GL_DEPTH_BUFFER_BIT);
 
     if (config.is_shadows()) {
-      shader_manager_->get_shader_program("shadow")->run();
+      shader_manager_->get_program("shadow")->run();
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("shadow_map")->get_index());
       glActiveTexture(GL_TEXTURE0);
@@ -353,7 +353,7 @@ void CosmosSimulation::run() {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
     cube_transform->apply();
-    shader_manager_->get_shader_program("default")->run();
+    shader_manager_->get_program("default")->run();
     cube_renderable->render();
     glUseProgram(0);
     glPopMatrix();
