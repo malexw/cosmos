@@ -35,140 +35,41 @@ void ShaderManager::init() {
   shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
   create_program("bumpdec", shader_names_);
   shader_names_.clear();
-  
+
+  // Configuration for the bump/decal program
+  ShaderProgram::ShPtr bumpdec = get_program("bumpdec");
+  bumpdec->seti("tex", 0);
+  bumpdec->seti("bump", 1);
+  bumpdec->seti("decal", 2);
+
   shader_names_.push_back(std::string("res/shaders/shadow.vert"));
   shader_names_.push_back(std::string("res/shaders/shadow.frag"));
   create_program("shadow", shader_names_);
   shader_names_.clear();
-  
+
   // Configuration for the shadow program
   ShaderProgram::ShPtr shadow = get_program("shadow");
-  shadow->run();
-  GLint texSampler = glGetUniformLocation(shadow->get_id(), "tex");
-  GLint shadowSampler = glGetUniformLocation(shadow->get_id(), "shadowMap");
-  glUniform1i(texSampler, 0);
-  glUniform1i(shadowSampler, 3);
-  
+  shadow->seti("tex", 0);
+  shadow->seti("shadowMap", 3);
+
   shader_names_.push_back(std::string("res/shaders/hdr.vert"));
   shader_names_.push_back(std::string("res/shaders/hdr.frag"));
   create_program("hdr", shader_names_);
   shader_names_.clear();
-  
+
+  // HDR program config
+  ShaderProgram::ShPtr hdr = get_program("hdr");
+  hdr->setf("exposure", 1.0f);
+
   shader_names_.push_back(std::string("res/shaders/bump.vert"));
   shader_names_.push_back(std::string("res/shaders/bump.frag"));
   create_program("bump", shader_names_);
   shader_names_.clear();
-  //load_shaders();
+
+  ShaderProgram::ShPtr bump = get_program("bump");
+  bump->seti("tex", 0);
+  bump->seti("bump", 1);
 }
-
-/*
- *
- */
-/*void ShaderManager::load_shaders() {
-
-  // The rest of the shaders
-  int shader_count = shader_names_.size();
-
-  for (int j = 0; j < shader_count; ++j) {
-    std::cout << "Processing " << shader_names_[j] << std::endl;
-    FileBlob::ShPtr file(new FileBlob(shader_names_[j]));
-    if (file->extension() == "vert") {
-      int vname = glCreateShader(GL_VERTEX_SHADER);
-      VertexShader::ShPtr vshader(new VertexShader(shader_names_[j], vname));
-      vshaders_.push_back(vshader);
-      const char* src = file->get_bytes();
-      glShaderSource(vname, 1, &src, 0);
-      glCompileShader(vname);
-      print_shader_log(vname);
-    } else if (file->extension() == "frag") {
-      int fname = glCreateShader(GL_FRAGMENT_SHADER);
-      FragmentShader::ShPtr fshader(new FragmentShader(shader_names_[j], fname));
-      fshaders_.push_back(fshader);
-      const char* src = file->get_bytes();
-      glShaderSource(fname, 1, &src, 0);
-      glCompileShader(fname);
-      print_shader_log(fname);
-    } else {
-      std::cout << "ShaderManager error: shader type not recognized" << std::endl;
-    }
-  }
-
-  // The bumpdec program
-  unsigned int p = glCreateProgram();
-  unsigned int v = vshaders_[0]->get_id();
-  unsigned int f = fshaders_[0]->get_id();
-
-  glAttachShader(p,v);
-  glAttachShader(p,f);
-
-  glLinkProgram(p);
-  //print_program_log(p);
-  ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
-  programs_.insert(ShaderTable::value_type(program->get_name(), program));
-  glUseProgram(p);
-
-  GLint texSampler = glGetUniformLocation(p, "tex");
-  GLint bumpSampler = glGetUniformLocation(p, "bump");
-  GLint decalSampler = glGetUniformLocation(p, "decal");
-  glUniform1i(texSampler, 0);
-  glUniform1i(bumpSampler, 1);
-  glUniform1i(decalSampler, 2);
-
-  // The shadow program
-  p = glCreateProgram();
-  v = vshaders_[1]->get_id();
-  f = fshaders_[1]->get_id();
-
-  glAttachShader(p, v);
-  glAttachShader(p, f);
-  glLinkProgram(p);
-  //print_program_log(p);
-  ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
-  programs_.insert(ShaderTable::value_type(shadow->get_name(), shadow));
-  glUseProgram(p);
-  texSampler = glGetUniformLocation(p, "tex");
-  GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1i(texSampler, 0);
-  glUniform1i(shadowSampler, 3);
-
-  // HDR program
-  p = glCreateProgram();
-  v = vshaders_[2]->get_id();
-  f = fshaders_[2]->get_id();
-
-  glAttachShader(p, v);
-  glAttachShader(p, f);
-  glLinkProgram(p);
-  //print_program_log(p);
-  ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
-  programs_.insert(ShaderTable::value_type(hdr->get_name(), hdr));
-  glUseProgram(p);
-  GLint exp = glGetUniformLocation(p, "exposure");
-  //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1f(exp, 1.0);
-  //glUniform1i(shadowSampler, 3);
-
-  // The bump program
-  p = glCreateProgram();
-  v = vshaders_[3]->get_id();
-  f = fshaders_[3]->get_id();
-
-  glAttachShader(p,v);
-  glAttachShader(p,f);
-
-  glLinkProgram(p);
-  //print_program_log(p);
-  ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
-  programs_.insert(ShaderTable::value_type(bump->get_name(), bump));
-  glUseProgram(p);
-
-  texSampler = glGetUniformLocation(p, "tex");
-  bumpSampler = glGetUniformLocation(p, "bump");
-  glUniform1i(texSampler, 0);
-  glUniform1i(bumpSampler, 1);
-
-  glUseProgram(0);
-}*/
 
 /*
  * Returns a shader program with the name "name" if it's been loaded. Otherwise returns the default program.

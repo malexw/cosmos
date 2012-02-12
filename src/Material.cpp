@@ -11,8 +11,7 @@ void Material::apply() const {
     
     glBindTexture(GL_TEXTURE_2D, diff_tex_->get_index());
   }
-  if (false) {
-  //if (bump_tex_) {
+  if (bump_tex_) {
     // TODO See above
     glActiveTexture(GL_TEXTURE1);
     glClientActiveTexture(GL_TEXTURE1);

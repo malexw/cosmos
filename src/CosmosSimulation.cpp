@@ -353,7 +353,7 @@ void CosmosSimulation::run() {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
     cube_transform->apply();
-    shader_manager_->get_program("default")->run();
+    shader_manager_->get_program("bump")->run();
     cube_renderable->render();
     glUseProgram(0);
     glPopMatrix();
