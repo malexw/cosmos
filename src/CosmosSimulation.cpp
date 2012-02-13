@@ -102,7 +102,6 @@ void CosmosSimulation::run() {
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
   // ----------------- WORLD -------------------------------------------
-  // TODO A world should be terrain + a skybox and the renderer should take this into account
   World::ShPtr world(new World(*this, std::string("res/worlds/bigbrother.obj")));
 
   // -------------- OBJECTS --------------------------------------------
@@ -360,12 +359,13 @@ void CosmosSimulation::run() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    glUseProgram(0);
     if (config.is_particles()) {
       glDisable(GL_LIGHTING);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
+      shader_manager_->get_program("bump")->run();
       emitter->render(camera_->get_transform());
+      glUseProgram(0);
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_LIGHTING);

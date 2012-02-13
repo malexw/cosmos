@@ -45,14 +45,6 @@ class ShaderManager {
 
   void init();
 
-  // Iterates through the list of shaders that need to be loaded and loads them. First checks to see if
-  // shaders have been loaded to prevent duplicate loadings
-  //void load_shaders();
-
-  //char* load_shader(char *fn);
-  //void print_shader_log(int id);
-  //void print_program_log(int id);
-
   DISALLOW_COPY_AND_ASSIGN(ShaderManager);
 };
 

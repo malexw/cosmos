@@ -44,7 +44,7 @@ void MeshManager::load_meshes() {
   }
   
   // TODO Hack to test out vertex buffers
-  meshes_[0]->uploadToGpu();
+  meshes_[0]->upload_to_gpu();
 }
 
 /*

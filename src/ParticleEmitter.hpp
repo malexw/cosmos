@@ -23,11 +23,8 @@ class ParticleEmitter {
  public:
   typedef boost::shared_ptr<ParticleEmitter> ShPtr;
 
-  ParticleEmitter(Transform::ShPtr transform, Renderable::ShPtr renderable, float speed, float lifetime, float radius, float generation_rate/*, int count*/)
-   : transform_(transform), renderable_(renderable), speed_(speed), lifetime_(lifetime), radius_(radius),
-     part_count_((generation_rate*lifetime)+1), generation_rate_(1/generation_rate), generation_remainder_(1/generation_rate), next_part_(0) {
-    init();
-  }
+  ParticleEmitter(Transform::ShPtr transform, Renderable::ShPtr renderable,
+    float speed, float lifetime, float radius, float generation_rate);
 
   void update(float delta);
   void render(Transform::ShPtr cam);
@@ -36,9 +33,13 @@ class ParticleEmitter {
 
   Transform::ShPtr transform_;
   Renderable::ShPtr renderable_;
+  Mesh::ShPtr mesh_;
+  
+  std::vector<Vector3f> particle_velocities_;
+  std::vector<float> particle_lifetimes_;
   
   float speed_;
-  std::vector<Particle::ShPtr> parts_;
+  //std::vector<Particle::ShPtr> parts_;
   int part_count_;
   float radius_;
   float generation_rate_;
