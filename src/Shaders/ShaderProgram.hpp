@@ -8,6 +8,7 @@
 #include "Shaders/FragmentShader.hpp"
 #include "Shaders/GeometryShader.hpp"
 #include "Shaders/VertexShader.hpp"
+#include "Matrix4f.hpp"
 #include "Renderer.hpp"
 
 #include "util.hpp"
@@ -37,6 +38,7 @@ public:
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);
   void seti(std::string varname, int value);
+  void setmat(std::string varname, const Matrix4f& value);
 
 private:
   const std::string name_;

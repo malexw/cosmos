@@ -70,3 +70,10 @@ void ShaderProgram::seti(std::string varname, int value) {
   glUniform1i(var_index, value);
   glUseProgram(0);
 }
+
+void ShaderProgram::setmat(std::string varname, const Matrix4f& value) {
+  glUseProgram(shader_id_);
+  GLint var_index = glGetUniformLocation(shader_id_, varname.c_str());
+  glUniformMatrix4fv(var_index, 16, GL_FALSE, value.to_array());
+  glUseProgram(0);
+}

@@ -29,6 +29,7 @@ class Camera {
   
   const unsigned int get_id() const { return id_; }
   Transform::ShPtr get_transform() { return transform_; }
+  Matrix4f::ShPtr get_rotation_matrix() { return transform_->get_rotation_matrix(); }
 
   static Matrix4f matrixFromPositionDirection(Vector3f position, Vector3f direction);
 

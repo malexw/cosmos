@@ -199,6 +199,8 @@ void CosmosSimulation::run() {
     Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
     tum->add_arg("yaw", 2).add_arg("pitch", 1);
     gob_manager_->message_transform(cube_id, tum);
+    shader_manager_->get_program("point-sprite")->setmat("cosmos_RotationModelViewProjectionMatrix", *(camera_->get_rotation_matrix()));
+
 
     // Collisions
     if (config.is_collisions()) {

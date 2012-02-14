@@ -94,6 +94,10 @@ void Transform::apply_inverse() {
 }
 
 void Transform::apply_rotation() {
+  glMultMatrixf(get_rotation_matrix()->to_array());
+}
+
+Matrix4f::ShPtr Transform::get_rotation_matrix() {
   Quaternion iR = quat_.invert();
 
   float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
@@ -101,12 +105,12 @@ void Transform::apply_rotation() {
   float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
   float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
 
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f );
-
-  glMultMatrixf(m.to_array());
+  Matrix4f::ShPtr m(new Matrix4f( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
+              (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
+              (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
+              0.0f, 0.0f, 0.0f, 1.0f ));
+  
+  return m;
 }
 
 Transform& Transform::rotate(const Vector3f& axis, float angle) {
