@@ -17,20 +17,15 @@ ParticleEmitter::ParticleEmitter(Transform::ShPtr transform, Renderable::ShPtr r
 }
 
 void ParticleEmitter::init() {
-  mesh_.reset(new Mesh("particle-effect"));
+  mesh_.reset(new Mesh("particle-effect", GL_POINTS));
   
   // Just using billboarded quads for now. Will update once we need to do something more interesting
   Vector3f pos = transform_->get_position();
-  Vector2f uv_tl(0.0f, 0.0f);
-  Vector2f uv_tr(1.0f, 0.0f);
-  Vector2f uv_bl(0.0f, 1.0f);
-  Vector2f uv_br(1.0f, 1.0f);
-  // Borrow the data area for the normal to store our opacity since we don't need the normal
-  Vector3f norm = Vector3f::ZEROS;
-  Vector3f color = Vector3f::ZEROS;
+
   for (int i = part_count_; i > 0; --i) {
-    mesh_->add_triangle(pos, uv_tl, norm, color, pos, uv_bl, norm, color, pos, uv_tr, norm, color);
-    mesh_->add_triangle(pos, uv_tr, norm, color, pos, uv_bl, norm, color, pos, uv_br, norm, color);
+    mesh_->add_point(pos);
+    //mesh_->add_triangle(pos, uv_tl, norm, color, pos, uv_bl, norm, color, pos, uv_tr, norm, color);
+    //mesh_->add_triangle(pos, uv_tr, norm, color, pos, uv_bl, norm, color, pos, uv_br, norm, color);
     // Also fill in the initial particle data
     particle_velocities_.push_back(Vector3f(0.0f, 0.0f, 0.0f));
     particle_lifetimes_.push_back(generation_rate_*i);
@@ -56,29 +51,14 @@ void ParticleEmitter::update(float delta) {
 
       // respawning
       Vector3f pos = transform_->get_position();
-      Vector2f uv_tl(0.0f, 0.0f);
-      Vector2f uv_tr(1.0f, 0.0f);
-      Vector2f uv_bl(0.0f, 1.0f);
-      Vector2f uv_br(1.0f, 1.0f);
       pos = pos + ((delta + particle_lifetimes_[i]) * particle_velocities_[i]);
-      unsigned int v_index = i*6;
-      mesh_->deform(v_index, pos + Vector3f(-0.5, 0.5, 0), uv_tl, Vector3f::ZEROS);
-      mesh_->deform(v_index+1, pos + Vector3f(-0.5, -0.5, 0), uv_bl, Vector3f::ZEROS);
-      mesh_->deform(v_index+2, pos + Vector3f(0.5, 0.5, 0), uv_tr, Vector3f::ZEROS);
-      mesh_->deform(v_index+3, pos + Vector3f(0.5, 0.5, 0), uv_tr, Vector3f::ZEROS);
-      mesh_->deform(v_index+4, pos + Vector3f(-0.5, -0.5, 0), uv_bl, Vector3f::ZEROS);
-      mesh_->deform(v_index+5, pos + Vector3f(0.5, -0.5, 0), uv_br, Vector3f::ZEROS);
-      
+      Vector2f uv_tl(0.0f, 0.0f);
+      mesh_->deform(i, pos, uv_tl, Vector3f::ZEROS);
+
       particle_lifetimes_[i] += lifetime_;
     } else {
       Vector3f translation = delta * particle_velocities_[i];
-      unsigned int v_index = i*6;
-      mesh_->deform_relative(v_index, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
-      mesh_->deform_relative(v_index+1, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
-      mesh_->deform_relative(v_index+2, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
-      mesh_->deform_relative(v_index+3, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
-      mesh_->deform_relative(v_index+4, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
-      mesh_->deform_relative(v_index+5, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
+      mesh_->deform_relative(i, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
     }
   }
   

@@ -52,14 +52,23 @@ void ShaderManager::init() {
   shadow->seti("tex", 0);
   shadow->seti("shadowMap", 3);
 
-  shader_names_.push_back(std::string("res/shaders/hdr.vert"));
+  /*shader_names_.push_back(std::string("res/shaders/hdr.vert"));
   shader_names_.push_back(std::string("res/shaders/hdr.frag"));
   create_program("hdr", shader_names_);
   shader_names_.clear();
 
   // HDR program config
   ShaderProgram::ShPtr hdr = get_program("hdr");
-  hdr->setf("exposure", 1.0f);
+  hdr->setf("exposure", 1.0f);*/
+  
+  shader_names_.push_back(std::string("res/shaders/point_sprite.vert"));
+  shader_names_.push_back(std::string("res/shaders/point_sprite.geom"));
+  shader_names_.push_back(std::string("res/shaders/point_sprite.frag"));
+  create_program("point-sprite", shader_names_);
+  shader_names_.clear();
+
+  ShaderProgram::ShPtr sprite = get_program("point-sprite");
+  sprite->seti("tex", 0);
 
   shader_names_.push_back(std::string("res/shaders/bump.vert"));
   shader_names_.push_back(std::string("res/shaders/bump.frag"));
@@ -106,6 +115,15 @@ const bool ShaderManager::create_program(const std::string& program_name, const 
         program->attach_shader(vshader);
       } else {
         std::cout << "Failed to compile vertex shader <" << paths[i] << ">" << std::endl;
+      }
+
+    } else if (file->extension() == "geom") {
+      
+      GeometryShader::ShPtr gshader(new GeometryShader(file));
+      if (gshader->compile()) {
+        program->attach_shader(gshader);
+      } else {
+        std::cout << "Failed to compile geometry shader <" << paths[i] << ">" << std::endl;
       }
 
     } else if (file->extension() == "frag") {

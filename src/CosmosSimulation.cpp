@@ -363,7 +363,7 @@ void CosmosSimulation::run() {
       glDisable(GL_LIGHTING);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
-      shader_manager_->get_program("bump")->run();
+      shader_manager_->get_program("point-sprite")->run();
       emitter->render(camera_->get_transform());
       glUseProgram(0);
       glDepthMask(GL_TRUE);

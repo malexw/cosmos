@@ -23,12 +23,14 @@ class Mesh {
 
   static const unsigned int ELEMENTS_PER_VERTEX = 8;
 
-  Mesh(std::string name): name_(name), triangle_count_(0), on_gpu_(false), size_array_(0) {}
+  Mesh(std::string name, GLenum type): name_(name), type_(type), triangle_count_(0), on_gpu_(false), size_array_(0) {}
 
   // This is to be used by whatever is parsing the OBJ file to build the geometry
   void add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                     Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
                     Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3);
+                    
+  void add_point(Vector3f p);
 
   // After deforming vertices, call this to send the updated geometry to the GPU.
   // Does nothing if the geometry hasn't been uploaded to the GPU
@@ -57,6 +59,7 @@ class Mesh {
   std::string name_;
   unsigned int triangle_count_;
   unsigned int size_array_;
+  GLenum type_;
   std::vector<Vector3f> verticies_;
   std::vector<Vector3f> normals_;
   std::vector<Vector2f> tex_coords_;

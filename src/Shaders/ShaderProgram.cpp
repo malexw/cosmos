@@ -18,6 +18,11 @@ void ShaderProgram::attach_shader(FragmentShader::ShPtr frag) {
   frag_count_ += 1;
 }
 
+void ShaderProgram::attach_shader(GeometryShader::ShPtr geom) {
+  glAttachShader(shader_id_, geom->get_id());
+  geom_count_ += 1;
+}
+
 const bool ShaderProgram::link() const {
   if (vert_count_ == 0 || frag_count_ == 0) {
     if (vert_count_ == 0) {

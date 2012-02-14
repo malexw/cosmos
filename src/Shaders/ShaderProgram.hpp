@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "Shaders/FragmentShader.hpp"
+#include "Shaders/GeometryShader.hpp"
 #include "Shaders/VertexShader.hpp"
 #include "Renderer.hpp"
 
@@ -29,6 +30,7 @@ public:
 
   void attach_shader(FragmentShader::ShPtr frag);
   void attach_shader(VertexShader::ShPtr vert);
+  void attach_shader(GeometryShader::ShPtr geom);
 
   const bool link() const;
 
@@ -42,6 +44,7 @@ private:
 
   unsigned int vert_count_;
   unsigned int frag_count_;
+  unsigned int geom_count_;
 
   void init();
 

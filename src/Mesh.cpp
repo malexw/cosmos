@@ -27,22 +27,35 @@ void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
   size_array_ += 3 * 8;
 }
 
+// TODO Don't do this. Subclass mesh into types, eg TriangleMesh, PointMesh, etc.
+void Mesh::add_point(Vector3f p) {
+  verticies_.push_back(p);
+  size_array_ += 3;
+}
+
 void Mesh::draw() const {
   if (on_gpu_) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    
-    glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
-    glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
-    glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
-    glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+    if (type_ == GL_TRIANGLES) {
+      glEnableVertexAttribArray(0);
+      glEnableVertexAttribArray(1);
+      glEnableVertexAttribArray(2);
+      
+      glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
+      glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
+      glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
+      glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
 
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
+      glDisableVertexAttribArray(0);
+      glDisableVertexAttribArray(1);
+      glDisableVertexAttribArray(2);
+    } else if (type_ == GL_POINTS) {
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 0/*stride*/, 0/*start*/);
+      glDrawArrays(GL_POINTS, 0, verticies_.size());
+      glDisableVertexAttribArray(0);
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   } else {
@@ -77,8 +90,9 @@ void Mesh::deform_relative(unsigned int vertex, Vector3f translation, Vector2f t
   }
   
   verticies_[vertex] = verticies_[vertex] + translation;
-  tex_coords_[vertex] = tex_coords_[vertex] + tex_coords;
-  normals_[vertex] = normals_[vertex] + normal;
+  // TODO fix this when we subclass Mesh
+  //tex_coords_[vertex] = tex_coords_[vertex] + tex_coords;
+  //normals_[vertex] = normals_[vertex] + normal;
 }
 
 void Mesh::deform(unsigned int vertex, Vector3f translation, Vector2f tex_coords, Vector3f normal) {
@@ -87,8 +101,9 @@ void Mesh::deform(unsigned int vertex, Vector3f translation, Vector2f tex_coords
   }
   
   verticies_[vertex] = translation;
-  tex_coords_[vertex] = tex_coords;
-  normals_[vertex] = normal;
+  // TODO fix this when we subclass Mesh
+  //tex_coords_[vertex] = tex_coords;
+  //normals_[vertex] = normal;
 }
 
 void Mesh::upload_to_gpu() {
@@ -125,19 +140,30 @@ void Mesh::update_on_gpu() {
 boost::shared_array<float> Mesh::to_array() {
 
   boost::shared_array<float> attrib_array(new float[size_array_]);
-  for (int i = 0; i < triangle_count_ * 3; ++i) {
-    unsigned int vertex_start = i * ELEMENTS_PER_VERTEX;
-    Vector3f pos = verticies_.at(i);
-    attrib_array[vertex_start] = pos.x();
-    attrib_array[vertex_start+1] = pos.y();
-    attrib_array[vertex_start+2] = pos.z();
-    Vector2f tex = tex_coords_.at(i);
-    attrib_array[vertex_start+3] = tex.u();
-    attrib_array[vertex_start+4] = tex.v();
-    Vector3f norm = normals_.at(i);
-    attrib_array[vertex_start+5] = norm.x();
-    attrib_array[vertex_start+6] = norm.y();
-    attrib_array[vertex_start+7] = norm.z();
+  
+  if (type_ == GL_TRIANGLES) {
+    for (int i = 0; i < triangle_count_ * 3; ++i) {
+      unsigned int vertex_start = i * ELEMENTS_PER_VERTEX;
+      Vector3f pos = verticies_.at(i);
+      attrib_array[vertex_start] = pos.x();
+      attrib_array[vertex_start+1] = pos.y();
+      attrib_array[vertex_start+2] = pos.z();
+      Vector2f tex = tex_coords_.at(i);
+      attrib_array[vertex_start+3] = tex.u();
+      attrib_array[vertex_start+4] = tex.v();
+      Vector3f norm = normals_.at(i);
+      attrib_array[vertex_start+5] = norm.x();
+      attrib_array[vertex_start+6] = norm.y();
+      attrib_array[vertex_start+7] = norm.z();
+    }
+  } else if (type_ == GL_POINTS) {
+    for (int i = 0; i < verticies_.size(); ++i) {
+      unsigned int vertex_start = i * 3;
+      Vector3f pos = verticies_.at(i);
+      attrib_array[vertex_start] = pos.x();
+      attrib_array[vertex_start+1] = pos.y();
+      attrib_array[vertex_start+2] = pos.z();
+    }
   }
   
   return attrib_array;

@@ -5,6 +5,7 @@
 
 //#include "MaterialManager.hpp"
 #include "MeshManager.hpp"
+#include "Renderer.hpp"
 
 MeshManager::MeshManager() 
   : loaded_(false) {
@@ -71,7 +72,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
   std::vector<Vector3f> norms;
   
   std::vector<std::string> tokens;
-  Mesh::ShPtr mesh (new Mesh(b.path()));
+  Mesh::ShPtr mesh (new Mesh(b.path(), GL_TRIANGLES));
   //Material::ShPtr mat;
   
   while (index < b.size()) {
