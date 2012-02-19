@@ -35,29 +35,15 @@ void Mesh::add_point(Vector3f p) {
 
 void Mesh::draw() const {
   if (on_gpu_) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
+    glBindVertexArray(vao_address_);
 
     if (type_ == GL_TRIANGLES) {
-      glEnableVertexAttribArray(0);
-      glEnableVertexAttribArray(1);
-      glEnableVertexAttribArray(2);
-      
-      glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
-      glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
-      glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
       glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
-
-      glDisableVertexAttribArray(0);
-      glDisableVertexAttribArray(1);
-      glDisableVertexAttribArray(2);
     } else if (type_ == GL_POINTS) {
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 0/*stride*/, 0/*start*/);
       glDrawArrays(GL_POINTS, 0, verticies_.size());
-      glDisableVertexAttribArray(0);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
   } else {
     glClientActiveTexture(GL_TEXTURE0);
 
@@ -118,11 +104,27 @@ void Mesh::upload_internal(GLenum usage) {
   
   boost::shared_array<float> attrib_array = to_array();
   
+  glGenVertexArrays(1, &vao_address_);
+  glBindVertexArray(vao_address_);
+
   glGenBuffers(1, &vbo_address_);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
   glBufferData(GL_ARRAY_BUFFER, size_array_*sizeof(float), attrib_array.get(), usage);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  if (type_ == GL_TRIANGLES) {
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    
+    glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
+    glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
+    glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
+  } else if (type_ == GL_POINTS) {
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 0/*stride*/, 0/*start*/);
+  }
+
+  glBindVertexArray(0);
   on_gpu_ = true;
 }
 

@@ -58,6 +58,7 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
   Material::ShPtr mat(new Material(b.path()));
 
   std::vector<std::string> tokens;
+  std::vector<std::string> shader_source_files;
 
   while (index < b.size()) {
     tokens = Tokenize(b, index);
@@ -103,6 +104,12 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         // dissolve texture map
       } else if (tokens[0] == "map_bump") {
         mat->set_bump_tex(texture_manager_->get_texture("res/textures/" + tokens[1]));
+      } else if (tokens[0] == "shader_vert") {
+        shader_source_files.push_back(tokens[1]);
+      } else if (tokens[0] == "shader_geom") {
+        shader_source_files.push_back(tokens[1]);
+      } else if (tokens[0] == "shader_frag") {
+        shader_source_files.push_back(tokens[1]);
       } else {
         std::cout << ".mtl processing warning: unknown token <" << tokens[0] << ">" << std::endl;
       }
@@ -112,6 +119,12 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
       break;
     }
   }
+
+  //foreach (std::string path, shader_source_files) {
+  //  std::cout << "spath: " << path << std::endl;
+  //}
+  shader_manager_->create_program(mat->get_name(), shader_source_files);
+  mat->set_shader(shader_manager_->get_program(mat->get_name()));
 
   return mat;
 }
@@ -138,7 +151,7 @@ const std::vector<std::string> MaterialManager::Tokenize(const FileBlob& b, cons
 
   std::string line;
   line.assign(&b[offset], &b[newline_index(b, offset)]);
-  boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
+  boost::split(tokens, line, boost::is_any_of("\t \r\n"));
 
   return tokens;
 }

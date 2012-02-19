@@ -40,12 +40,12 @@ void MeshManager::load_meshes() {
   for (int j = 0; j < mesh_count; ++j) {
     FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
     Mesh::ShPtr new_mesh = decode(*file);
-    //new_mesh->uploadToGpu();
+    new_mesh->upload_to_gpu();
     meshes_.push_back(new_mesh);
   }
   
   // TODO Hack to test out vertex buffers
-  meshes_[0]->upload_to_gpu();
+  //meshes_[0]->upload_to_gpu();
 }
 
 /*

@@ -34,12 +34,11 @@ class ParticleEmitter {
   Transform::ShPtr transform_;
   Renderable::ShPtr renderable_;
   Mesh::ShPtr mesh_;
-  
+
   std::vector<Vector3f> particle_velocities_;
   std::vector<float> particle_lifetimes_;
-  
+
   float speed_;
-  //std::vector<Particle::ShPtr> parts_;
   int part_count_;
   float radius_;
   float generation_rate_;

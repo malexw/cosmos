@@ -18,18 +18,18 @@ const bool VertexShader::compile() const {
   glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &status);
   bool success = status == GL_TRUE;
 
-  /*if (!success) {
+  if (!success) {
     int length = 0;
     int count = 0;
 
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+    glGetShaderiv(shader_id_, GL_INFO_LOG_LENGTH, &length);
 
     if (length > 0) {
       char data[length];
-      glGetShaderInfoLog(id, length, &count, data);
+      glGetShaderInfoLog(shader_id_, length, &count, data);
       std::cout << data;
     }
-  }*/
+  }
 
   return success;
 }

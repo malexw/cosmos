@@ -66,6 +66,7 @@ class Mesh {
   // Hopefully one day we won't need a whole new mesh object for color variations
   std::vector<Vector3f> colors_;
 
+  GLuint vao_address_;
   GLuint vbo_address_;
   bool on_gpu_;
   int offsets_[4];

@@ -40,6 +40,7 @@ class Transform {
   Vector3f get_scale() { return scale_; }
   Quaternion get_rotation() { return quat_; }
   Matrix4f::ShPtr get_rotation_matrix();
+  Matrix4f::ShPtr get_matrix();
   Vector3f get_position() { return translate_; }
 
   //Transform& rotate(const Quaternion& q);

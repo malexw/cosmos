@@ -21,11 +21,11 @@ void Material::apply() const {
     glBindTexture(GL_TEXTURE_2D, bump_tex_->get_index());
   }
   
-  //shader_program_->run();
+  shader_program_->run();
 }
 
 void Material::tidy() const {
-  //glUseProgram(0);
+  glUseProgram(0);
   glActiveTexture(GL_TEXTURE1);
   glDisable(GL_TEXTURE_2D);
   glClientActiveTexture(GL_TEXTURE0);

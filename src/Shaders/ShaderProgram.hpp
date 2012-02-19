@@ -37,8 +37,10 @@ public:
 
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);
+  void set3f(std::string varname, float v1, float v2, float v3);
   void seti(std::string varname, int value);
   void setmat(std::string varname, const Matrix4f& value);
+  void set_block_binding(std::string varname, unsigned int binding_point);
 
 private:
   const std::string name_;

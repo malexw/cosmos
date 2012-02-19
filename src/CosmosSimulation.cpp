@@ -24,6 +24,7 @@
 // Screen size
 const int CosmosSimulation::SCREEN_WIDTH = 960;
 const int CosmosSimulation::SCREEN_HEIGHT = 600;
+const float CosmosSimulation::ASPECT_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const int CosmosSimulation::SCREEN_BPP = 32;
 
 // Frame rate
@@ -45,38 +46,41 @@ CosmosSimulation::~CosmosSimulation() {
 }
 
 void CosmosSimulation::run() {
+
   // ---------- CAMERA ------------------------------
   camera_.reset(new Camera(gob_manager_));
-
+  camera_->set_projection(Matrix4f::projectionPerspectiveMatrix(45, ASPECT_RATIO, 1, 4000));
   {
     unsigned int camera_id = camera_->get_id();
     Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
     // use default scale and quaternion value
     mts->add_arg("translation_x", 2.0f).add_arg("translation_y", 1.0f).add_arg("translation_z", -2.0f);
+    //mts->add_arg("translation_x", 5.0f).add_arg("translation_y", 15.0f).add_arg("translation_z", 5.0f);
     gob_manager_->message_transform(camera_id, mts);
     Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
     mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", 0.0f).add_arg("direction_z", -1.0f);
+    //mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", -15.0f).add_arg("direction_z", -35.0f);
     gob_manager_->message_transform(camera_id, mtl);
     Message::ShPtr mcs(new Message(Message::COLLIDABLE_SCALE));
     mcs->add_arg("scale_x", 3.0f).add_arg("scale_y", 3.0f).add_arg("scale_z", 3.0f);
     gob_manager_->message_collidable(camera_id, mcs);
   }
-  
+
   // ----------- LIGHTING ----------------------------------------------
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
+  //glEnable(GL_LIGHTING);
+  //glEnable(GL_LIGHT0);
   //GLfloat lightVals[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-  GLfloat lightVals[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightVals);
+  //GLfloat lightVals[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+  //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightVals);
 
-  glLightfv(GL_LIGHT0, GL_AMBIENT, lightVals);
+  //glLightfv(GL_LIGHT0, GL_AMBIENT, lightVals);
 
-  lightVals[0] = 1.0f; lightVals[1] = 1.0f; lightVals[2] = 1.0f; lightVals[3] = 1.0f;
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightVals);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, lightVals);
+  //lightVals[0] = 1.0f; lightVals[1] = 1.0f; lightVals[2] = 1.0f; lightVals[3] = 1.0f;
+  //glLightfv(GL_LIGHT0, GL_DIFFUSE, lightVals);
+  //glLightfv(GL_LIGHT0, GL_SPECULAR, lightVals);
 
   //Vector3f(5, 0, -30)-Vector3f(5, 15, 5)
-  lightVals[0] = 0.0f; lightVals[1] = -15.0f; lightVals[2] = -30.0f; lightVals[3] = 0.0f;
+  //lightVals[0] = 3.0f; lightVals[1] = 14.0f; lightVals[2] = -17.0f; lightVals[3] = 0.0f;
   //lightVals[0] = 5.0f; lightVals[1] = 15.0f; lightVals[2] = 5.0f; lightVals[3] = 0.0f;
   //glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
 
@@ -91,6 +95,19 @@ void CosmosSimulation::run() {
   glReadBuffer(GL_NONE);
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, texture_manager_->get_texture("shadow_map")->get_index(), 0);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+  Camera::ShPtr shadow_camera(new Camera(gob_manager_));
+  shadow_camera->set_projection(Matrix4f::projectionPerspectiveMatrix(45, 1, 10, 40000));
+  {
+    unsigned int shadow_camera_id = shadow_camera->get_id();
+    Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+    // use default scale and quaternion value
+    mts->add_arg("translation_x", 5.0f).add_arg("translation_y", 15.0f).add_arg("translation_z", 5.0f);
+    gob_manager_->message_transform(shadow_camera_id, mts);
+    Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
+    mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", -15.0f).add_arg("direction_z", -35.0f);
+  }
+  shadow_camera->upload_matrices(UniformLocations::SHADOW_MATRIX_BINDING);
 
   // -------------- HDR? -----------------------------------------------
   GLuint hdrFrameBuffer;
@@ -124,7 +141,7 @@ void CosmosSimulation::run() {
   // Pull these out so we have direct control while testing
   Renderable::ShPtr cube_renderable = gob_manager_->get_renderable(cube_id);
   Transform::ShPtr cube_transform = gob_manager_->get_transform(cube_id);
-  
+
   // The particle emitter
   ParticleEmitter::ShPtr emitter;
   {
@@ -136,9 +153,24 @@ void CosmosSimulation::run() {
     Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
     mrs->add_arg("material", "res/materials/ion.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
     gob_manager_->message_renderable(pe_id, mrs);
-    
+
     emitter.reset(new ParticleEmitter(gob_manager_->get_transform(pe_id), gob_manager_->get_renderable(pe_id), 3.0f, 2.0f, 20, 30));
   }
+
+  // TODO Use a Uniform Buffer Object? to set these
+  ShaderProgram::ShPtr b = shader_manager_->get_program("default");
+  b->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  b->seti("bump", UniformLocations::BUMP_TEXTURE_UNIT);
+  b->set3f("light_pos", 5.0f, 15.0f, 5.0f);
+  b->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  shader_manager_->get_program("ion")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  shader_manager_->get_program("ion")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  shader_manager_->get_program("tronish")->set3f("light_pos", 5.0f, 15.0f, 5.0f);
+  shader_manager_->get_program("tronish")->seti("shadowMap", UniformLocations::SHADOW_TEXTURE_UNIT);
+  shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);
+  shader_manager_->get_program("skybox")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  shader_manager_->get_program("skybox")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
 
   Sound::ShPtr part_sound = audio_manager_->get_sound("res/sounds/starshipmono.wav");
   part_sound->set_position(Vector3f(7, 1, -20));
@@ -194,13 +226,11 @@ void CosmosSimulation::run() {
     // Update
     float update_delta = fps_->frame_delta();
     gob_manager_->update_collidables(update_delta);
-    //camera_collidable->update(updateDelta);    
+    //camera_collidable->update(updateDelta);
     emitter->update(update_delta);
     Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
     tum->add_arg("yaw", 2).add_arg("pitch", 1);
     gob_manager_->message_transform(cube_id, tum);
-    shader_manager_->get_program("point-sprite")->setmat("cosmos_RotationModelViewProjectionMatrix", *(camera_->get_rotation_matrix()));
-
 
     // Collisions
     if (config.is_collisions()) {
@@ -213,62 +243,49 @@ void CosmosSimulation::run() {
 
     // With final positions, we can update the sound
     audio_manager_->set_listener_transform(camera_->get_transform());
+    // And send transformation matrices to the GPU
+    camera_->upload_matrices(UniformLocations::MATRIX_BINDING);
+    shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);
+    shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);
 
     //-------------- First pass for shadows
     if (config.is_shadows()) {
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer); //Rendering offscreen
-      glUseProgram(0);
+      shader_manager_->get_program("tronish")->run();
       glViewport(0,0,1024,1024);
       glClear(GL_DEPTH_BUFFER_BIT);
       glCullFace(GL_FRONT);
       glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
       glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      gluPerspective(45,1,10,40000);
+      glLoadMatrixf(Matrix4f::projectionPerspectiveMatrix(45, 1, 10, 40000).to_array());
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       // Generate the matrix for seeing the world from the light source
-      glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
+      glMultMatrixf(Matrix4f::viewFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
 
       // Draw all the things that should cast shadows
-      world->draw_geometry();
+      //world->draw_geometry();
+      shadow_camera->upload_model_matrix(Matrix4f(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
+      world->draw();
 
       glPushMatrix();
+      shadow_camera->upload_model_matrix(*(cube_transform->get_matrix()));
       cube_transform->apply();
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
       cube_transform->apply();
-      shader_manager_->get_program("default")->run();
       cube_renderable->draw_geometry();
+      //cube_renderable->render();
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+      glPopMatrix();
+
       glUseProgram(0);
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
-
-      // Configure the shadow texture
-      double modelView[16];
-      double projection[16];
-
-      const GLdouble bias[16] = {
-      0.5, 0.0, 0.0, 0.0,
-      0.0, 0.5, 0.0, 0.0,
-      0.0, 0.0, 0.5, 0.0,
-      0.5, 0.5, 0.5, 1.0};
-
-      glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
-      glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
-      glMatrixMode(GL_TEXTURE);
-      glActiveTexture(GL_TEXTURE3);
-
-      glLoadIdentity();
-      glLoadMatrixd(bias);
-      glMultMatrixd(projection);
-      glMultMatrixd(modelView);
-
-      glMatrixMode(GL_MODELVIEW);
     }
+
+    shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+    shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
 
     //-------------- Second pass for skybox
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
@@ -279,98 +296,47 @@ void CosmosSimulation::run() {
     glCullFace(GL_BACK);
     glActiveTexture(GL_TEXTURE0);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),0.1,3);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1)).to_array());
-
-    glDisable(GL_LIGHTING);
     glFrontFace(GL_CW);
-    //glUseProgram(ShaderManager::get().get_program("hdr")->get_id());
-    camera_->apply_rotation();
-    if (config.is_hdr()) {
-      shader_manager_->get_program("hdr")->run();
-    }
-    glPushMatrix();
-    glRotatef(180, 0.0, 1.0f, 0.0);
+
+    camera_->upload_skybox_matrix(Matrix4f::modelFromSqt(Vector3f::ONES, Quaternion(Vector3f::UNIT_Y, 180), Vector3f::ZEROS));
     world->draw_skybox();
-    glPopMatrix();
-    glUseProgram(0);
+
     glFrontFace(GL_CCW);
-    glEnable(GL_LIGHTING);
 
     //------------------- Third pass to actually draw things
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     // "skybox"
     // Skip drawing the background when textures are off since it obscures everything
     if (config.is_textures() && config.is_skybox()) {
-      glPushMatrix();
-      glDisable(GL_LIGHTING);
-      glTranslatef(0.0f, 0.0f, -2.0f);
-      glScalef(2.7f, 1.7f, 1.0f);
-      if (config.is_textures()) {
-        glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("hdr target")->get_index());
-      }
+      glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("hdr target")->get_index());
+      camera_->upload_imposter_matrix();
+      shader_manager_->get_program("skybox")->run();
       mesh_manager_->get_mesh("res/meshes/face-center-quad.obj")->draw();
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      glEnable(GL_LIGHTING);
-      glPopMatrix();
+      glUseProgram(0);
     }
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
     if (config.is_shadows()) {
-      shader_manager_->get_program("shadow")->run();
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("shadow_map")->get_index());
       glActiveTexture(GL_TEXTURE0);
     }
-
-    camera_->apply_inverse();
-    //glPushMatrix();
-    //camera_->apply();
-    //camera_collidable->render_collision();
-    //glPopMatrix();
-    // Remember kids, always apply your lights *after* the camera transform
-    glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
-
+    camera_->upload_model_matrix(Matrix4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
     world->draw();
 
-    glPushMatrix();
-    //if (config.is_collidables()) {
-      //cube_collidable->render_collision();
-    //}
-    cube_transform->apply();
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    cube_transform->apply();
-    shader_manager_->get_program("bump")->run();
+    camera_->upload_model_matrix(*(cube_transform->get_matrix()));
     cube_renderable->render();
-    glUseProgram(0);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
 
     if (config.is_particles()) {
-      glDisable(GL_LIGHTING);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
-      shader_manager_->get_program("point-sprite")->run();
+      camera_->upload_model_matrix(Matrix4f(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
       emitter->render(camera_->get_transform());
-      glUseProgram(0);
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-      glEnable(GL_LIGHTING);
     }
     //////////////////////////////////////////
     SDL_GL_SwapBuffers();
@@ -420,23 +386,6 @@ void CosmosSimulation::init_sdl() {
   std::cout << "SDL initialized" << std::endl;
 }
 
-/*void CosmosSimulation::init_gl() {
-  const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-  const char* version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-  const char* glsl_version = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
-  std::cout << vendor << " GL version:" << version << " GLSL version:" << glsl_version << std::endl;
-  glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  if( glGetError() != GL_NO_ERROR )
-  {
-    std::cout << "OpenGL Error" << std::endl;
-  }
-  std::cout << "OpenGL initialized" << std::endl;
-}*/
-
 void CosmosSimulation::init_gl() {
   const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
   const char* version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -444,7 +393,7 @@ void CosmosSimulation::init_gl() {
   std::cout << vendor << " GL version:" << version << " GLSL version:" << glsl_version << std::endl;
   //const char* extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
   //std::cout << extensions << std::endl;
-  
+
   glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 
   glEnable(GL_TEXTURE_2D);

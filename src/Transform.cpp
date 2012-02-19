@@ -5,7 +5,7 @@
 void Transform::handle_message(Message::ShPtr msg) {
 
   if (msg->type_ == Message::TRANSFORM_SET) {
-    
+
     if (msg->has_key("scale_x")) {
       scale_ = Vector3f(msg->get_float("scale_x"), msg->get_float("scale_y"), msg->get_float("scale_z"));
     } else {
@@ -21,9 +21,9 @@ void Transform::handle_message(Message::ShPtr msg) {
     } else {
       translate_ = Vector3f::ZEROS;
     }
-  
+
   } else if (msg->type_ == Message::TRANSFORM_UPDATE) {
-    
+
     if (msg->has_key("scale_x")) {
       scale_.x() *= msg->get_float("scale_x");
       scale_.y() *= msg->get_float("scale_y");
@@ -41,31 +41,16 @@ void Transform::handle_message(Message::ShPtr msg) {
       translate_.y() += msg->get_float("translation_y");
       translate_.z() += msg->get_float("translation_z");
     }
-  
+
   } else if (msg->type_ == Message::TRANSFORM_LOOKAT) {
-  
+
     set_direction(Vector3f(msg->get_float("direction_x"), msg->get_float("direction_y"), msg->get_float("direction_z")));
-  
+
   }
 }
 
 void Transform::apply() {
-
-  float x = quat_.x(); float y = quat_.y(); float z = quat_.z(); float w = quat_.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
-
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-                translate_.x(), translate_.y(), translate_.z(), 1.0f );
-
-  m[0] = m[0] * scale_.x(); m[1] = m[1] * scale_.x(); m[2] = m[2] * scale_.x();
-  m[4] = m[4] * scale_.y(); m[5] = m[5] * scale_.y(); m[7] = m[7] * scale_.y();
-  m[8] = m[8] * scale_.z(); m[9] = m[9] * scale_.z(); m[10] = m[10] * scale_.z();
-
-  glMultMatrixf(m.to_array());
+  glMultMatrixf(Matrix4f::modelFromSqt(scale_, quat_, translate_).to_array());
 }
 
 void Transform::apply_inverse() {
@@ -76,21 +61,7 @@ void Transform::apply_inverse() {
   iT = iR * iT; // rotate
   iT *= iS; // scale
 
-  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
-
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-                iT.x(), iT.y(), iT.z(), 1.0f );
-
-  m[0] = m[0] * iS.x(); m[1] = m[1] * iS.x(); m[2] = m[2] * iS.x();
-  m[4] = m[4] * iS.y(); m[5] = m[5] * iS.y(); m[7] = m[7] * iS.y();
-  m[8] = m[8] * iS.z(); m[9] = m[9] * iS.z(); m[10] = m[10] * iS.z();
-
-  glMultMatrixf(m.to_array());
+  glMultMatrixf(Matrix4f::modelFromSqt(iS, iR, iT).to_array());
 }
 
 void Transform::apply_rotation() {
@@ -100,16 +71,12 @@ void Transform::apply_rotation() {
 Matrix4f::ShPtr Transform::get_rotation_matrix() {
   Quaternion iR = quat_.invert();
 
-  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  Matrix4f::ShPtr m(new Matrix4f(Matrix4f::modelFromSqt(Vector3f::ONES, iR, Vector3f::ZEROS)));
+  return m;
+}
 
-  Matrix4f::ShPtr m(new Matrix4f( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-              (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-              (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-              0.0f, 0.0f, 0.0f, 1.0f ));
-  
+Matrix4f::ShPtr Transform::get_matrix() {
+  Matrix4f::ShPtr m(new Matrix4f(Matrix4f::modelFromSqt(scale_, quat_, translate_)));
   return m;
 }
 

@@ -64,7 +64,7 @@ void FontManager::load_fonts() {
         glEndList();
       }
       
-      Font::ShPtr f (new Font(font_names_.at(j)));
+      Cosmos::Font::ShPtr f (new Cosmos::Font(font_names_.at(j)));
       f->set_displaylist(dl_index);
       f->set_texture(fonttex);
       fonts_.push_back(f);
@@ -75,13 +75,13 @@ void FontManager::load_fonts() {
 /*
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
-const Font::ShPtr FontManager::get_font(std::string name) const {
-  foreach (Font::ShPtr font, fonts_) {
+const Cosmos::Font::ShPtr FontManager::get_font(std::string name) const {
+  foreach (Cosmos::Font::ShPtr font, fonts_) {
     if (font->is_name(name)) {
       return font;
     }
   }
   
   std::cout << "Error: font <" << name << "> not found" << std::endl;
-  return Font::ShPtr();
+  return Cosmos::Font::ShPtr();
 }

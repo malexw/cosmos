@@ -39,6 +39,7 @@ class CosmosSimulation {
   // Screen size
   static const int SCREEN_WIDTH;
   static const int SCREEN_HEIGHT;
+  static const float ASPECT_RATIO;
   static const int SCREEN_BPP;
 
   // Frame rate

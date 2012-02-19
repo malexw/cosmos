@@ -7,94 +7,83 @@ Camera::Camera(GameObjectManager::ShPtr gob_man)
   id_ = gob_man_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_COLLIDABLE);
   transform_ = gob_man_->get_transform(id_);
   collidable_ = gob_man_->get_collidable(id_);
-} 
 
-// TODO move this to the matrix class
-Matrix4f Camera::matrixFromPositionDirection(Vector3f position, Vector3f direction) {
-  Vector3f ndir = -(direction.normalize());
-  Vector3f vx = Vector3f::UNIT_Y.cross(ndir).normalize();
-  Vector3f vy = ndir.cross(vx).normalize();
-  Quaternion q(vx, vy, ndir);
+  glGenBuffers(1, &matrix_buffer_);
 
-  Vector3f iT = -position;
-  Quaternion iR = q.invert();
+  glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
+  glBufferData(GL_UNIFORM_BUFFER, sizeof(GLfloat) * 16 * 6, 0, GL_STREAM_DRAW);
 
-  iT = iR * iT; // rotate
+  // TODO This matrix is for a static shadow at (5, 15, 5) looking at (5, 0, -30)
+  Matrix4f bias(0.5, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0, 0.5, 0.5, 0.5, 1.0);
+  Matrix4f shadow_matrix = Matrix4f::viewFromPositionDirection(Vector3f(5, 15, 5), Vector3f(0, -15, -35)) * (Matrix4f::projectionPerspectiveMatrix(45, 1, 10, 40000) * bias);
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*2, sizeof(GLfloat)*16, shadow_matrix.to_array());
 
-  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
-
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-              (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-              (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-              iT.x(), iT.y(), iT.z(), 1.0f );
-
-  return m;
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-/*void Camera::apply() {
+void Camera::upload_matrices(unsigned int binding) const {
 
-  Vector3f iT = -translate_;
-  Vector3f iS(1 / scale_.x(), 1 / scale_.y(), 1 / scale_.z());
-  Quaternion iR = quat_.invert();
+  Vector3f iT = -(transform_->get_position());
+  Vector3f scale = transform_->get_scale();
+  Vector3f iS(1 / scale.x(), 1 / scale.y(), 1 / scale.z());
+  Quaternion iR = (transform_->get_rotation()).invert();
 
-  iT = iR * iT; // rotate
-  iT *= iS; // scale
+  iT = iR * iT;
+  iT *= iS;
 
-  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
+  glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GLfloat)*16, Matrix4f::modelFromSqt(iS, iR, iT).to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16, sizeof(GLfloat)*16, projection_matrix_.to_array());
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-                iT.x(), iT.y(), iT.z(), 1.0f );
+  // TODO consider moving this to initialization and subclassing Camera
+  glBindBufferBase(GL_UNIFORM_BUFFER, binding, matrix_buffer_);
+}
 
-  m[0] = m[0] * iS.x(); m[1] = m[1] * iS.x(); m[2] = m[2] * iS.x();
-  m[4] = m[4] * iS.y(); m[5] = m[5] * iS.y(); m[7] = m[7] * iS.y();
-  m[8] = m[8] * iS.z(); m[9] = m[9] * iS.z(); m[10] = m[10] * iS.z();
+void Camera::upload_model_matrix(const Matrix4f& model_matrix) const {
+  Vector3f iT = -(transform_->get_position());
+  Vector3f scale = transform_->get_scale();
+  Vector3f iS(1 / scale.x(), 1 / scale.y(), 1 / scale.z());
+  Quaternion iR = (transform_->get_rotation()).invert();
 
-  glMultMatrixf(m.to_array());
-}*/
+  iT = iR * iT;
+  iT *= iS;
 
-/*void Camera::apply_rotation() {
-  Quaternion iR = quat_.invert();
+  Matrix4f model_view = model_matrix * Matrix4f::modelFromSqt(iS, iR, iT);
+  Matrix4f model_view_projection = model_view * projection_matrix_;
 
-  float x = iR.x(); float y = iR.y(); float z = iR.z(); float w = iR.w();
-  float dx = x+x; float dy = y+y; float dz = z+z;
-  float xy = x*dy; float xz = x*dz; float xw = dx*w; float yz = y*dz; float yw = dy*w; float zw = dz*w;
-  float x2 = dx*x; float y2 = dy*y; float z2 = dz*z;
+  glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*3, sizeof(GLfloat)*16, model_matrix.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*4, sizeof(GLfloat)*16, model_view.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*5, sizeof(GLfloat)*16, model_view_projection.to_array());
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
-  Matrix4f m( 1.0f-(y2+z2), (xy+zw), (xz-yw), 0.0f,
-                (xy-zw), 1.0f-(x2+z2), (yz+xw), 0.0f,
-                (xz+yw), (yz-xw), 1.0f-(x2+y2), 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f );
+// TODO Maybe the World should handle uploading these matrices with a special shader
+void Camera::upload_skybox_matrix(const Matrix4f& model_matrix) const {
+  Quaternion iR = (transform_->get_rotation()).invert();
 
-  glMultMatrixf(m.to_array());
-}*/
+  Matrix4f model_view = model_matrix * Matrix4f::modelFromSqt(Vector3f::ONES, iR, Vector3f::ZEROS);
+  //Matrix4f model_view = model_matrix * Matrix4f::viewFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1));
+  Matrix4f model_view_projection = model_view * Matrix4f::projectionPerspectiveMatrix(45, static_cast<float>(960.0f) / static_cast<float>(600.0f), 0.1, 3);
+  //Matrix4f model_view_projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
-/*Camera& Camera::set_direction(const Vector3f& dir) {
-  Vector3f ndir = -(dir.normalize());
-  Vector3f x = Vector3f(0, 1, 0).cross(ndir).normalize();
-  Vector3f y = ndir.cross(x).normalize();
+  glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*3, sizeof(GLfloat)*16, model_matrix.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*4, sizeof(GLfloat)*16, model_view.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*5, sizeof(GLfloat)*16, model_view_projection.to_array());
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
-  Quaternion q(x, y, ndir);
-  set_quat(q);
-}*/
+// TODO Use a special shader for drawing this full-screen quad
+void Camera::upload_imposter_matrix() const {
+  Matrix4f model_matrix = Matrix4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  Matrix4f model_view = Matrix4f::modelFromSqt(Vector3f(2.7, 1.7, 1.0), Quaternion(), Vector3f(0, 0, -2));
+  Matrix4f model_view_projection = model_view * projection_matrix_;
 
-/*Camera& Camera::rotate(const Vector3f& axis, float angle) {
-  Quaternion q(axis, angle);
-  quat_ = q.normalize() * quat_;
-}*/
-
-/*Camera& Camera::rotate_relative(const Vector3f& axis, float angle) {
-  Quaternion q(quat_ * axis, angle);
-  quat_ = q.normalize() * quat_;
-}*/
-
-/*void Camera::update(float delta) {
-  translate_ += (delta * (quat_ * velo_));
-}*/
+  glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*3, sizeof(GLfloat)*16, model_matrix.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*4, sizeof(GLfloat)*16, model_view.to_array());
+  glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*5, sizeof(GLfloat)*16, model_view_projection.to_array());
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}

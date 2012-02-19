@@ -35,6 +35,8 @@ public:
 
   Material& set_diff_color(Vector3f color) { diff_color_ = color; return *this; }
   Vector3f get_diff_color() const { return diff_color_; }
+  
+  Material& set_shader(ShaderProgram::ShPtr shader) { shader_program_ = shader; return *this; }
 
 private:
   const std::string path_;
