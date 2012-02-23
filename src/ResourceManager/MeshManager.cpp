@@ -46,8 +46,7 @@ Mesh::ShPtr MeshManager::get_mesh(const std::string& path) {
     if (load_mesh(path)) {
       ret = meshes_.find(path)->second;
     } else {
-      // ret = Material::DEFAULT;
-      ret = Mesh::ShPtr();
+      ret = meshes_.find("__err_mesh")->second;
     }
   }
 
