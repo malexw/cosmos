@@ -1,6 +1,7 @@
 #ifndef COSMOS_MESHMANAGER_H_
 #define COSMOS_MESHMANAGER_H_
 
+#include <map>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -12,24 +13,22 @@
 class MeshManager {
  public:
   typedef boost::shared_ptr<MeshManager> ShPtr;
+  typedef std::map<std::string, Mesh::ShPtr> MeshTable;
 
   MeshManager();
-  
-  // Iterates through the list of loaded textures searching for a texture with the same name as "name".
-  // Returns the first texture found with a matching name. Returns an empty pointer if no matching texture
-  // is found.
-  const Mesh::ShPtr get_mesh(const std::string name) const;
+
+  /*
+   * Looks through the set of loaded meshes for a mesh with the name path. If no loaded mesh is found, attempts to load
+   * the mesh pointed at by path. If that fails, returns the default mesh.
+   */
+  Mesh::ShPtr get_mesh(const std::string& path);
 
  private:
-  bool loaded_;
-  std::vector<std::string> mesh_names_;
-  std::vector<Mesh::ShPtr> meshes_;
-  
+  MeshTable meshes_;
+
   void init();
-  
-  // Iterates through the list of textures that need to be loaded and loads them. First checks to see if
-  // textures have been loaded to prevent duplicate loadings
-  void load_meshes();
+
+  const bool load_mesh(const std::string& path);
 
   // OBJ Decoding stuff -------------
   Mesh::ShPtr decode(FileBlob& b);
@@ -38,7 +37,7 @@ class MeshManager {
   // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;
-  
+
   DISALLOW_COPY_AND_ASSIGN(MeshManager);
 };
 

@@ -36,11 +36,12 @@ Material::ShPtr MaterialManager::get_material(const std::string& path) {
 
 const bool MaterialManager::load_material(const std::string& path) {
   // For now, assuming one material per .mat file.
+  bool ret = false;
   FileBlob::ShPtr file(new FileBlob(path));
-  bool ret = file->is_valid();
 
-  if (ret) {
+  if (file->is_valid()) {
     materials_.insert(MaterialTable::value_type(path, decode(*file)));
+    ret = true;
   } else {
     std::cout << "Error: material file <" << path << "> not found" << std::endl;
   }

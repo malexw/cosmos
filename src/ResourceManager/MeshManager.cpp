@@ -7,57 +7,66 @@
 #include "MeshManager.hpp"
 #include "Renderer.hpp"
 
-MeshManager::MeshManager()
-  : loaded_(false) {
+MeshManager::MeshManager() {
   init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' font list.
- * In the future, FontMan should read from some kind of resource file so we don't need to specify these by
- * hand
- */
 void MeshManager::init() {
-  mesh_names_.push_back(std::string("res/meshes/cube.obj"));
-  mesh_names_.push_back(std::string("res/meshes/face-center-quad.obj"));
-  mesh_names_.push_back(std::string("res/meshes/edge-center-quad.obj"));
-  mesh_names_.push_back(std::string("res/meshes/skybox.obj"));
-  mesh_names_.push_back(std::string("res/meshes/hdrbox.obj"));
-  load_meshes();
+  // Create the default mesh
+  Mesh::ShPtr default_mesh(new Mesh("__err_mesh", GL_TRIANGLES));
+  Vector3f v1(-0.5, 0.5, 0.5); Vector3f v2(0.5, 0.5, 0.5); Vector3f v3(-0.5, -0.5, 0.5); Vector3f v4(0.5, -0.5, 0.5);
+  Vector3f v5(-0.5, 0.5, -0.5); Vector3f v6(0.5, 0.5, -0.5); Vector3f v7(-0.5, -0.5, -0.5); Vector3f v8(0.5, -0.5, -0.5);
+  Vector2f vt1(0, 0); Vector2f vt2(1, 0); Vector2f vt3(0, 1); Vector2f vt4(1, 1);
+  Vector3f vn1(0, 0, 1); Vector3f vn2(1, 0, 0); Vector3f vn3(0, 0, -1); Vector3f vn4(-1, 0, 0); Vector3f vn5(0, 1, 0); Vector3f vn6(0, -1, 0);
+
+  default_mesh->add_triangle(v2, vt2, vn1, v1, vt1, vn1, v4, vt4, vn1);
+  default_mesh->add_triangle(v4, vt4, vn1, v1, vt1, vn1, v3, vt3, vn1);
+  default_mesh->add_triangle(v4, vt3, vn6, v3, vt4, vn6, v7, vt2, vn6);
+  default_mesh->add_triangle(v7, vt3, vn4, v3, vt4, vn4, v1, vt2, vn4);
+  default_mesh->add_triangle(v7, vt3, vn4, v1, vt2, vn4, v5, vt1, vn4);
+  default_mesh->add_triangle(v5, vt3, vn5, v1, vt4, vn5, v2, vt2, vn5);
+  default_mesh->add_triangle(v5, vt3, vn5, v2, vt2, vn5, v6, vt1, vn5);
+  default_mesh->add_triangle(v6, vt2, vn2, v2, vt1, vn2, v4, vt3, vn2);
+  default_mesh->add_triangle(v6, vt2, vn2, v4, vt3, vn2, v8, vt4, vn2);
+  default_mesh->add_triangle(v8, vt1, vn6, v4, vt3, vn6, v7, vt2, vn6);
+  default_mesh->add_triangle(v8, vt3, vn3, v7, vt4, vn3, v6, vt1, vn3);
+  default_mesh->add_triangle(v6, vt1, vn3, v7, vt4, vn3, v5, vt2, vn3);
+
+  default_mesh->upload_to_gpu();
+  meshes_.insert(MeshTable::value_type("__err_mesh", default_mesh));
 }
 
-/*
- *
- */
-void MeshManager::load_meshes() {
-  if (loaded_) {
-    std::cout << "FontMan: Error - fonts already loaded" << std::endl;
-    return;
-  }
+Mesh::ShPtr MeshManager::get_mesh(const std::string& path) {
+  Mesh::ShPtr ret;
+  MeshTable::iterator iter = meshes_.find(path);
 
-  int mesh_count = mesh_names_.size();
-
-  for (int j = 0; j < mesh_count; ++j) {
-    FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
-    Mesh::ShPtr new_mesh = decode(*file);
-    new_mesh->upload_to_gpu();
-    meshes_.push_back(new_mesh);
-  }
-
-}
-
-/*
- * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
- */
-const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
-  foreach (Mesh::ShPtr mesh, meshes_) {
-    if (mesh->is_name(name)) {
-      return mesh;
+  if (iter != meshes_.end()) {
+    ret = iter->second;
+  } else {
+    if (load_mesh(path)) {
+      ret = meshes_.find(path)->second;
+    } else {
+      // ret = Material::DEFAULT;
+      ret = Mesh::ShPtr();
     }
   }
 
-  std::cout << "Error: mesh <" << name << "> not found" << std::endl;
-  return Mesh::ShPtr();
+  return ret;
+}
+
+const bool MeshManager::load_mesh(const std::string& path) {
+  bool ret = false;
+
+  FileBlob::ShPtr file(new FileBlob(path));
+  if (file->is_valid()) {
+    Mesh::ShPtr new_mesh = decode(*file);
+    meshes_.insert(MeshTable::value_type(path, new_mesh));
+    ret = true;
+  } else {
+    std::cout << "Error: unable to load mesh <" << path << ">" << std::endl;
+  }
+
+  return ret;
 }
 
 Mesh::ShPtr MeshManager::decode(FileBlob& b) {
@@ -97,7 +106,8 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
         float z = boost::lexical_cast<float>(tokens[3]);
         norms.push_back(Vector3f(x, y, z));
       } else if (tokens[0] == "usemtl") {
-        // do nothing here
+        // Do nothing here. Though the OBJ format supports specifying the material at a per-face level, this engine
+        // assumes one material per mesh, which is specified at run time by the game script.
         //mat = (MaterialManager::get().get_material("res/materials/" + tokens[1]));
         //std::cout << "Material has color " << mat->get_diff_color() << std::endl;
       } else if (tokens[0] == "f") {
@@ -111,11 +121,10 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
         int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
         int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
         int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
-        //std::cout << x << " " << y << " " << z << " " << n << std::endl;
-        Vector3f color(1.0f, 1.0f, 1.0f); //= mat->get_diff_color(); Seems silly to assign colors to a mesh this early
-        mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
-                            verts[v2i], uvs[vt2i], norms[vn2i], color,
-                            verts[v3i], uvs[vt3i], norms[vn3i], color);
+
+        mesh->add_triangle( verts[v1i], uvs[vt1i], norms[vn1i],
+                            verts[v2i], uvs[vt2i], norms[vn2i],
+                            verts[v3i], uvs[vt3i], norms[vn3i]);
       }
       index = newline_index(b, index+1);
     } else {
@@ -123,8 +132,8 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
     }
   }
 
-  //mesh->uploadToGpu();
-  //std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
+  mesh->upload_to_gpu();
+
   return mesh;
 }
 
