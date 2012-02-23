@@ -1,6 +1,7 @@
 #ifndef COSMOS_TEXTUREMANAGER_H_
 #define COSMOS_TEXTUREMANAGER_H_
 
+#include <map>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -14,25 +15,32 @@
 class TextureManager {
  public:
   typedef boost::shared_ptr<TextureManager> ShPtr;
+  typedef std::map<std::string, Texture::ShPtr> TextureTable;
 
   TextureManager();
-  
-  // Iterates through the list of loaded textures searching for a texture with the same name as "name".
-  // Returns the first texture found with a matching name. Returns an empty pointer if no matching texture
-  // is found.
-  const Texture::ShPtr get_texture(const std::string name) const;
+
+  /*
+   * Searches through the list of loaded textures for one with a name of path. Returns it if it was found, otherwise tries
+   * to load an image from that path. If loading fails, returns the default texture.
+   */
+  Texture::ShPtr get_texture(const std::string& name);
 
  private:
-  bool loaded_;
+  TextureTable textures_;
   std::vector<std::string> tex_names_;
-  std::vector<Texture::ShPtr> textures_;
-  
+
   void init();
-  
-  // Iterates through the list of textures that need to be loaded and loads them. First checks to see if
-  // textures have been loaded to prevent duplicate loadings
-  void load_textures();
-  
+
+  /*
+   * Loads the image pointed at by path onto the GPU
+   */
+  const bool load_texture(const std::string& path);
+
+  /*
+   * Checking the values of the SDL_Surface format appears to be the best way to get the image format.
+   */
+  const GLenum get_surface_format(const SDL_Surface* const surface);
+
   DISALLOW_COPY_AND_ASSIGN(TextureManager);
 };
 

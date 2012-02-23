@@ -27,7 +27,7 @@ class ParticleEmitter {
     float speed, float lifetime, float radius, float generation_rate);
 
   void update(float delta);
-  void render(Transform::ShPtr cam);
+  void render();
 
  private:
 

@@ -25,7 +25,7 @@ class MaterialManager {
   /*
    * Look up the requested material in the materials table. If the material isn't there, try to load it.
    */
-  const Material::ShPtr get_material(const std::string& path);
+  Material::ShPtr get_material(const std::string& path);
 
  private:
   ShaderManager::ShPtr shader_manager_;

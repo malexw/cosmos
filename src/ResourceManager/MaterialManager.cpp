@@ -16,7 +16,7 @@ MaterialManager::MaterialManager(ShaderManager::ShPtr shader_manager, TextureMan
 void MaterialManager::init() {
 }
 
-const Material::ShPtr MaterialManager::get_material(const std::string& path) {
+Material::ShPtr MaterialManager::get_material(const std::string& path) {
   Material::ShPtr ret;
   MaterialTable::iterator iter = materials_.find(path);
 

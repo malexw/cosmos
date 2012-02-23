@@ -16,6 +16,9 @@ class Matrix4f {
  public:
   typedef boost::shared_ptr<Matrix4f> ShPtr;
 
+  static const Matrix4f IDENTITY;
+  static const Matrix4f ZEROS;
+
   Matrix4f() {
     m_[0]=1.0f; m_[1]=0.0f; m_[2]=0.0f; m_[3]=0.0f;
     m_[4]=0.0f; m_[5]=1.0f; m_[6]=0.0f; m_[7]=0.0f;

@@ -5,9 +5,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "Shaders/FragmentShader.hpp"
-#include "Shaders/GeometryShader.hpp"
-#include "Shaders/VertexShader.hpp"
+//#include "Shaders/FragmentShader.hpp"
+//#include "Shaders/GeometryShader.hpp"
+//#include "Shaders/VertexShader.hpp"
+#include "Shaders/Shader.hpp"
 #include "Matrix4f.hpp"
 #include "Renderer.hpp"
 
@@ -33,7 +34,7 @@ public:
   void attach_shader(VertexShader::ShPtr vert);
   void attach_shader(GeometryShader::ShPtr geom);
 
-  const bool link() const;
+  const bool link();
 
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);
@@ -41,6 +42,8 @@ public:
   void seti(std::string varname, int value);
   void setmat(std::string varname, const Matrix4f& value);
   void set_block_binding(std::string varname, unsigned int binding_point);
+
+  void print_program_log();
 
 private:
   const std::string name_;

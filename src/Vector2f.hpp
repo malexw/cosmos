@@ -11,6 +11,13 @@
 class Vector2f {
  public:
   typedef boost::shared_ptr<Vector2f> ShPtr;
+  static const Vector2f UNIT_U;
+  static const Vector2f NEGATIVE_U;
+  static const Vector2f UNIT_V;
+  static const Vector2f NEGATIVE_V;
+  static const Vector2f ZEROS;
+  static const Vector2f ONES;
+
 
   Vector2f(): u_(0.0f), v_(0.0f) {}
   Vector2f(float u, float v): u_(u), v_(v) {}

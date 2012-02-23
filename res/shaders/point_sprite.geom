@@ -1,13 +1,6 @@
 #version 150
 
-layout (std140) uniform matrices {
-  mat4 c_ViewMatrix;
-  mat4 c_ProjectionMatrix;
-  mat4 c_ShadowMatrix;
-  mat4 c_ModelMatrix;
-  mat4 c_ModelViewMatrix;
-  mat4 c_ModelViewProjectionMatrix;
-};
+#include cosmos.matrices
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;

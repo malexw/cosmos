@@ -7,77 +7,33 @@ ShaderManager::ShaderManager() {
   init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' font list.
- * In the future, FontMan should read from some kind of resource file so we don't need to specify these by
- * hand
- */
 void ShaderManager::init() {
 
   // Add the default shader
-  ShaderProgram::ShPtr default_program(new ShaderProgram("error_program"));
+  ShaderProgram::ShPtr default_program(new ShaderProgram("__err_program"));
 
-  int default_vname = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(default_vname, 1, default_vert, 0);
-  glCompileShader(default_vname);
+  std::string dv(default_vert);
+  insert_includes(dv);
+  const char* dv_ptr = dv.c_str();
+  const char* vert_sources[1] = { dv_ptr };
+  VertexShader::ShPtr vshader(new VertexShader(vert_sources));
+  vshader->compile();
+  default_program->attach_shader(vshader);
 
-  int default_fname = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(default_fname, 1, default_frag, 0);
-  glCompileShader(default_fname);
+  std::string df(default_frag);
+  insert_includes(df);
+  const char* df_ptr = df.c_str();
+  const char* frag_sources[1] = { df_ptr };
+  FragmentShader::ShPtr fshader(new FragmentShader(frag_sources));
+  fshader->compile();
+  default_program->attach_shader(fshader);
 
-  glAttachShader(default_program->get_id(), default_vname);
-  glAttachShader(default_program->get_id(), default_fname);
-  glLinkProgram(default_program->get_id());
-
-  programs_.insert(ShaderTable::value_type(default_program->get_name(), default_program));
-
-  //shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
-  //shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
-  //create_program("bumpdec", shader_names_);
-  //shader_names_.clear();
-
-  // Configuration for the bump/decal program
-  //ShaderProgram::ShPtr bumpdec = get_program("bumpdec");
-  //bumpdec->seti("tex", 0);
-  //bumpdec->seti("bump", 1);
-  //bumpdec->seti("decal", 2);
-
-  //shader_names_.push_back(std::string("res/shaders/shadow.vert"));
-  //shader_names_.push_back(std::string("res/shaders/shadow.frag"));
-  //create_program("shadow", shader_names_);
-  //shader_names_.clear();
-
-  // Configuration for the shadow program
-  //ShaderProgram::ShPtr shadow = get_program("shadow");
-  //shadow->seti("tex", 0);
-  //shadow->seti("shadowMap", 3);
-
-  /*shader_names_.push_back(std::string("res/shaders/hdr.vert"));
-  shader_names_.push_back(std::string("res/shaders/hdr.frag"));
-  create_program("hdr", shader_names_);
-  shader_names_.clear();
-
-  // HDR program config
-  ShaderProgram::ShPtr hdr = get_program("hdr");
-  hdr->setf("exposure", 1.0f);*/
-  
-  //shader_names_.push_back(std::string("res/shaders/point_sprite.vert"));
-  //shader_names_.push_back(std::string("res/shaders/point_sprite.geom"));
-  //shader_names_.push_back(std::string("res/shaders/point_sprite.frag"));
-  //create_program("point-sprite", shader_names_);
-  //shader_names_.clear();
-
-  //ShaderProgram::ShPtr sprite = get_program("point-sprite");
-  //sprite->seti("tex", 0);
-
-  //shader_names_.push_back(std::string("res/shaders/bump.vert"));
-  //shader_names_.push_back(std::string("res/shaders/bump.frag"));
-  //create_program("bump", shader_names_);
-  //shader_names_.clear();
-
-  //ShaderProgram::ShPtr bump = get_program("bump");
-  //bump->seti("tex", 0);
-  //bump->seti("bump", 1);
+  if (default_program->link()) {
+    programs_.insert(ShaderTable::value_type(default_program->get_name(), default_program));
+  } else {
+    std::cout << "Error linking default shader program" << std::endl;
+  }
+  // End of code for default shader
 }
 
 /*
@@ -90,8 +46,6 @@ ShaderProgram::ShPtr ShaderManager::get_program(const std::string& name) {
   if (iter != programs_.end()) {
     ret = iter->second;
   } else {
-    // Attempt to load the program if not found
-    // if it can't be loaded, return the default
     std::cout << "Error: shader program <" << name << "> not found" << std::endl;
     ret = programs_.find("default")->second;
   }
@@ -112,9 +66,13 @@ const bool ShaderManager::create_program(const std::string& program_name, const 
       continue;
     }
 
+    std::string source_string(file->get_bytes());
+    insert_includes(source_string);
+    const char* source_array[1] = { source_string.c_str() };
+
     if (file->extension() == "vert") {
 
-      VertexShader::ShPtr vshader(new VertexShader(file));
+      VertexShader::ShPtr vshader(new VertexShader(source_array));
       if (vshader->compile()) {
         program->attach_shader(vshader);
       } else {
@@ -122,8 +80,8 @@ const bool ShaderManager::create_program(const std::string& program_name, const 
       }
 
     } else if (file->extension() == "geom") {
-      
-      GeometryShader::ShPtr gshader(new GeometryShader(file));
+
+      GeometryShader::ShPtr gshader(new GeometryShader(source_array));
       if (gshader->compile()) {
         program->attach_shader(gshader);
       } else {
@@ -132,7 +90,7 @@ const bool ShaderManager::create_program(const std::string& program_name, const 
 
     } else if (file->extension() == "frag") {
 
-      FragmentShader::ShPtr fshader(new FragmentShader(file));
+      FragmentShader::ShPtr fshader(new FragmentShader(source_array));
       if (fshader->compile()) {
         program->attach_shader(fshader);
       } else {
@@ -153,14 +111,52 @@ const bool ShaderManager::create_program(const std::string& program_name, const 
   }
 }
 
-const char* ShaderManager::default_frag[] = {
+void ShaderManager::insert_includes(std::string& source) {
+  substitute_text(source,
+    std::string("#include cosmos.matrices\n"),
+    std::string(
+      "layout (std140) uniform matrices {\n"
+      "  mat4 c_ViewMatrix;\n"
+      "  mat4 c_ProjectionMatrix;\n"
+      "  mat4 c_ShadowMatrix;\n"
+      "  mat4 c_ModelMatrix;\n"
+      "  mat4 c_ModelViewMatrix;\n"
+      "  mat4 c_ModelViewProjectionMatrix;\n"
+      "};\n"
+    )
+  );
+  substitute_text(source,
+    std::string("#include cosmos.attrib_array\n"),
+    std::string(
+      "layout (location = 0) in vec3 pos;\n"
+      "layout (location = 1) in vec2 tex;\n"
+      "layout (location = 2) in vec3 norm;\n"
+    )
+  );
+
+}
+
+void ShaderManager::substitute_text(std::string& source, const std::string& marker, const std::string& replacement) {
+  std::size_t index = source.find(marker);
+
+  if (index != std::string::npos) {
+    source.erase(index, marker.size());
+    source.insert(index, replacement);
+  }
+}
+
+
+const std::string ShaderManager::default_frag(
   "void main() { "
     "gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
   "}"
-};
-const char* ShaderManager::default_vert[] = {
-  "layout (location = 0) in vec3 pos; "
+);
+
+const std::string ShaderManager::default_vert(
+  "#version 150\n"
+  "#include cosmos.attrib_array\n"
+  "#include cosmos.matrices\n"
   "void main() { "
     "gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0); "
   "}"
-};
+);

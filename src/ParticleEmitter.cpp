@@ -23,7 +23,7 @@ void ParticleEmitter::init() {
   for (int i = part_count_; i > 0; --i) {
     mesh_->add_point(pos);
     // Also fill in the initial particle data
-    particle_velocities_.push_back(Vector3f(0.0f, 0.0f, 0.0f));
+    particle_velocities_.push_back(Vector3f::ZEROS);
     particle_lifetimes_.push_back(generation_rate_*i);
   }
   mesh_->upload_to_gpu_type(GL_DYNAMIC_DRAW);
@@ -48,19 +48,18 @@ void ParticleEmitter::update(float delta) {
       // respawning
       Vector3f pos = transform_->get_position();
       pos = pos + ((delta + particle_lifetimes_[i]) * particle_velocities_[i]);
-      Vector2f uv_tl(0.0f, 0.0f);
-      mesh_->deform(i, pos, uv_tl, Vector3f::ZEROS);
+      mesh_->deform(i, pos, Vector2f::ZEROS, Vector3f::ZEROS);
 
       particle_lifetimes_[i] += lifetime_;
     } else {
       Vector3f translation = delta * particle_velocities_[i];
-      mesh_->deform_relative(i, translation, Vector2f(0.0f, 0.0f), Vector3f::ZEROS);
+      mesh_->deform_relative(i, translation, Vector2f::ZEROS, Vector3f::ZEROS);
     }
   }
 
   mesh_->update_on_gpu();
 }
 
-void ParticleEmitter::render(Transform::ShPtr cam) {
+void ParticleEmitter::render() {
   renderable_->render();
 }

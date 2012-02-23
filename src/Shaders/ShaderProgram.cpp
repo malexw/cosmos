@@ -23,7 +23,7 @@ void ShaderProgram::attach_shader(GeometryShader::ShPtr geom) {
   geom_count_ += 1;
 }
 
-const bool ShaderProgram::link() const {
+const bool ShaderProgram::link() {
   if (vert_count_ == 0 || frag_count_ == 0) {
     if (vert_count_ == 0) {
       std::cout << "Shader program <" << name_ << "> has no vertex shader" << std::endl;
@@ -40,16 +40,7 @@ const bool ShaderProgram::link() const {
   bool success = status == GL_TRUE;
 
   if (!success) {
-    int length = 0;
-    int count = 0;
-
-    glGetProgramiv(shader_id_, GL_INFO_LOG_LENGTH, &length);
-
-    if (length > 0) {
-      char data[length];
-      glGetProgramInfoLog(shader_id_, length, &count, data);
-      std::cout << data;
-    }
+    print_program_log();
   }
 
   return success;
@@ -94,4 +85,17 @@ void ShaderProgram::set_block_binding(std::string varname, unsigned int binding_
     std::cout << "Shader <" << name_ << "> could not bind <" << varname << ">" << std::endl;
   }
   glUseProgram(0);
+}
+
+void ShaderProgram::print_program_log() {
+  int length = 0;
+  int count = 0;
+
+  glGetProgramiv(shader_id_, GL_INFO_LOG_LENGTH, &length);
+
+  if (length > 0) {
+    char data[length];
+    glGetProgramInfoLog(shader_id_, length, &count, data);
+    std::cout << data;
+  }
 }

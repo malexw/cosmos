@@ -266,7 +266,7 @@ void CosmosSimulation::run() {
 
       // Draw all the things that should cast shadows
       //world->draw_geometry();
-      shadow_camera->upload_model_matrix(Matrix4f(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
+      shadow_camera->upload_model_matrix(Matrix4f::IDENTITY);
       world->draw();
 
       glPushMatrix();
@@ -324,7 +324,7 @@ void CosmosSimulation::run() {
       glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("shadow_map")->get_index());
       glActiveTexture(GL_TEXTURE0);
     }
-    camera_->upload_model_matrix(Matrix4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+    camera_->upload_model_matrix(Matrix4f::IDENTITY);
     world->draw();
 
     camera_->upload_model_matrix(*(cube_transform->get_matrix()));
@@ -333,11 +333,12 @@ void CosmosSimulation::run() {
     if (config.is_particles()) {
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
-      camera_->upload_model_matrix(Matrix4f(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
-      emitter->render(camera_->get_transform());
+      camera_->upload_model_matrix(Matrix4f::IDENTITY);
+      emitter->render();
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     }
+
     //////////////////////////////////////////
     SDL_GL_SwapBuffers();
 

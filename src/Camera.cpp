@@ -64,9 +64,7 @@ void Camera::upload_skybox_matrix(const Matrix4f& model_matrix) const {
   Quaternion iR = (transform_->get_rotation()).invert();
 
   Matrix4f model_view = model_matrix * Matrix4f::modelFromSqt(Vector3f::ONES, iR, Vector3f::ZEROS);
-  //Matrix4f model_view = model_matrix * Matrix4f::viewFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1));
   Matrix4f model_view_projection = model_view * Matrix4f::projectionPerspectiveMatrix(45, static_cast<float>(960.0f) / static_cast<float>(600.0f), 0.1, 3);
-  //Matrix4f model_view_projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
   glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
   glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*3, sizeof(GLfloat)*16, model_matrix.to_array());
@@ -77,7 +75,7 @@ void Camera::upload_skybox_matrix(const Matrix4f& model_matrix) const {
 
 // TODO Use a special shader for drawing this full-screen quad
 void Camera::upload_imposter_matrix() const {
-  Matrix4f model_matrix = Matrix4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  Matrix4f model_matrix = Matrix4f::IDENTITY;
   Matrix4f model_view = Matrix4f::modelFromSqt(Vector3f(2.7, 1.7, 1.0), Quaternion(), Vector3f(0, 0, -2));
   Matrix4f model_view_projection = model_view * projection_matrix_;
 

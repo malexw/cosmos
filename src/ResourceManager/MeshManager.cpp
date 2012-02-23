@@ -7,7 +7,7 @@
 #include "MeshManager.hpp"
 #include "Renderer.hpp"
 
-MeshManager::MeshManager() 
+MeshManager::MeshManager()
   : loaded_(false) {
   init();
 }
@@ -27,25 +27,23 @@ void MeshManager::init() {
 }
 
 /*
- * 
+ *
  */
 void MeshManager::load_meshes() {
   if (loaded_) {
     std::cout << "FontMan: Error - fonts already loaded" << std::endl;
     return;
   }
-    
+
   int mesh_count = mesh_names_.size();
-    
+
   for (int j = 0; j < mesh_count; ++j) {
     FileBlob::ShPtr file(new FileBlob(mesh_names_[j]));
     Mesh::ShPtr new_mesh = decode(*file);
     new_mesh->upload_to_gpu();
     meshes_.push_back(new_mesh);
   }
-  
-  // TODO Hack to test out vertex buffers
-  //meshes_[0]->upload_to_gpu();
+
 }
 
 /*
@@ -57,27 +55,27 @@ const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
       return mesh;
     }
   }
-  
+
   std::cout << "Error: mesh <" << name << "> not found" << std::endl;
   return Mesh::ShPtr();
 }
 
 Mesh::ShPtr MeshManager::decode(FileBlob& b) {
-   
+
   int index = 0;
   int triangles = 0;
-  
+
   std::vector<Vector3f> verts;
   std::vector<Vector2f> uvs;
   std::vector<Vector3f> norms;
-  
+
   std::vector<std::string> tokens;
   Mesh::ShPtr mesh (new Mesh(b.path(), GL_TRIANGLES));
   //Material::ShPtr mat;
-  
+
   while (index < b.size()) {
     tokens = Tokenize(b, index);
-    
+
     if (tokens.size() > 0) {
       if (tokens[0] == "#") {
         // this line is a comment - skip it
@@ -124,7 +122,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
       break;
     }
   }
-  
+
   //mesh->uploadToGpu();
   //std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
   return mesh;
@@ -132,16 +130,16 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
 
 // Returns the index of the first character following a group of newline characters after the offset
 const unsigned int MeshManager::newline_index(const FileBlob& b, const unsigned int offset) const {
-  
+
   int ni = offset;
-  
+
   while (!(b[ni] == '\n' || b[ni] == '\r')) {
     ni++;
   }
   while (b[ni] == '\n' || b[ni] == '\r') {
     ni++;
   }
-  
+
   return ni++;
 }
 
@@ -149,10 +147,10 @@ const unsigned int MeshManager::newline_index(const FileBlob& b, const unsigned 
 // line
 const std::vector<std::string> MeshManager::Tokenize(const FileBlob& b, const unsigned int offset) const {
   std::vector<std::string> tokens;
-  
+
   std::string line;
   line.assign(&b[offset], &b[newline_index(b, offset)]);
   boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
-  
+
   return tokens;
 }
