@@ -106,6 +106,7 @@ void CosmosSimulation::run() {
     gob_manager_->message_transform(shadow_camera_id, mts);
     Message::ShPtr mtl(new Message(Message::TRANSFORM_LOOKAT));
     mtl->add_arg("direction_x", 0.0f).add_arg("direction_y", -15.0f).add_arg("direction_z", -35.0f);
+    gob_manager_->message_transform(shadow_camera_id, mtl);
   }
   shadow_camera->upload_matrices(UniformLocations::SHADOW_MATRIX_BINDING);
 
@@ -259,29 +260,13 @@ void CosmosSimulation::run() {
       glCullFace(GL_FRONT);
       glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-      glMatrixMode(GL_PROJECTION);
-      glLoadMatrixf(Matrix4f::projectionPerspectiveMatrix(45, 1, 10, 40000).to_array());
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-      // Generate the matrix for seeing the world from the light source
-      glMultMatrixf(Matrix4f::viewFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
-
       // Draw all the things that should cast shadows
-      //world->draw_geometry();
       shadow_camera->upload_model_matrix(Matrix4f::IDENTITY);
       world->draw();
 
-      glPushMatrix();
       shadow_camera->upload_model_matrix(*(cube_transform->get_matrix()));
-      cube_transform->apply();
-      glMatrixMode(GL_TEXTURE);
-      glPushMatrix();
-      cube_transform->apply();
+      shader_manager_->get_program("default")->run();
       cube_renderable->draw_geometry();
-      //cube_renderable->render();
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
 
       glUseProgram(0);
     }
@@ -313,6 +298,7 @@ void CosmosSimulation::run() {
       glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("shadow_map")->get_index());
       glActiveTexture(GL_TEXTURE0);
     }
+
     camera_->upload_model_matrix(Matrix4f::IDENTITY);
     world->draw();
 

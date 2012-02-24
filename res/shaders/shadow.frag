@@ -28,6 +28,4 @@ void main()
 
   vec4 texel = texture2D(tex, vTexCoords.st); //vec4(1.0, 1.0, 1.0, 1.0);
   gl_FragColor = vec4(texel.rgb * color * shadow, texel.a * gl_FrontMaterial.diffuse.a);
-  //gl_FragDepth = gl_FragCoord.z;
-  //gl_FragColor = shadow * vec4(color, texel.a * gl_FrontMaterial.diffuse.a);
 }

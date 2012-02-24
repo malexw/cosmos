@@ -84,23 +84,31 @@ void World::draw() const {
   }
 }
 
-/*void World::draw_geometry() const {
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
+void World::draw_geometry() const {
+  int drawn = 0;
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_address_);
 
-  glVertexPointer(3, GL_FLOAT, 0, &verticies_[0]);
-  glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
-  glNormalPointer(GL_FLOAT, 0, &normals_[0]);
-  glColorPointer(3, GL_FLOAT, 0, &colors_[0]);
-  glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+  foreach (World::MatPair mat, mats_) {
+    //mat.first->apply();
+    //glBindTexture(GL_TEXTURE_2D, sim_.texture_manager_->get_texture("hdr target")->get_index());
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
-}*/
+    glVertexAttribPointer(0, 3/*position x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, 0/*start*/);
+    glVertexAttribPointer(1, 2/*tex u, v*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)12/*start*/);
+    glVertexAttribPointer(2, 3/*normal x, y, z*/, GL_FLOAT, GL_TRUE, 32/*stride*/, (void*)20/*start*/);
+    glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+
+    //mat.first->tidy();
+  }
+  //
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
 void World::draw_skybox() const {
   if (!CosmosConfig::get().is_textures()) {
