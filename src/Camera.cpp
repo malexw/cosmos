@@ -76,8 +76,11 @@ void Camera::upload_skybox_matrix(const Matrix4f& model_matrix) const {
 // TODO Use a special shader for drawing this full-screen quad
 void Camera::upload_imposter_matrix() const {
   Matrix4f model_matrix = Matrix4f::IDENTITY;
-  Matrix4f model_view = Matrix4f::modelFromSqt(Vector3f(2.7, 1.7, 1.0), Quaternion(), Vector3f(0, 0, -2));
-  Matrix4f model_view_projection = model_view * projection_matrix_;
+  //Matrix4f model_view = Matrix4f::modelFromSqt(Vector3f(2.7, 1.7, 1.0), Quaternion(), Vector3f(0, 0, -2));
+  //Matrix4f model_view_projection = model_view * projection_matrix_;
+  float ASPECT_RATIO = static_cast<float>(960) / static_cast<float>(600);
+  Matrix4f model_view = Matrix4f::modelFromSqt(Vector3f(ASPECT_RATIO, 1, 1), Quaternion(), Vector3f::ZEROS);
+  Matrix4f model_view_projection = model_view * Matrix4f::projectionOrthoMatrix(-ASPECT_RATIO/2, ASPECT_RATIO/2, -0.5, 0.5, -1, 1);
 
   glBindBuffer(GL_UNIFORM_BUFFER, matrix_buffer_);
   glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat)*16*3, sizeof(GLfloat)*16, model_matrix.to_array());

@@ -113,9 +113,11 @@ void CosmosSimulation::run() {
   GLuint hdrFrameBuffer;
   glGenFramebuffersEXT(1, &hdrFrameBuffer);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_manager_->get_texture("hdr target")->get_index(), 0);
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_manager_->get_texture("hdr_color")->get_index(), 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, texture_manager_->get_texture("hdr_depth")->get_index(), 0);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
   // ----------------- WORLD -------------------------------------------
@@ -303,20 +305,7 @@ void CosmosSimulation::run() {
 
     glFrontFace(GL_CCW);
 
-    //------------------- Third pass to actually draw things
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // "skybox"
-    // Skip drawing the background when textures are off since it obscures everything
-    if (config.is_textures() && config.is_skybox()) {
-      glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("hdr target")->get_index());
-      camera_->upload_imposter_matrix();
-      shader_manager_->get_program("skybox")->run();
-      mesh_manager_->get_mesh("res/meshes/face-center-quad.obj")->draw();
-      glUseProgram(0);
-    }
-
+    // Now draw the objects in the scene
     glClear(GL_DEPTH_BUFFER_BIT);
 
     if (config.is_shadows()) {
@@ -337,6 +326,20 @@ void CosmosSimulation::run() {
       emitter->render();
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    //------------------- Third pass to draw the HDR imposter
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // "skybox"
+    // Skip drawing the background when textures are off since it obscures everything
+    if (config.is_textures() && config.is_skybox()) {
+      glBindTexture(GL_TEXTURE_2D, texture_manager_->get_texture("hdr_color")->get_index());
+      camera_->upload_imposter_matrix();
+      shader_manager_->get_program("skybox")->run();
+      mesh_manager_->get_mesh("res/meshes/face-center-quad.obj")->draw();
+      glUseProgram(0);
     }
 
     //////////////////////////////////////////

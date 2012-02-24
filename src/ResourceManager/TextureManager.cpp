@@ -66,15 +66,27 @@ void TextureManager::init() {
 
   textures_.insert(TextureTable::value_type(shadow->get_name(), shadow));
 
-  // Generate a texture as a target for the HDR rendering FBO
-  Texture::ShPtr hdr_target(new Texture("hdr target"));
+  // Generate a texture as a color target for the HDR rendering FBO
+  Texture::ShPtr hdr_color(new Texture("hdr_color"));
 
-  glBindTexture(GL_TEXTURE_2D, hdr_target->get_index());
+  glBindTexture(GL_TEXTURE_2D, hdr_color->get_index());
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 960, 600, 0, GL_RGBA, GL_FLOAT, 0);
 
-  textures_.insert(TextureTable::value_type(hdr_target->get_name(), hdr_target));
+  textures_.insert(TextureTable::value_type(hdr_color->get_name(), hdr_color));
+
+  // Generate a texture as a depth target for the HDR rendering FBO
+  Texture::ShPtr hdr_depth(new Texture("hdr_depth"));
+
+  glBindTexture(GL_TEXTURE_2D, hdr_depth->get_index());
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 960, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+
+  textures_.insert(TextureTable::value_type(hdr_depth->get_name(), hdr_depth));
 
   glBindTexture(GL_TEXTURE_2D, 0);
 }
