@@ -5,27 +5,24 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "FileBlob.hpp"
+#include "Renderer.hpp"
 #include "util.hpp"
 
 class VertexShader {
 public:
-	typedef boost::shared_ptr<VertexShader> ShPtr;
+  typedef boost::shared_ptr<VertexShader> ShPtr;
 
-	VertexShader(std::string name, int id): name_(name), shader_id_(id) {}
-	
-	// Returns the name of the VertexShader
-	const std::string get_name() const;
-	
-	// Compares the name of this VertexShader with another name. Returns true if they're equal, false otherwise.
-	const bool is_name(const std::string& rhs) const;
-  
+  VertexShader(FileBlob::ShPtr file);
+  ~VertexShader();
+
   const int get_id() const { return shader_id_; }
+  const bool compile() const;
 
 private:
-	std::string name_;
-	int shader_id_;
+  int shader_id_;
 
-	DISALLOW_COPY_AND_ASSIGN(VertexShader);
+  DISALLOW_COPY_AND_ASSIGN(VertexShader);
 };
 
 #endif

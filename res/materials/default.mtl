@@ -10,3 +10,5 @@ map_Kd default.png
 map_Ks default.png
 map_d default.png
 map_bump normal_map.png
+shader_vert res/shaders/bump.vert
+shader_frag res/shaders/bump.frag

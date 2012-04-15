@@ -1,5 +1,5 @@
-#ifndef COSMOS_CosmosConfig_H_
-#define COSMOS_CosmosConfig_H_
+#ifndef COSMOS_COSMOSCONFIG_H_
+#define COSMOS_COSMOSCONFIG_H_
 
 #include <string>
 
@@ -9,10 +9,10 @@
 #include "util.hpp"
 
 class CosmosConfig {
-public:
-	typedef boost::shared_ptr<CosmosConfig> ShPtr;
+ public:
+  typedef boost::shared_ptr<CosmosConfig> ShPtr;
 
-	CosmosConfig();
+  CosmosConfig();
 
   static CosmosConfig& get();
   
@@ -53,7 +53,7 @@ public:
   void set_quit(bool value) { quit_ = value; invalidate(); }
   bool is_quit() const { return quit_; }
 
-private:
+ private:
   bool valid_;
   bool hdr_;
   bool textures_;
@@ -67,7 +67,7 @@ private:
   bool sounds_;
   bool quit_;
 
-	DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
+  DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
 };
 
 #endif

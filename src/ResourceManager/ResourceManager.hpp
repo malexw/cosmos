@@ -9,17 +9,15 @@
 
 class ResourceManager {
  public:
-	typedef boost::shared_ptr<ResourceManager> ShPtr;
+  typedef boost::shared_ptr<ResourceManager> ShPtr;
 
-	ResourceManager();
-	
-  static ResourceManager& get();
+  ResourceManager();
 
  private:
-	
-	void init();
-	
-	DISALLOW_COPY_AND_ASSIGN(ResourceManager);
+  
+  void init();
+  
+  DISALLOW_COPY_AND_ASSIGN(ResourceManager);
 };
 
 #endif

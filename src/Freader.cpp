@@ -12,6 +12,10 @@ FileReader::~FileReader() {
   file_stream_.close();
 }
 
+const bool FileReader::exists() {
+  return !(file_stream_.fail());
+}
+
 // The other way to get the file length is via stat, but it's not supported on
 // all platforms.
 const int FileReader::GetFileSize() {

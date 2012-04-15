@@ -3,185 +3,160 @@
 #include "FileBlob.hpp"
 #include "ShaderManager.hpp"
 
-ShaderManager::ShaderManager() 
-  : loaded_(false) {
-	init();
+ShaderManager::ShaderManager() {
+  init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' font list.
- * In the future, FontMan should read from some kind of resource file so we don't need to specify these by
- * hand
- */
 void ShaderManager::init() {
-	shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
-  shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
-  shader_names_.push_back(std::string("res/shaders/shadow.vert"));
-  shader_names_.push_back(std::string("res/shaders/shadow.frag"));
-  shader_names_.push_back(std::string("res/shaders/hdr.vert"));
-  shader_names_.push_back(std::string("res/shaders/hdr.frag"));
-  shader_names_.push_back(std::string("res/shaders/bump.vert"));
-  shader_names_.push_back(std::string("res/shaders/bump.frag"));
-  load_shaders();
+
+  // Add the default shader
+  ShaderProgram::ShPtr default_program(new ShaderProgram("__err_program"));
+
+  std::string dv(default_vert);
+  insert_includes(dv);
+  const char* dv_ptr = dv.c_str();
+  const char* vert_sources[1] = { dv_ptr };
+  VertexShader::ShPtr vshader(new VertexShader(vert_sources));
+  vshader->compile();
+  default_program->attach_shader(vshader);
+
+  std::string df(default_frag);
+  insert_includes(df);
+  const char* df_ptr = df.c_str();
+  const char* frag_sources[1] = { df_ptr };
+  FragmentShader::ShPtr fshader(new FragmentShader(frag_sources));
+  fshader->compile();
+  default_program->attach_shader(fshader);
+
+  if (default_program->link()) {
+    programs_.insert(ShaderTable::value_type(default_program->get_name(), default_program));
+  } else {
+    std::cout << "Error linking default shader program" << std::endl;
+  }
+  // End of code for default shader
 }
 
 /*
- * Singleton pattern
+ * Returns a shader program with the name "name" if it's been loaded. Otherwise returns the default program.
  */
-ShaderManager& ShaderManager::get() {
-  static ShaderManager instance;
-  return instance;
+ShaderProgram::ShPtr ShaderManager::get_program(const std::string& name) {
+  ShaderProgram::ShPtr ret;
+  ShaderTable::iterator iter = programs_.find(name);
+
+  if (iter != programs_.end()) {
+    ret = iter->second;
+  } else {
+    std::cout << "Error: shader program <" << name << "> not found" << std::endl;
+    ret = programs_.find("default")->second;
+  }
+
+  return ret;
 }
 
-/*
- * 
- */
-void ShaderManager::load_shaders() {
-  if (loaded_) {
-		std::cout << "ShaderManager error: shaders already loaded" << std::endl;
-		return;
-	}
-    
-  int shader_count = shader_names_.size();
-    
-  for (int j = 0; j < shader_count; ++j) {
-    std::cout << "Processing " << shader_names_[j] << std::endl;
-    FileBlob::ShPtr file(new FileBlob(shader_names_[j]));
+const bool ShaderManager::create_program(const std::string& program_name, const std::vector<std::string>& paths) {
+
+  ShaderProgram::ShPtr program(new ShaderProgram(program_name));
+  unsigned int shader_count = paths.size();
+
+  for (int i = 0; i < shader_count; ++i) {
+
+    FileBlob::ShPtr file(new FileBlob(paths[i]));
+    if (!file->is_valid()) {
+      std::cout << "Failed to compile shader: source file <" << paths[i] << "> not found." << std::endl;
+      continue;
+    }
+
+    std::string source_string(file->get_bytes());
+    insert_includes(source_string);
+    const char* source_array[1] = { source_string.c_str() };
+
     if (file->extension() == "vert") {
-      int vname = glCreateShader(GL_VERTEX_SHADER);
-      VertexShader::ShPtr vshader(new VertexShader(shader_names_[j], vname));
-      vshaders_.push_back(vshader);
-      const char* src = file->get_bytes();
-      glShaderSource(vname, 1, &src, 0);
-      glCompileShader(vname);
-      print_shader_log(vname);
+
+      VertexShader::ShPtr vshader(new VertexShader(source_array));
+      if (vshader->compile()) {
+        program->attach_shader(vshader);
+      } else {
+        std::cout << "Failed to compile vertex shader <" << paths[i] << ">" << std::endl;
+      }
+
+    } else if (file->extension() == "geom") {
+
+      GeometryShader::ShPtr gshader(new GeometryShader(source_array));
+      if (gshader->compile()) {
+        program->attach_shader(gshader);
+      } else {
+        std::cout << "Failed to compile geometry shader <" << paths[i] << ">" << std::endl;
+      }
+
     } else if (file->extension() == "frag") {
-      int fname = glCreateShader(GL_FRAGMENT_SHADER);
-      FragmentShader::ShPtr fshader(new FragmentShader(shader_names_[j], fname));
-      fshaders_.push_back(fshader);
-      const char* src = file->get_bytes();
-      glShaderSource(fname, 1, &src, 0);
-      glCompileShader(fname);
-      print_shader_log(fname);
+
+      FragmentShader::ShPtr fshader(new FragmentShader(source_array));
+      if (fshader->compile()) {
+        program->attach_shader(fshader);
+      } else {
+        std::cout << "Failed to compile fragment shader <" << paths[i] << ">" << std::endl;
+      }
+
     } else {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
-	}
-  // The bumpdec program
-  int p = glCreateProgram();
-  int v = vshaders_[0]->get_id();
-  int f = fshaders_[0]->get_id();
-  
-  glAttachShader(p,v);
-  glAttachShader(p,f);
-  
-  glLinkProgram(p);
-  print_program_log(p);
-  ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
-  programs_.push_back(program);
-  glUseProgram(p);
-  
-  GLint texSampler = glGetUniformLocation(p, "tex");
-  GLint bumpSampler = glGetUniformLocation(p, "bump");
-  GLint decalSampler = glGetUniformLocation(p, "decal");
-  glUniform1i(texSampler, 0);
-  glUniform1i(bumpSampler, 1);
-  glUniform1i(decalSampler, 2);
+  }
 
-  // The shadow program
-  p = glCreateProgram();
-  v = vshaders_[1]->get_id();
-  f = fshaders_[1]->get_id();
-  
-  glAttachShader(p, v);
-  glAttachShader(p, f);
-  glLinkProgram(p);
-  print_program_log(p);
-  ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
-  programs_.push_back(shadow);
-  glUseProgram(p);
-  texSampler = glGetUniformLocation(p, "tex");
-  GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1i(texSampler, 0);
-  glUniform1i(shadowSampler, 3);
-  
-  // HDR program
-  p = glCreateProgram();
-  v = vshaders_[2]->get_id();
-  f = fshaders_[2]->get_id();
-  
-  glAttachShader(p, v);
-  glAttachShader(p, f);
-  glLinkProgram(p);
-  print_program_log(p);
-  ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
-  programs_.push_back(hdr);
-  glUseProgram(p);
-  GLint exp = glGetUniformLocation(p, "exposure");
-  //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1f(exp, 1.0);
-  //glUniform1i(shadowSampler, 3);
-  
-  // The bump program
-  p = glCreateProgram();
-  v = vshaders_[3]->get_id();
-  f = fshaders_[3]->get_id();
-  
-  glAttachShader(p,v);
-  glAttachShader(p,f);
-  
-  glLinkProgram(p);
-  print_program_log(p);
-  ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
-  programs_.push_back(bump);
-  glUseProgram(p);
-  
-  texSampler = glGetUniformLocation(p, "tex");
-  bumpSampler = glGetUniformLocation(p, "bump");
-  glUniform1i(texSampler, 0);
-  glUniform1i(bumpSampler, 1);
-
-  glUseProgram(0);
-}
-
-/*
- * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
- */
-const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& name) const {
-	foreach (ShaderProgram::ShPtr shaderp, programs_) {
-		if (shaderp->is_name(name)) {
-			return shaderp;
-		}
-	}
-	
-  std::cout << "Error: shader program <" << name << "> not found" << std::endl;
-	return ShaderProgram::ShPtr();
-}
-
-void ShaderManager::print_shader_log(int id) {
-
-  int length = 0;
-  int count = 0;
-
-  glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-
-  if (length > 0) {
-    char data[length];
-    glGetShaderInfoLog(id, length, &count, data);
-    std::cout << data;
+  if (program->link()) {
+    programs_.insert(ShaderTable::value_type(program->get_name(), program));
+    return true;
+  } else {
+    std::cout << "Failed to link shader program <" << program_name << ">" << std::endl;
+    return false;
   }
 }
 
-void ShaderManager::print_program_log(int id) {
+void ShaderManager::insert_includes(std::string& source) {
+  substitute_text(source,
+    std::string("#include cosmos.matrices\n"),
+    std::string(
+      "layout (std140) uniform matrices {\n"
+      "  mat4 c_ViewMatrix;\n"
+      "  mat4 c_ProjectionMatrix;\n"
+      "  mat4 c_ShadowMatrix;\n"
+      "  mat4 c_ModelMatrix;\n"
+      "  mat4 c_ModelViewMatrix;\n"
+      "  mat4 c_ModelViewProjectionMatrix;\n"
+      "};\n"
+    )
+  );
+  substitute_text(source,
+    std::string("#include cosmos.attrib_array\n"),
+    std::string(
+      "layout (location = 0) in vec3 pos;\n"
+      "layout (location = 1) in vec2 tex;\n"
+      "layout (location = 2) in vec3 norm;\n"
+    )
+  );
 
-  int length = 0;
-  int count = 0;
+}
 
-  glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+void ShaderManager::substitute_text(std::string& source, const std::string& marker, const std::string& replacement) {
+  std::size_t index = source.find(marker);
 
-  if (length > 0) {
-    char data[length];
-    glGetProgramInfoLog(id, length, &count, data);
-    std::cout << data;
+  if (index != std::string::npos) {
+    source.erase(index, marker.size());
+    source.insert(index, replacement);
   }
 }
+
+
+const std::string ShaderManager::default_frag(
+  "void main() { "
+    "gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
+  "}"
+);
+
+const std::string ShaderManager::default_vert(
+  "#version 150\n"
+  "#include cosmos.attrib_array\n"
+  "#include cosmos.matrices\n"
+  "void main() { "
+    "gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0); "
+  "}"
+);

@@ -1,14 +1,17 @@
 #ifndef COSMOS_WORLD_H_
 #define COSMOS_WORLD_H_
 
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 
 #include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include "Renderer.hpp"
 
+#include "CosmosSimulation.hpp"
 #include "Material.hpp"
+#include "Mesh.hpp"
 #include "util.hpp"
 #include "Vector2f.hpp"
 #include "Vector3f.hpp"
@@ -18,36 +21,49 @@
  */
 class World {
  public:
-	typedef boost::shared_ptr<World> ShPtr;
+  typedef boost::shared_ptr<World> ShPtr;
 
-	World(std::string path);
-  
+  World(CosmosSimulation& sim, std::string path);
+
   // This is to be used by whatever is parsing the OBJ file to build the geometry
   void add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                     Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
                     Vector3f v3, Vector2f vt3, Vector3f vn3, Vector3f c3);
-	// Also to be called by whatever is parsing the geometry file
+  // Also to be called by whatever is parsing the geometry file
   void set_material(Material::ShPtr mat);
-  
+
   // Called by the engine to submit the geometry to the GPU
   void draw() const;
   void draw_geometry() const;
+  void draw_skybox() const;
+
   // The number of triangles in the World
-	const unsigned int triangle_count() const { return triangle_count_; }
+  const unsigned int triangle_count() const { return triangle_count_; }
 
  private:
   typedef std::pair<Material::ShPtr, int> MatPair;
- 
+
+  CosmosSimulation& sim_;
+  Material::ShPtr skybox_material_;
+  Mesh::ShPtr skybox_mesh_;
+
   unsigned int triangle_count_;
-	std::vector<Vector3f> verticies_;
-	std::vector<Vector3f> normals_;
-	std::vector<Vector2f> tex_coords_;
+  unsigned int size_array_;
+
+  GLuint vbo_address_;
+
+  std::vector<Vector3f> verticies_;
+  std::vector<Vector3f> normals_;
+  std::vector<Vector2f> tex_coords_;
   std::vector<Vector3f> colors_;
   std::vector<MatPair> mats_;
   std::string path_;
-  
+
   void init();
-  
+
+  void upload_to_gpu();
+  boost::shared_array<float> to_array();
+
   // OBJ Decoding stuff -------------
   void decode(FileBlob& b);
   // Returns the index of the first character following a group of newline characters after the offset
@@ -56,7 +72,7 @@ class World {
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;
 
-  
+
   DISALLOW_COPY_AND_ASSIGN(World);
 };
 

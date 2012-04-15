@@ -36,6 +36,7 @@ const std::string FileBlob::extension() const {
 
 void FileBlob::init() {
   FileReader fr(file_path_);
+  valid_ = fr.exists();
   file_size_ = fr.GetFileSize();
 
   // +1 for a null termination (needed when using FileBlob for loading shaders)

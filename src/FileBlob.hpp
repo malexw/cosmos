@@ -17,6 +17,7 @@ class FileBlob {
   explicit FileBlob(std::string path);
   ~FileBlob();
   
+  const bool is_valid() { return valid_; }
   const char& operator[](std::size_t position) const { return bytes_[position]; }
   int size() const;
   const std::string extension() const;
@@ -28,6 +29,7 @@ class FileBlob {
 
   std::string file_path_;
   int file_size_;
+  bool valid_;
   
   // TODO: Change this to a boost::shared_array
   char * bytes_;

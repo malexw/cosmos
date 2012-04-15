@@ -4,3 +4,5 @@ Kd 1.0 1.0 1.0
 map_Ka tronish.png
 map_Kd tronish.png
 map_Ks tronish.png
+shader_vert res/shaders/shadow.vert
+shader_frag res/shaders/shadow.frag
