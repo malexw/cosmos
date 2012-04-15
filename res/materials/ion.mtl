@@ -1,0 +1,6 @@
+newmtl ion
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+map_Ka ion.png
+map_Kd ion.png
+map_Ks ion.png

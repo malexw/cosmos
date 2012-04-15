@@ -1,0 +1,12 @@
+newmtl default
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 10.0
+d 1.0
+illum 2
+map_Ka default.png
+map_Kd default.png
+map_Ks default.png
+map_d default.png
+map_bump normal_map.png

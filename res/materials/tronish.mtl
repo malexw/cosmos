@@ -1,0 +1,6 @@
+newmtl tronish
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+map_Ka tronish.png
+map_Kd tronish.png
+map_Ks tronish.png
