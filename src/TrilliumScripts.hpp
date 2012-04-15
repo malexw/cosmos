@@ -29,7 +29,7 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
     // Create cameras?
 
     // Create meteor field
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 10; ++i) {
       unsigned int id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
       float rx = fmod((rand() / static_cast<float>(100)), 20) - 10;
       float ry = fmod((rand() / static_cast<float>(100)), 20) - 10;
@@ -38,6 +38,19 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
       gob_manager_->message_transform(id, mts);
       Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
       mrs->add_arg("material", "res/materials/meteor_big.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
+      gob_manager_->message_renderable(id, mrs);
+    }
+
+    // Create the trillium field
+    for (int i = 0; i < 20; ++i) {
+      unsigned int id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE);
+      float rx = fmod((rand() / static_cast<float>(100)), 20) - 10;
+      float ry = fmod((rand() / static_cast<float>(100)), 20) - 10;
+      Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
+      mts->add_arg("translation_x", rx).add_arg("translation_y", ry).add_arg("scale_x", 0.25f).add_arg("scale_y", 0.25f).add_arg("scale_z", 0.25f);
+      gob_manager_->message_transform(id, mts);
+      Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
+      mrs->add_arg("material", "res/materials/trillium.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
       gob_manager_->message_renderable(id, mrs);
     }
 
