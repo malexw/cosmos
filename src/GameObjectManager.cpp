@@ -34,9 +34,8 @@ unsigned int GameObjectManager::spawn(char components) {
   }
 
   if (components & COMPONENT_INPUTHANDLER) {
-    // TODO InputHandler shouldn't be abstract, will accept a callback
-    //InputHandler::ShPtr i(new InputHandler(id));
-    //input_handlers_.push_back(i);
+    InputHandler::ShPtr i(new InputHandler(id));
+    input_handlers_.push_back(i);
   }
 
   return id;
@@ -82,10 +81,18 @@ T GameObjectManager::find_component(std::list<T> list, unsigned int id) {
       return item;
     }
   }
-} 
+}
 
 void GameObjectManager::draw_geometries() {
 
+}
+
+void GameObjectManager::render_renderables() {
+
+  foreach (Renderable::ShPtr r, renderables_) {
+    matrix_stack_->upload_model_matrix(*((r->get_transform())->get_matrix()));
+    r->render();
+  }
 }
 
 void GameObjectManager::update_collidables(float delta) {
@@ -94,7 +101,11 @@ void GameObjectManager::update_collidables(float delta) {
   }
 }
 
-void GameObjectManager::check_collisions() {  
+void GameObjectManager::handle_input(SDL_Event e) {
+  input_handlers_.back()->handle_input(e);
+}
+
+void GameObjectManager::check_collisions() {
   // Check against every other object for a collision. Horribly inefficient.
   for (std::list<CollidableObject::ShPtr>::const_iterator ci = collidables_.begin(); ci != collidables_.end(); ++ci) {
     for (std::list<CollidableObject::ShPtr>::const_iterator rhs = ci; rhs != collidables_.end(); ++rhs) {

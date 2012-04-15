@@ -21,7 +21,11 @@ void CollidableObject::handle_message(Message::ShPtr msg) {
 }
 
 void CollidableObject::update(float delta) {
-  transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
+  if (update_callback_) {
+    update_callback_(delta);
+  } else {
+    transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
+  }
 }
 
 void CollidableObject::check(CollidableObject::ShPtr rhs) {

@@ -27,9 +27,9 @@ class Transform {
 
   void handle_message(Message::ShPtr msg);
 
-  void apply();
-  void apply_inverse();
-  void apply_rotation();
+  //void apply();
+  //void apply_inverse();
+  //void apply_rotation();
   void set_direction(const Vector3f& dir);
 
   // S Q T

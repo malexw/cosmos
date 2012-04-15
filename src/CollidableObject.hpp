@@ -1,6 +1,7 @@
 #ifndef COSMOS_COLLIDABLEOBJECT_H_
 #define COSMOS_COLLIDABLEOBJECT_H_
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <string>
@@ -38,8 +39,11 @@ class CollidableObject {
   void render_collision();
   //Vector3f supportSS(CollidableObject::ShPtr rhs, const Vector3f direction);
 
+  Vector3f get_velocity() { return velo_; }
   CollidableObject& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }
   CollidableObject& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }
+
+  CollidableObject& set_callback(boost::function<void (float delta)> callback) { update_callback_ = callback; }
 
   Vector3f get_scale() { return scale_; }
 
@@ -53,6 +57,8 @@ class CollidableObject {
   Vector3f velo_;
   GLUquadricObj* quadric_;
   //Vector3f simplex_[4];
+
+  boost::function<void (float delta)> update_callback_;
 
   DISALLOW_COPY_AND_ASSIGN(CollidableObject);
 };
