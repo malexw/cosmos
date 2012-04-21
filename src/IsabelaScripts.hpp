@@ -34,7 +34,7 @@ class IsabelaScripts: public boost::enable_shared_from_this<IsabelaScripts> {
       mts->add_arg("translation_x", -10.0f).add_arg("translation_y", 0.0f).add_arg("translation_z", 0.0f);//.add_arg("scale_x", 0.25f).add_arg("scale_y", 0.25f).add_arg("scale_z", 0.25f);
       gob_manager_->message_transform(id, mts);
       Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
-      mrs->add_arg("material", "res/materials/trillium.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
+      mrs->add_arg("material", "res/materials/asteroid.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
       gob_manager_->message_renderable(id, mrs);
     }
     {
@@ -55,7 +55,7 @@ class IsabelaScripts: public boost::enable_shared_from_this<IsabelaScripts> {
       mts->add_arg("translation_x", 10.0f).add_arg("translation_y", 0.0f).add_arg("translation_z", 0.0f);//.add_arg("scale_x", 0.25f).add_arg("scale_y", 0.25f).add_arg("scale_z", 0.25f);
       gob_manager_->message_transform(id, mts);
       Message::ShPtr mrs(new Message(Message::RENDERABLE_SET));
-      mrs->add_arg("material", "res/materials/trillium.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
+      mrs->add_arg("material", "res/materials/asteroid.mtl").add_arg("mesh", "res/meshes/face-center-quad.obj");
       gob_manager_->message_renderable(id, mrs);
     }
     {

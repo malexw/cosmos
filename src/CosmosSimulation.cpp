@@ -175,10 +175,10 @@ void CosmosSimulation::run() {
   //b->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   //shader_manager_->get_program("ion")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   //shader_manager_->get_program("ion")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
-  shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
-  shader_manager_->get_program("tronish")->set3f("light_pos", 5.0f, 15.0f, 5.0f);
-  shader_manager_->get_program("tronish")->seti("shadowMap", UniformLocations::SHADOW_TEXTURE_UNIT);
-  shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  //shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  //shader_manager_->get_program("tronish")->set3f("light_pos", 5.0f, 15.0f, 5.0f);
+  //shader_manager_->get_program("tronish")->seti("shadowMap", UniformLocations::SHADOW_TEXTURE_UNIT);
+  //shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   shader_manager_->get_program("skybox")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   shader_manager_->get_program("skybox")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   //shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
