@@ -1,6 +1,0 @@
-newmtl terminal
-Ka 1.0 1.0 1.0
-Kd 1.0 1.0 1.0
-map_Ka terminal.png
-map_Kd terminal.png
-map_Ks terminal.png

@@ -19,7 +19,7 @@
 #include "Sound.hpp"
 #include "Timer.hpp"
 #include "Transform.hpp"
-#include "TrilliumScripts.hpp"
+#include "IsabelaScripts.hpp"
 #include "Vector3f.hpp"
 #include "World.hpp"
 
@@ -51,6 +51,7 @@ void CosmosSimulation::run() {
 
   // ---------- CAMERA ------------------------------
   camera_.reset(new Camera(gob_manager_, matrix_stack_));
+  //camera_->set_projection(Matrix4f::projectionOrthoMatrix(-ASPECT_RATIO/2, ASPECT_RATIO/2, -0.5, 0.5, -1, 1));
   camera_->set_projection(Matrix4f::projectionPerspectiveMatrix(45, ASPECT_RATIO, 1, 4000));
   {
     unsigned int camera_id = camera_->get_id();
@@ -129,8 +130,8 @@ void CosmosSimulation::run() {
 
   // -------------- OBJECTS --------------------------------------------
 
-  TrilliumScripts::ShPtr trillium(new TrilliumScripts(gob_manager_, camera_));
-  trillium->init();
+  IsabelaScripts::ShPtr isabela(new IsabelaScripts(gob_manager_, camera_));
+  isabela->init();
 
   unsigned int cube_id;
   // The cube
@@ -246,9 +247,9 @@ void CosmosSimulation::run() {
     gob_manager_->update_collidables(update_delta);
     //camera_collidable->update(updateDelta);
     //emitter->update(update_delta);
-    Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
-    tum->add_arg("yaw", 2).add_arg("pitch", 1);
-    gob_manager_->message_transform(cube_id, tum);
+    //Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
+    //tum->add_arg("yaw", 2).add_arg("pitch", 1);
+    //gob_manager_->message_transform(cube_id, tum);
 
     // Collisions
     if (config.is_collisions()) {

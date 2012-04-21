@@ -1,6 +1,0 @@
-newmtl hdrbox
-Ka 1.0 1.0 1.0
-Kd 1.0 1.0 1.0
-map_Ka grace_cross.hdr
-map_Kd grace_cross.hdr
-map_Ks grace_cross.hdr

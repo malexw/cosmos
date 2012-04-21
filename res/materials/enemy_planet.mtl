@@ -1,13 +1,13 @@
-newmtl trillium
+newmtl enemy_planet
 Ka 1.0 1.0 1.0
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ns 10.0
 d 1.0
 illum 2
-map_Ka trillium.png
-map_Kd trillium.png
-map_Ks trillium.png
-map_d trillium.png
+map_Ka enemy_planet.png
+map_Kd enemy_planet.png
+map_Ks enemy_planet.png
+map_d enemy_planet.png
 shader_vert res/shaders/diffuse.vert
 shader_frag res/shaders/diffuse.frag

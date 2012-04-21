@@ -24,7 +24,7 @@ void CollidableObject::update(float delta) {
   if (update_callback_) {
     update_callback_(delta);
   } else {
-    transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
+    //transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
   }
 }
 
