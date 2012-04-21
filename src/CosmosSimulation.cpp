@@ -134,7 +134,7 @@ void CosmosSimulation::run() {
 
   unsigned int cube_id;
   // The cube
-  {
+  /*{
     cube_id = gob_manager_->spawn(GameObjectManager::COMPONENT_TRANSFORM | GameObjectManager::COMPONENT_RENDERABLE | GameObjectManager::COMPONENT_COLLIDABLE);
     Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
     // use default scale and quaternion value
@@ -149,7 +149,7 @@ void CosmosSimulation::run() {
   }
   // Pull these out so we have direct control while testing
   Renderable::ShPtr cube_renderable = gob_manager_->get_renderable(cube_id);
-  Transform::ShPtr cube_transform = gob_manager_->get_transform(cube_id);
+  Transform::ShPtr cube_transform = gob_manager_->get_transform(cube_id);*/
 
   // The particle emitter
   /*ParticleEmitter::ShPtr emitter;
@@ -167,11 +167,11 @@ void CosmosSimulation::run() {
   }*/
 
   // TODO Use a Uniform Buffer Object? to set these
-  ShaderProgram::ShPtr b = shader_manager_->get_program("default");
-  b->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
-  b->seti("bump", UniformLocations::BUMP_TEXTURE_UNIT);
-  b->set3f("light_pos", 5.0f, 15.0f, 5.0f);
-  b->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  //ShaderProgram::ShPtr b = shader_manager_->get_program("default");
+  //b->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  //b->seti("bump", UniformLocations::BUMP_TEXTURE_UNIT);
+  //b->set3f("light_pos", 5.0f, 15.0f, 5.0f);
+  //b->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   //shader_manager_->get_program("ion")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   //shader_manager_->get_program("ion")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
@@ -180,7 +180,7 @@ void CosmosSimulation::run() {
   shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   shader_manager_->get_program("skybox")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   shader_manager_->get_program("skybox")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
-  shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  //shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
 
   Sound::ShPtr part_sound = audio_manager_->get_sound("res/sounds/starshipmono.wav");
   part_sound->set_position(Vector3f(7, 1, -20));

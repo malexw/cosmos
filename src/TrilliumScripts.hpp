@@ -21,7 +21,7 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
   typedef boost::shared_ptr<TrilliumScripts> ShPtr;
 
   TrilliumScripts(GameObjectManager::ShPtr gob_manager, Camera::ShPtr camera)
-   : gob_manager_(gob_manager), camera_(camera) {
+   : gob_manager_(gob_manager), camera_(camera), player_ss_rot_velo(0), player_ss_rot(0), player_ss_thrusting(false) {
   }
 
   void init() {
@@ -75,9 +75,18 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
     // derp. Why bother sending messages if we have access to the actual object.
     Transform::ShPtr ss_xf = gob_manager_->get_transform(player_ss_id);
     Vector3f pos = ss_xf->get_position();
-    //CollidableObject::ShPtr ss_c = gob_manager_->get_collidable(player_ss_id);
+    Quaternion quat = ss_xf->get_rotation();
+    quat = Quaternion(Vector3f::UNIT_Z, player_ss_rot_velo).normalize() * quat;
+    ss_xf->set_quat(quat);
+    if (player_ss_thrusting) {
+      player_ss_target_velo = quat * player_ss_target_velo;
+    }
+
     player_ss_current_velo = player_ss_current_velo + new_velocity(player_ss_current_velo, player_ss_target_velo, player_ss_accel, delta);
     ss_xf->set_translate(pos + (delta * (player_ss_current_velo)));
+
+    //Quaternion ss_rot(Vector3f::UNIT_Z, player_ss_rot);
+    ss_xf->rotate(Vector3f::UNIT_Z, player_ss_rot_velo);
 
     Message::ShPtr mts(new Message(Message::TRANSFORM_SET));
     mts->add_arg("translation_x", pos.x()).add_arg("translation_y", pos.y()).add_arg("translation_z", 20.0f);
@@ -88,20 +97,25 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
     Message::ShPtr mcv(new Message(Message::COLLIDABLE_VELOCITY));
     Vector3f velo;
     bool ret = false;
+    Quaternion rot = gob_manager_->get_transform(player_ss_id)->get_rotation();
 
     switch (e.type) {
       case SDL_KEYDOWN:
         switch(e.key.keysym.sym) {
-          case SDLK_w: player_ss_target_velo = Vector3f(0, 10, 0); ret = true; break;
-          case SDLK_s: player_ss_target_velo = Vector3f(0, -10, 0); ret = true; break;
+          case SDLK_w: player_ss_target_velo = rot * Vector3f(0, 10, 0); player_ss_thrusting = true; ret = true; break;
+          case SDLK_s: player_ss_target_velo = rot * Vector3f(0, -10, 0); player_ss_thrusting = true; ret = true; break;
+          case SDLK_a: player_ss_rot_velo = 2; ret = true; break;
+          case SDLK_d: player_ss_rot_velo = -2; ret = true; break;
         };
         mcv->add_arg("velocity_x", velo.x()).add_arg("velocity_y", velo.y());
         gob_manager_->message_collidable(player_ss_id, mcv);
         break;
       case SDL_KEYUP:
         switch(e.key.keysym.sym) {
-          case SDLK_w: player_ss_target_velo = player_ss_current_velo; ret = true; break;
-          case SDLK_s: player_ss_target_velo = player_ss_current_velo; ret = true; break;
+          case SDLK_w: player_ss_target_velo = player_ss_current_velo; player_ss_thrusting = false; ret = true; break;
+          case SDLK_s: player_ss_target_velo = player_ss_current_velo; player_ss_thrusting = false; ret = true; break;
+          case SDLK_a: player_ss_rot_velo = 0; ret = true; break;
+          case SDLK_d: player_ss_rot_velo = 0; ret = true; break;
         };
         mcv->add_arg("velocity_x", velo.x()).add_arg("velocity_y", velo.y());
         gob_manager_->message_collidable(player_ss_id, mcv);
@@ -122,6 +136,9 @@ class TrilliumScripts: public boost::enable_shared_from_this<TrilliumScripts> {
   static const float player_ss_max_velocity = 10.0f;
   Vector3f player_ss_target_velo;
   Vector3f player_ss_current_velo;
+  int player_ss_rot_velo;
+  int player_ss_rot;
+  bool player_ss_thrusting;
 
   Vector3f new_velocity(Vector3f old_v, Vector3f new_v, float accel, float delta) {
     return accel * delta * (new_v - old_v);
