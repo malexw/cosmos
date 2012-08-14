@@ -29,9 +29,9 @@ void CollidableObject::update(float delta) {
 }
 
 void CollidableObject::check(CollidableObject::ShPtr rhs) {
-  if (this == rhs) {
-    return;
-  }
+  //if (this == rhs) {
+  //  return;
+  //}
 
   Vector3f distance;
   float length, actual_distance;
