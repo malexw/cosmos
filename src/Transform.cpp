@@ -49,7 +49,7 @@ void Transform::handle_message(Message::ShPtr msg) {
   }
 }
 
-void Transform::apply() {
+/*void Transform::apply() {
   glMultMatrixf(Matrix4f::modelFromSqt(scale_, quat_, translate_).to_array());
 }
 
@@ -66,7 +66,7 @@ void Transform::apply_inverse() {
 
 void Transform::apply_rotation() {
   glMultMatrixf(get_rotation_matrix()->to_array());
-}
+}*/
 
 Matrix4f::ShPtr Transform::get_rotation_matrix() {
   Quaternion iR = quat_.invert();

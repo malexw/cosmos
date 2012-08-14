@@ -58,6 +58,7 @@ class CosmosSimulation {
 
   // TODO Camera should likely be moved out to a "Renderer" class along with all the GL-specific code
   Camera::ShPtr camera_;
+  MatrixStack::ShPtr matrix_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(CosmosSimulation);
 };

@@ -29,6 +29,8 @@ class Renderable {
   Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->get_texture(); return *this; }
   Renderable& set_mesh(Mesh::ShPtr mesh) { mesh_ = mesh; return *this; }
 
+  Transform::ShPtr get_transform() { return transform_; }
+
   void render() const;
   void draw_geometry() const;
 
@@ -41,7 +43,7 @@ class Renderable {
  private:
   bool textured_;
   const unsigned int id_;
-  
+
   MaterialManager::ShPtr mat_man_;
   MeshManager::ShPtr mesh_man_;
 

@@ -34,9 +34,8 @@ unsigned int GameObjectManager::spawn(char components) {
   }
 
   if (components & COMPONENT_INPUTHANDLER) {
-    // TODO InputHandler shouldn't be abstract, will accept a callback
-    //InputHandler::ShPtr i(new InputHandler(id));
-    //input_handlers_.push_back(i);
+    InputHandler::ShPtr i(new InputHandler(id));
+    input_handlers_.push_back(i);
   }
 
   return id;
@@ -88,10 +87,22 @@ void GameObjectManager::draw_geometries() {
 
 }
 
+void GameObjectManager::render_renderables() {
+
+  foreach (Renderable::ShPtr r, renderables_) {
+    matrix_stack_->upload_model_matrix(*((r->get_transform())->get_matrix()));
+    r->render();
+  }
+}
+
 void GameObjectManager::update_collidables(float delta) {
   foreach (CollidableObject::ShPtr c, collidables_) {
     c->update(delta);
   }
+}
+
+void GameObjectManager::handle_input(SDL_Event e) {
+  input_handlers_.back()->handle_input(e);
 }
 
 void GameObjectManager::check_collisions() {
