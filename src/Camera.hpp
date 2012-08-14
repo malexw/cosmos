@@ -31,6 +31,7 @@ class Camera {
   const unsigned int get_id() const { return id_; }
   Transform::ShPtr get_transform() { return transform_; }
   Matrix4f::ShPtr get_rotation_matrix() { return transform_->get_rotation_matrix(); }
+  Matrix4f get_view_projection_matrix() { return matrix_stack_->get_view_projection_matrix(); }
 
   void upload_matrices(unsigned int binding) const;
   void upload_model_matrix(const Matrix4f& model_matrix) const;

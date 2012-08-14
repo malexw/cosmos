@@ -20,6 +20,7 @@ class Vector3f {
   static const Vector3f NEGATIVE_Z;
   static const Vector3f ZEROS;
   static const Vector3f ONES;
+  static const float e = 0.0001;
 
   Vector3f(): x_(0.0f), y_(0.0f), z_(0.0f) {}
   Vector3f(float x, float y, float z): x_(x), y_(y), z_(z) {}
@@ -57,6 +58,16 @@ class Vector3f {
     y_ *= rhs.y();
     z_ *= rhs.z();
     return *this;
+  }
+
+  const bool operator==(const Vector3f& rhs) {
+    return ((x_ > rhs.x() - e) && (x_ < rhs.x() + e) &&
+            (y_ > rhs.y() - e) && (y_ < rhs.y() + e) &&
+            (z_ > rhs.z() - e) && (z_ < rhs.z() + e));
+  }
+
+  const bool operator!=(const Vector3f& rhs) {
+    return !(operator==(rhs));
   }
 
   Vector3f cross(const Vector3f& rhs) const {

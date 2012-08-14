@@ -157,3 +157,10 @@ void CollidableObject::render_collision() {
   //std::cout << lhspoint << " " << rhspoint << std::endl;
   return lhspoint - rhspoint;
 }*/
+
+bool CollidableObject::query(const Ray& ray) {
+  Vector3f pos = (transform_->get_position()) - ray.position();
+  Vector3f dir = ray.direction();
+  float dc = (dir.dot(pos));
+  return ((dc*dc) - pos.lengthSquare() + (scale_.x() * scale_.x())) >= 0;
+}

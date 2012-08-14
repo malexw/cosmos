@@ -95,6 +95,16 @@ void GameObjectManager::render_renderables() {
   }
 }
 
+std::list<unsigned int> GameObjectManager::query_collidables(const Ray& ray) {
+  std::list<unsigned int> results;
+  foreach (CollidableObject::ShPtr c, collidables_) {
+    if (c->query(ray)) {
+      results.push_back(c->id());
+    }
+  }
+  return results;
+}
+
 void GameObjectManager::update_collidables(float delta) {
   foreach (CollidableObject::ShPtr c, collidables_) {
     c->update(delta);

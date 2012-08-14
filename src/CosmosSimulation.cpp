@@ -202,16 +202,6 @@ void CosmosSimulation::run() {
   while(1) {
     fps_->frame_start();
 
-    // Input
-    //im.handleInput();
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-      gob_manager_->handle_input(e);
-      if (e.type == SDL_QUIT) {
-        config.set_quit(true);
-      }
-    }
-
     if (!config.is_valid()) {
       if (config.is_quit()) {
         break;
@@ -266,6 +256,16 @@ void CosmosSimulation::run() {
     matrix_stack_->set_view(camera_->get_transform());
     matrix_stack_->upload_matrices(UniformLocations::MATRIX_BINDING);
     //camera_->upload_matrices(UniformLocations::MATRIX_BINDING);
+
+    // Input
+    //im.handleInput();
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+      gob_manager_->handle_input(e);
+      if (e.type == SDL_QUIT) {
+        config.set_quit(true);
+      }
+    }
 
     //shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);
     //shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);

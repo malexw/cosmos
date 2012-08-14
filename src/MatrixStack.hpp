@@ -28,6 +28,7 @@ class MatrixStack {
 
   void set_projection(Matrix4f projection_matrix) { projection_matrix_ = projection_matrix; }
   void set_view(Transform::ShPtr camera_transform);
+  Matrix4f get_view_projection_matrix() const { return view_matrix_ * projection_matrix_; }
 
  private:
 
