@@ -1,11 +1,12 @@
 #include <iostream>
 #include <stdlib.h>
+#include <time.h>
 
 #include "CosmosSimulation.hpp"
 
 int main(int argc, char* argv[]) {
 
-  srand(31337);
+  srand(time(0));
 
   CosmosSimulation sim;
   std::cout << "Simulation initialized" << std::endl;

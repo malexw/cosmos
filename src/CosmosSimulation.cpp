@@ -19,7 +19,7 @@
 #include "Sound.hpp"
 #include "Timer.hpp"
 #include "Transform.hpp"
-#include "TrilliumScripts.hpp"
+#include "IsabelaScripts.hpp"
 #include "Vector3f.hpp"
 #include "World.hpp"
 
@@ -51,6 +51,7 @@ void CosmosSimulation::run() {
 
   // ---------- CAMERA ------------------------------
   camera_.reset(new Camera(gob_manager_, matrix_stack_));
+  //camera_->set_projection(Matrix4f::projectionOrthoMatrix(-ASPECT_RATIO/2, ASPECT_RATIO/2, -0.5, 0.5, -1, 1));
   camera_->set_projection(Matrix4f::projectionPerspectiveMatrix(45, ASPECT_RATIO, 1, 4000));
   {
     unsigned int camera_id = camera_->get_id();
@@ -129,8 +130,8 @@ void CosmosSimulation::run() {
 
   // -------------- OBJECTS --------------------------------------------
 
-  TrilliumScripts::ShPtr trillium(new TrilliumScripts(gob_manager_, camera_));
-  trillium->init();
+  IsabelaScripts::ShPtr isabela(new IsabelaScripts(gob_manager_, camera_));
+  isabela->init();
 
   unsigned int cube_id;
   // The cube
@@ -174,10 +175,10 @@ void CosmosSimulation::run() {
   //b->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   //shader_manager_->get_program("ion")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   //shader_manager_->get_program("ion")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
-  shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
-  shader_manager_->get_program("tronish")->set3f("light_pos", 5.0f, 15.0f, 5.0f);
-  shader_manager_->get_program("tronish")->seti("shadowMap", UniformLocations::SHADOW_TEXTURE_UNIT);
-  shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
+  //shader_manager_->get_program("tronish")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
+  //shader_manager_->get_program("tronish")->set3f("light_pos", 5.0f, 15.0f, 5.0f);
+  //shader_manager_->get_program("tronish")->seti("shadowMap", UniformLocations::SHADOW_TEXTURE_UNIT);
+  //shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   shader_manager_->get_program("skybox")->seti("tex", UniformLocations::DIFFUSE_TEXTURE_UNIT);
   shader_manager_->get_program("skybox")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
   //shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
@@ -200,16 +201,6 @@ void CosmosSimulation::run() {
 
   while(1) {
     fps_->frame_start();
-
-    // Input
-    //im.handleInput();
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-      gob_manager_->handle_input(e);
-      if (e.type == SDL_QUIT) {
-        config.set_quit(true);
-      }
-    }
 
     if (!config.is_valid()) {
       if (config.is_quit()) {
@@ -246,9 +237,9 @@ void CosmosSimulation::run() {
     gob_manager_->update_collidables(update_delta);
     //camera_collidable->update(updateDelta);
     //emitter->update(update_delta);
-    Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
-    tum->add_arg("yaw", 2).add_arg("pitch", 1);
-    gob_manager_->message_transform(cube_id, tum);
+    //Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
+    //tum->add_arg("yaw", 2).add_arg("pitch", 1);
+    //gob_manager_->message_transform(cube_id, tum);
 
     // Collisions
     if (config.is_collisions()) {
@@ -265,6 +256,16 @@ void CosmosSimulation::run() {
     matrix_stack_->set_view(camera_->get_transform());
     matrix_stack_->upload_matrices(UniformLocations::MATRIX_BINDING);
     //camera_->upload_matrices(UniformLocations::MATRIX_BINDING);
+
+    // Input
+    //im.handleInput();
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+      gob_manager_->handle_input(e);
+      if (e.type == SDL_QUIT) {
+        config.set_quit(true);
+      }
+    }
 
     //shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);
     //shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::SHADOW_MATRIX_BINDING);

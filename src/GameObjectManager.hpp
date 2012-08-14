@@ -19,6 +19,7 @@
 
 #include "MatrixStack.hpp"
 #include "Message.hpp"
+#include "Ray.hpp"
 #include "Renderer.hpp"
 #include "util.hpp"
 
@@ -55,6 +56,7 @@ class GameObjectManager {
 
   void handle_input(SDL_Event e);
 
+  std::list<unsigned int> query_collidables(const Ray& ray);
   void update_collidables(float delta);
   void check_collisions();
 

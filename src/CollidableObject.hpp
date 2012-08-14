@@ -14,6 +14,7 @@
 #include "Mesh.hpp"
 #include "Message.hpp"
 #include "Quaternion.hpp"
+#include "Ray.hpp"
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -38,6 +39,7 @@ class CollidableObject {
   //void gjk(CollidableObject::ShPtr rhs);
   void render_collision();
   //Vector3f supportSS(CollidableObject::ShPtr rhs, const Vector3f direction);
+  bool query(const Ray& ray);
 
   Vector3f get_velocity() { return velo_; }
   CollidableObject& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }

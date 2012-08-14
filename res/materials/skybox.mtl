@@ -1,8 +1,8 @@
 newmtl skybox
 Ka 1.0 1.0 1.0
 Kd 1.0 1.0 1.0
-map_Ka spacebox.png
-map_Kd spacebox.png
-map_Ks spacebox.png
+map_Ka starfieldbox.png
+map_Kd starfieldbox.png
+map_Ks starfieldbox.png
 shader_vert res/shaders/diffuse.vert
 shader_frag res/shaders/diffuse.frag

@@ -16,7 +16,7 @@ World::World(CosmosSimulation& sim, std::string path)
 void World::init() {
   FileBlob::ShPtr file(new FileBlob(path_));
   std::cout << "Loading world " << path_ << std::endl;
-  decode(*file);
+  //decode(*file);
 
   upload_to_gpu();
 

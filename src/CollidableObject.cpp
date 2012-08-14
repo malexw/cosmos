@@ -24,7 +24,7 @@ void CollidableObject::update(float delta) {
   if (update_callback_) {
     update_callback_(delta);
   } else {
-    transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
+    //transform_->set_translate(transform_->get_position() + (delta * (transform_->get_rotation() * velo_)));
   }
 }
 
@@ -161,3 +161,10 @@ void CollidableObject::render_collision() {
   //std::cout << lhspoint << " " << rhspoint << std::endl;
   return lhspoint - rhspoint;
 }*/
+
+bool CollidableObject::query(const Ray& ray) {
+  Vector3f pos = (transform_->get_position()) - ray.position();
+  Vector3f dir = ray.direction();
+  float dc = (dir.dot(pos));
+  return ((dc*dc) - pos.lengthSquare() + (scale_.x() * scale_.x())) >= 0;
+}

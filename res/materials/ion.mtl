@@ -1,9 +1,0 @@
-newmtl ion
-Ka 1.0 1.0 1.0
-Kd 1.0 1.0 1.0
-map_Ka ion.png
-map_Kd ion.png
-map_Ks ion.png
-shader_vert res/shaders/point_sprite.vert
-shader_geom res/shaders/point_sprite.geom
-shader_frag res/shaders/point_sprite.frag
