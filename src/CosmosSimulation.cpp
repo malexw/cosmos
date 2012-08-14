@@ -231,9 +231,9 @@ void CosmosSimulation::run() {
     gob_manager_->update_collidables(update_delta);
     //camera_collidable->update(updateDelta);
     emitter->update(update_delta);
-    Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
-    tum->add_arg("yaw", 2).add_arg("pitch", 1);
-    gob_manager_->message_transform(cube_id, tum);
+    //Message::ShPtr tum(new Message(Message::TRANSFORM_UPDATE));
+    //tum->add_arg("yaw", 2).add_arg("pitch", 1);
+    //gob_manager_->message_transform(cube_id, tum);
 
     // Collisions
     if (config.is_collisions()) {
@@ -274,7 +274,7 @@ void CosmosSimulation::run() {
     shader_manager_->get_program("default")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
     shader_manager_->get_program("tronish")->set_block_binding("matrices", UniformLocations::MATRIX_BINDING);
 
-    //-------------- Second pass for skybox
+    //-------------- Second pass for skybox and renderables
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
     glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     // MUST call glColorMask BEFORE glClear or things get explodey

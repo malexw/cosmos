@@ -82,7 +82,7 @@ T GameObjectManager::find_component(std::list<T> list, unsigned int id) {
       return item;
     }
   }
-} 
+}
 
 void GameObjectManager::draw_geometries() {
 
@@ -94,10 +94,12 @@ void GameObjectManager::update_collidables(float delta) {
   }
 }
 
-void GameObjectManager::check_collisions() {  
+void GameObjectManager::check_collisions() {
   // Check against every other object for a collision. Horribly inefficient.
   for (std::list<CollidableObject::ShPtr>::const_iterator ci = collidables_.begin(); ci != collidables_.end(); ++ci) {
-    for (std::list<CollidableObject::ShPtr>::const_iterator rhs = ci; rhs != collidables_.end(); ++rhs) {
+    for (std::list<CollidableObject::ShPtr>::const_iterator rhs = collidables_.begin(); rhs != collidables_.end(); ++rhs) {
+      //rhs++;
+      //std::cout << "Checking <" << (*ci)->id() << ">, <" << (*rhs)->id() << ">" << std::endl;
       (*ci)->check(*rhs);
     }
   }
