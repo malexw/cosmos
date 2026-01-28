@@ -3,9 +3,7 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
-#include "SDL/SDL_opengl.h"
+#include <memory>
 
 #include "Shaders/VertexShader.hpp"
 #include "Shaders/FragmentShader.hpp"
@@ -14,7 +12,7 @@
 
 class ShaderManager {
  public:
-	typedef boost::shared_ptr<ShaderManager> ShPtr;
+	typedef std::shared_ptr<ShaderManager> ShPtr;
 
 	ShaderManager();
 	

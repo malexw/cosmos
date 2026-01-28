@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
@@ -11,7 +11,7 @@
 class FileBlob {
 
  public:
-  typedef boost::shared_ptr<FileBlob> ShPtr;
+  typedef std::shared_ptr<FileBlob> ShPtr;
   
   // Build a new instance based on a supplied path
   explicit FileBlob(std::string path);

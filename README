@@ -1,1 +1,25 @@
-Requires boost
+## Dependencies
+
+- CMake 3.16+
+- Ninja
+- SDL2
+- OpenGL + GLU
+- OpenAL
+
+Ubuntu/Debian:
+    sudo apt install cmake ninja-build libsdl2-dev libglu1-mesa-dev libopenal-dev
+
+macOS:
+    brew install cmake ninja sdl2 openal-soft
+
+## Build
+
+    mkdir build && cd build
+    cmake -G Ninja ..
+    ninja
+
+## Run
+
+From the project root (so it can find res/):
+
+    ./build/cosmos

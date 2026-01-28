@@ -3,13 +3,13 @@
 
 #include <sys/time.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 class Timer {
  public:
-  typedef boost::shared_ptr<Timer> ShPtr;
+  typedef std::shared_ptr<Timer> ShPtr;
   
   Timer(): paused_(false), frame_counter_(1) { gettimeofday(&frame_start_, NULL); }
 

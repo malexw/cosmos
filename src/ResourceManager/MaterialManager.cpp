@@ -1,9 +1,6 @@
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include "SDL/SDL_image.h"
+#include <string>
 
 #include "MaterialManager.hpp"
 #include "TextureManager.hpp"
@@ -63,7 +60,7 @@ void MaterialManager::load_materials() {
  * Uses a dumb linear search to find a texture with the same name. Optimizations welcome!
  */
 const Material::ShPtr MaterialManager::get_material(std::string name) const {
-	foreach (Material::ShPtr mat, mats_) {
+	for (const Material::ShPtr& mat : mats_) {
 		if (mat->is_name(name)) {
 			return mat;
 		}
@@ -94,23 +91,23 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
 			  // the name of the material is tokens[1]
 		  } else if (tokens[0] == "Ka") {
 			  // Ambient lighting color
-        /*float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
-        float b = boost::lexical_cast<float>(tokens[2]);*/
+        /*float r = std::stof(tokens[1]);
+			  float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[2]);*/
 		  } else if (tokens[0] == "Kd") {
 			  // Diffuse lighting color
-        float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
-        float b = boost::lexical_cast<float>(tokens[2]);
+        float r = std::stof(tokens[1]);
+			  float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[2]);
         mat->set_diff_color(Vector3f(r, g, b));
 		  } else if (tokens[0] == "Ks") {
         // Specular lighting color
-        /*float r = boost::lexical_cast<float>(tokens[1]);
-			  float g = boost::lexical_cast<float>(tokens[2]);
-        float b = boost::lexical_cast<float>(tokens[2]);*/
+        /*float r = std::stof(tokens[1]);
+			  float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[2]);*/
       } else if (tokens[0] == "Ns") {
         // Shininess
-        float s = boost::lexical_cast<float>(tokens[1]);
+        float s = std::stof(tokens[1]);
       } else if (tokens[0] == "d") {
         // dissolve, the .OBJ's version of alpha
       } else if (tokens[0] == "illum") {
@@ -160,11 +157,7 @@ const unsigned int MaterialManager::newline_index(const FileBlob& b, const unsig
 // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
 // line
 const std::vector<std::string> MaterialManager::Tokenize(const FileBlob& b, const unsigned int offset) const {
-  std::vector<std::string> tokens;
-  
   std::string line;
   line.assign(&b[offset], &b[newline_index(b, offset)]);
-  boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
-  
-  return tokens;
+  return split(line, "\t /\r\n");
 }

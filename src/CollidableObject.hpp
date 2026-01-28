@@ -1,11 +1,11 @@
 #ifndef COSMOS_COLLIDABLEOBJECT_H_
 #define COSMOS_COLLIDABLEOBJECT_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <iostream>
 #include <string>
 
-#include "SDL/SDL_opengl.h"
+#include <SDL2/SDL_opengl.h>
 
 #include "Transform.hpp"
 #include "Material.hpp"
@@ -20,7 +20,7 @@
  */
 class CollidableObject {
  public:
-	typedef boost::shared_ptr<CollidableObject> ShPtr;
+	typedef std::shared_ptr<CollidableObject> ShPtr;
 
   static const unsigned int TYPE_SPHERE;
   static const unsigned int TYPE_CAPSULE;

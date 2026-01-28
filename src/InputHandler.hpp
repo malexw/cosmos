@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "util.hpp"
 
@@ -14,7 +14,7 @@
  */
 class InputHandler {
  public:
-	typedef boost::shared_ptr<InputHandler> ShPtr;
+	typedef std::shared_ptr<InputHandler> ShPtr;
   
 	InputHandler(unsigned int id): id_(id) {}
   const unsigned int id() const { return id_; }

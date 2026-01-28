@@ -4,14 +4,14 @@
 #include <iostream>
 #include <math.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 // Basic object for representing a vector in 3 dimensions
 class Vector3f {
  public:
-	typedef boost::shared_ptr<Vector3f> ShPtr;
+	typedef std::shared_ptr<Vector3f> ShPtr;
   static const Vector3f UNIT_X;
   static const Vector3f NEGATIVE_X;
   static const Vector3f UNIT_Y;

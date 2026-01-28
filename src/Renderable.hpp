@@ -1,10 +1,8 @@
 #ifndef COSMOS_RENDERABLE_H_
 #define COSMOS_RENDERABLE_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
-
-#include "SDL/SDL_opengl.h"
 
 #include "Material.hpp"
 #include "Mesh.hpp"
@@ -15,7 +13,7 @@
  */
 class Renderable {
  public:
-	typedef boost::shared_ptr<Renderable> ShPtr;
+	typedef std::shared_ptr<Renderable> ShPtr;
 
 	Renderable(unsigned int id): id_(id) {}
   const unsigned int id() const { return id_; }

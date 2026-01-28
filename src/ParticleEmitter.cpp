@@ -1,7 +1,7 @@
 #include "ParticleEmitter.hpp"
 
 void ParticleEmitter::update(float delta) {
-  foreach (Particle::ShPtr part, parts_) {
+  for (const Particle::ShPtr& part : parts_) {
     part->update(delta);
   }
   
@@ -33,7 +33,7 @@ void ParticleEmitter::render(Transform::ShPtr cam) {
 
   glPushMatrix();
 
-  foreach (Particle::ShPtr part, parts_) {
+  for (const Particle::ShPtr& part : parts_) {
     part->render(cam);
   }
   

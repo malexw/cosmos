@@ -3,14 +3,14 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "Texture.hpp"
 #include "util.hpp"
 
 class CosmosConfig {
 public:
-	typedef boost::shared_ptr<CosmosConfig> ShPtr;
+	typedef std::shared_ptr<CosmosConfig> ShPtr;
 
 	CosmosConfig();
 

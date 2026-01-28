@@ -1,12 +1,11 @@
 #ifndef COSMOS_MESH_H_
 #define COSMOS_MESH_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <string>
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include <SDL2/SDL_opengl.h>
 
 #include "util.hpp"
 #include "Vector2f.hpp"
@@ -17,7 +16,7 @@
  */
 class Mesh {
  public:
-	typedef boost::shared_ptr<Mesh> ShPtr;
+	typedef std::shared_ptr<Mesh> ShPtr;
 
 	Mesh(std::string name): name_(name), triangle_count_(0), on_gpu_(false) {}
   

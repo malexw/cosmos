@@ -3,10 +3,7 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include <memory>
 
 #include "FileBlob.hpp"
 #include "Material.hpp"
@@ -14,7 +11,7 @@
 
 class MaterialManager {
  public:
-	typedef boost::shared_ptr<MaterialManager> ShPtr;
+	typedef std::shared_ptr<MaterialManager> ShPtr;
 
 	MaterialManager();
 	

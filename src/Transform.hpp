@@ -1,11 +1,9 @@
 #ifndef COSMOS_TRANSFORM_H_
 #define COSMOS_TRANSFORM_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <iostream>
 #include <string>
-
-#include "SDL/SDL_opengl.h"
 
 #include "Material.hpp"
 #include "Matrix4f.hpp"
@@ -19,7 +17,7 @@
  */
 class Transform {
  public:
-	typedef boost::shared_ptr<Transform> ShPtr;
+	typedef std::shared_ptr<Transform> ShPtr;
 
   Transform(unsigned int id): id_(id), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
   const unsigned int id() const { return id_; }

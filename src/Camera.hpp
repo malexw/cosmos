@@ -1,10 +1,8 @@
 #ifndef COSMOS_CAMERA_H_
 #define COSMOS_CAMERA_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <iostream>
-
-#include "SDL/SDL_opengl.h"
 
 #include "CollidableObject.hpp"
 #include "Matrix4f.hpp"
@@ -17,7 +15,7 @@
  */
 class Camera {
  public:
-	typedef boost::shared_ptr<Camera> ShPtr;
+	typedef std::shared_ptr<Camera> ShPtr;
 
 	Camera(): scale_(Vector3f::ONES), collision_radius_(3.0f) {}
   

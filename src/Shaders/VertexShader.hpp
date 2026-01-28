@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 class VertexShader {
 public:
-	typedef boost::shared_ptr<VertexShader> ShPtr;
+	typedef std::shared_ptr<VertexShader> ShPtr;
 
 	VertexShader(std::string name, int id): name_(name), shader_id_(id) {}
 	

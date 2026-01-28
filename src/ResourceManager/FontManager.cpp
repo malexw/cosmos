@@ -86,7 +86,7 @@ void FontManager::load_fonts() {
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 const Font::ShPtr FontManager::get_font(std::string name) const {
-	foreach (Font::ShPtr font, fonts_) {
+	for (const Font::ShPtr& font : fonts_) {
 		if (font->is_name(name)) {
 			return font;
 		}

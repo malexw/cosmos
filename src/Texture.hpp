@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 class Texture {
 public:
-	typedef boost::shared_ptr<Texture> ShPtr;
+	typedef std::shared_ptr<Texture> ShPtr;
 
 	Texture(std::string name);
 	

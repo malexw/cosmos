@@ -4,14 +4,14 @@
 #include <iostream>
 //#include <math.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //#include "util.hpp"
 
 // Basic object for representing a vector in 3 dimensions
 class Matrix4f {
  public: 
-	typedef boost::shared_ptr<Matrix4f> ShPtr;
+	typedef std::shared_ptr<Matrix4f> ShPtr;
 
   Matrix4f() {
     m_[0]=1.0f; m_[1]=0.0f; m_[2]=0.0f; m_[3]=0.0f;

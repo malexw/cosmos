@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "Texture.hpp"
 #include "util.hpp"
@@ -11,7 +11,7 @@
 
 class Material {
 public:
-	typedef boost::shared_ptr<Material> ShPtr;
+	typedef std::shared_ptr<Material> ShPtr;
 
 	Material(std::string name);
 	

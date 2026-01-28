@@ -1,5 +1,4 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <string>
 
 #include "CosmosConfig.hpp"
 #include "FileBlob.hpp"
@@ -53,7 +52,7 @@ void World::draw() const {
     //
     //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
     //
-    foreach (World::MatPair mat, mats_) {
+    for (const World::MatPair& mat : mats_) {
       glBindTexture(GL_TEXTURE_2D, mat.first->get_texture()->get_index());
       //glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
       glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
@@ -98,20 +97,20 @@ void World::decode(FileBlob& b) {
 			  // this line is a comment - skip it
 		  } else if (tokens[0] == "v") {
 			  // found a vertex
-			  float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
+			  float x = std::stof(tokens[1]);
+			  float y = std::stof(tokens[2]);
+			  float z = std::stof(tokens[3]);
 			  verts.push_back(Vector3f(x, y, z));
 		  } else if (tokens[0] == "vt") {
 			  // found a normal
-        float u = boost::lexical_cast<float>(tokens[1]);
-			  float v = boost::lexical_cast<float>(tokens[2]);
+        float u = std::stof(tokens[1]);
+			  float v = std::stof(tokens[2]);
 			  uvs.push_back(Vector2f(u, v));
 		  } else if (tokens[0] == "vn") {
 			  // found a normal
-        float x = boost::lexical_cast<float>(tokens[1]);
-			  float y = boost::lexical_cast<float>(tokens[2]);
-			  float z = boost::lexical_cast<float>(tokens[3]);
+        float x = std::stof(tokens[1]);
+			  float y = std::stof(tokens[2]);
+			  float z = std::stof(tokens[3]);
 			  norms.push_back(Vector3f(x, y, z));
 		  } else if (tokens[0] == "o") {
         // it's an object spawner 
@@ -119,15 +118,15 @@ void World::decode(FileBlob& b) {
         set_material(MaterialManager::get().get_material(std::string("res/materials/") + tokens[1]));
       } else if (tokens[0] == "f") {
 			  // -1 to each of these because OBJ uses 1-based indexing
-			  int v1i = boost::lexical_cast<int>(tokens[1]) - 1;
-        int vt1i = boost::lexical_cast<int>(tokens[2]) - 1;
-        int vn1i = boost::lexical_cast<int>(tokens[3]) - 1;
-			  int v2i = boost::lexical_cast<int>(tokens[4]) - 1;
-        int vt2i = boost::lexical_cast<int>(tokens[5]) - 1;
-			  int vn2i = boost::lexical_cast<int>(tokens[6]) - 1;
-        int v3i = boost::lexical_cast<int>(tokens[7]) - 1;
-			  int vt3i = boost::lexical_cast<int>(tokens[8]) - 1;
-        int vn3i = boost::lexical_cast<int>(tokens[9]) - 1;
+			  int v1i = std::stoi(tokens[1]) - 1;
+        int vt1i = std::stoi(tokens[2]) - 1;
+        int vn1i = std::stoi(tokens[3]) - 1;
+			  int v2i = std::stoi(tokens[4]) - 1;
+        int vt2i = std::stoi(tokens[5]) - 1;
+			  int vn2i = std::stoi(tokens[6]) - 1;
+        int v3i = std::stoi(tokens[7]) - 1;
+			  int vt3i = std::stoi(tokens[8]) - 1;
+        int vn3i = std::stoi(tokens[9]) - 1;
 			  Vector3f color = mats_.back().first->get_diff_color();
         //std::cout << x << " " << y << " " << z << " " << n << std::endl;
 			  add_triangle( verts[v1i], uvs[vt1i], norms[vn1i], color,
@@ -161,11 +160,7 @@ const unsigned int World::newline_index(const FileBlob& b, const unsigned int of
 // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
 // line
 const std::vector<std::string> World::Tokenize(const FileBlob& b, const unsigned int offset) const {
-  std::vector<std::string> tokens;
-  
   std::string line;
   line.assign(&b[offset], &b[newline_index(b, offset)]);
-  boost::split(tokens, line, boost::is_any_of("\t /\r\n"));
-  
-  return tokens;
+  return split(line, "\t /\r\n");
 }

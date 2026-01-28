@@ -54,12 +54,12 @@ void PlayerInputHandler::handleInput(SDL_Event e) {
       break;
     case SDL_MOUSEBUTTONDOWN:
       switch(e.button.button) {
-        case SDL_BUTTON_RIGHT: SDL_WM_GrabInput(SDL_GRAB_ON); SDL_ShowCursor(SDL_DISABLE); grabbing_ = true; break;
+        case SDL_BUTTON_RIGHT: SDL_SetRelativeMouseMode(SDL_TRUE); grabbing_ = true; break;
       }
       break;
     case SDL_MOUSEBUTTONUP:
       switch(e.button.button) {
-        case SDL_BUTTON_RIGHT: SDL_WM_GrabInput(SDL_GRAB_OFF); SDL_ShowCursor(SDL_ENABLE); grabbing_ = false; break;
+        case SDL_BUTTON_RIGHT: SDL_SetRelativeMouseMode(SDL_FALSE); grabbing_ = false; break;
       }
       break;
     case SDL_QUIT:

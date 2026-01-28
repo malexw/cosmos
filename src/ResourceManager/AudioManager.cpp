@@ -1,61 +1,142 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
+#include <vector>
 
 #include "AudioManager.hpp"
 
-AudioManager::AudioManager() 
+// Simple WAV file loader - returns true on success
+static bool loadWAV(const char* filename, ALenum* format, ALvoid** data, ALsizei* size, ALsizei* freq) {
+  FILE* file = fopen(filename, "rb");
+  if (!file) {
+    std::cout << "AudioManager: Failed to open " << filename << std::endl;
+    return false;
+  }
+
+  // Read and verify RIFF header
+  char riff[4];
+  fread(riff, 1, 4, file);
+  if (strncmp(riff, "RIFF", 4) != 0) {
+    std::cout << "AudioManager: Not a valid WAV file (no RIFF header)" << std::endl;
+    fclose(file);
+    return false;
+  }
+
+  fseek(file, 4, SEEK_CUR); // Skip file size
+
+  char wave[4];
+  fread(wave, 1, 4, file);
+  if (strncmp(wave, "WAVE", 4) != 0) {
+    std::cout << "AudioManager: Not a valid WAV file (no WAVE format)" << std::endl;
+    fclose(file);
+    return false;
+  }
+
+  // Find fmt chunk
+  char chunkId[4];
+  unsigned int chunkSize;
+  while (fread(chunkId, 1, 4, file) == 4) {
+    fread(&chunkSize, 4, 1, file);
+    if (strncmp(chunkId, "fmt ", 4) == 0) {
+      unsigned short audioFormat, numChannels, blockAlign, bitsPerSample;
+      unsigned int sampleRate, byteRate;
+
+      fread(&audioFormat, 2, 1, file);
+      fread(&numChannels, 2, 1, file);
+      fread(&sampleRate, 4, 1, file);
+      fread(&byteRate, 4, 1, file);
+      fread(&blockAlign, 2, 1, file);
+      fread(&bitsPerSample, 2, 1, file);
+
+      // Skip any extra fmt bytes
+      if (chunkSize > 16) {
+        fseek(file, chunkSize - 16, SEEK_CUR);
+      }
+
+      *freq = sampleRate;
+
+      // Determine OpenAL format
+      if (numChannels == 1) {
+        *format = (bitsPerSample == 8) ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
+      } else {
+        *format = (bitsPerSample == 8) ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
+      }
+    } else if (strncmp(chunkId, "data", 4) == 0) {
+      *size = chunkSize;
+      *data = malloc(chunkSize);
+      fread(*data, 1, chunkSize, file);
+      fclose(file);
+      return true;
+    } else {
+      // Skip unknown chunk
+      fseek(file, chunkSize, SEEK_CUR);
+    }
+  }
+
+  fclose(file);
+  std::cout << "AudioManager: WAV file missing data chunk" << std::endl;
+  return false;
+}
+
+AudioManager::AudioManager()
   : loaded_(false) {
 	init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' font list.
- * In the future, FontMan should read from some kind of resource file so we don't need to specify these by
- * hand
- */
 void AudioManager::init() {
-  alutInit(0, NULL);
+  // Initialize OpenAL directly (no ALUT)
+  ALCdevice* device = alcOpenDevice(NULL);
+  if (!device) {
+    std::cout << "AudioManager: Failed to open audio device" << std::endl;
+    return;
+  }
+  ALCcontext* context = alcCreateContext(device, NULL);
+  if (!context) {
+    std::cout << "AudioManager: Failed to create audio context" << std::endl;
+    alcCloseDevice(device);
+    return;
+  }
+  alcMakeContextCurrent(context);
+
   sound_names_.push_back(std::string("res/sounds/starshipmono.wav"));
   load_sounds();
 }
 
-/*
- * Singleton pattern
- */
 AudioManager& AudioManager::get() {
   static AudioManager instance;
   return instance;
 }
 
-/*
- * 
- */
 void AudioManager::load_sounds() {
   if (loaded_) {
-		std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
-		return;
-	}
-  
-  // For now, assuming one sound (buffer) per source
+    std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
+    return;
+  }
+
   int sound_count = sound_names_.size();
-  unsigned int source_indicies[sound_count];
-  unsigned int buffer_indicies[sound_count];
-  alGenBuffers(sound_count, buffer_indicies);
-  alGenSources(sound_count, source_indicies);
-  
-  ALenum     format;
-  ALsizei    size;
-  ALsizei    freq;
-  ALboolean  loop;
-  ALvoid*    data;
-    
+  std::vector<unsigned int> source_indicies(sound_count);
+  std::vector<unsigned int> buffer_indicies(sound_count);
+  alGenBuffers(sound_count, buffer_indicies.data());
+  alGenSources(sound_count, source_indicies.data());
+
   for (int j = 0; j < sound_count; ++j) {
-    // TODO Evil, evil casting here
-    alutLoadWAVFile(reinterpret_cast<ALbyte*>(const_cast<char*>(sound_names_[j].c_str())), &format, &data, &size, &freq, &loop);
-    alBufferData(buffer_indicies[j], format, data, size, freq);
-    alutUnloadWAV(format, data, size, freq);
-    Sound::ShPtr s(new Sound(sound_names_[j], source_indicies[j], buffer_indicies[j]));
-    sounds_.push_back(s);
-	}
+    ALenum format;
+    ALsizei size;
+    ALsizei freq;
+    ALvoid* data;
+
+    if (loadWAV(sound_names_[j].c_str(), &format, &data, &size, &freq)) {
+      alBufferData(buffer_indicies[j], format, data, size, freq);
+      free(data);
+      Sound::ShPtr s(new Sound(sound_names_[j], source_indicies[j], buffer_indicies[j]));
+      sounds_.push_back(s);
+    } else {
+      std::cout << "AudioManager: Failed to load " << sound_names_[j] << std::endl;
+    }
+  }
+
+  loaded_ = true;
 }
 
 void AudioManager::set_listener_transform(Transform::ShPtr transform) {
@@ -71,7 +152,7 @@ void AudioManager::set_listener_transform(Transform::ShPtr transform) {
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 Sound::ShPtr AudioManager::get_sound(std::string name) {
-	foreach (Sound::ShPtr sound, sounds_) {
+	for (const Sound::ShPtr& sound : sounds_) {
 		if (sound->is_name(name)) {
 			return sound;
 		}

@@ -1,14 +1,12 @@
 #ifndef COSMOS_PARTICLE_H_
 #define COSMOS_PARTICLE_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <iostream>
 //#include <vector>
 //#include <string>
 
 //#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
-
 #include "Camera.hpp"
 #include "Matrix4f.hpp"
 #include "Renderable.hpp"
@@ -20,7 +18,7 @@
  */
 class Particle {
  public:
-	typedef boost::shared_ptr<Particle> ShPtr;
+	typedef std::shared_ptr<Particle> ShPtr;
 
   // constant speed particles for now
 	Particle(Renderable::ShPtr renderable)

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <math.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 #include "Vector3f.hpp"
@@ -12,7 +12,7 @@
 // Represents an axis of rotation and an angle
 class Quaternion {
  public: 
-	typedef boost::shared_ptr<Quaternion> ShPtr;
+	typedef std::shared_ptr<Quaternion> ShPtr;
 
   Quaternion(): x_(0.0f), y_(0.0f), z_(0.0f), w_(1.0f) {}
   Quaternion(float x, float y, float z, float w): x_(x), y_(y), z_(z), w_(w) {}

@@ -3,10 +3,7 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include <memory>
 
 #include "Font.hpp"
 #include "TextureManager.hpp"
@@ -14,7 +11,7 @@
 
 class FontManager {
  public:
-	typedef boost::shared_ptr<FontManager> ShPtr;
+	typedef std::shared_ptr<FontManager> ShPtr;
 
 	FontManager();
 	

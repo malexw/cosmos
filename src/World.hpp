@@ -1,12 +1,11 @@
 #ifndef COSMOS_WORLD_H_
 #define COSMOS_WORLD_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <string>
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include <SDL2/SDL_opengl.h>
 
 #include "Material.hpp"
 #include "util.hpp"
@@ -18,7 +17,7 @@
  */
 class World {
  public:
-	typedef boost::shared_ptr<World> ShPtr;
+	typedef std::shared_ptr<World> ShPtr;
 
 	World(std::string path);
   

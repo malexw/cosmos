@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
-
 #include "Timer.hpp"
 
 void Timer::frame_start() {

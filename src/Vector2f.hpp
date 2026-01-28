@@ -3,14 +3,14 @@
 
 #include <iostream>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 // Basic object for representing a vector in 2 dimensions
 class Vector2f {
  public: 
-	typedef boost::shared_ptr<Vector2f> ShPtr;
+	typedef std::shared_ptr<Vector2f> ShPtr;
   
   Vector2f(): u_(0.0f), v_(0.0f) {}
 	Vector2f(float u, float v): u_(u), v_(v) {}

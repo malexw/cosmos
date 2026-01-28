@@ -3,17 +3,14 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include <memory>
 
 #include "Texture.hpp"
 #include "util.hpp"
 
 class TextureManager {
  public:
-	typedef boost::shared_ptr<TextureManager> ShPtr;
+	typedef std::shared_ptr<TextureManager> ShPtr;
 
 	TextureManager();
 	

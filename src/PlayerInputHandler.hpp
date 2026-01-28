@@ -1,11 +1,11 @@
 #ifndef COSMOS_PLAYERINPUTHANDLER_H_
 #define COSMOS_PLAYERINPUTHANDLER_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //#include <vector>
 #include <string>
 
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 //#include "SDL/SDL_opengl.h"
 
 #include "CollidableObject.hpp"
@@ -22,7 +22,7 @@
  */
 class PlayerInputHandler : public InputHandler {
  public:
-	typedef boost::shared_ptr<PlayerInputHandler> ShPtr;
+	typedef std::shared_ptr<PlayerInputHandler> ShPtr;
   
   PlayerInputHandler(unsigned int id);
   

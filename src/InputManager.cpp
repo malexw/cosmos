@@ -10,7 +10,7 @@ void InputManager::handleInput() const {
 }
 
 InputHandler::ShPtr InputManager::getHandler(unsigned int id) {
-  foreach (InputHandler::ShPtr handler, handlers_) {
+  for (const InputHandler::ShPtr& handler : handlers_) {
     if (handler->id() == id) {
       return handler;
     }

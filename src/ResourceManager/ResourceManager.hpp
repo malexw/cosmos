@@ -3,13 +3,13 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 class ResourceManager {
  public:
-	typedef boost::shared_ptr<ResourceManager> ShPtr;
+	typedef std::shared_ptr<ResourceManager> ShPtr;
 
 	ResourceManager();
 	

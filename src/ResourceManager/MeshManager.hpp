@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "FileBlob.hpp"
 #include "Mesh.hpp"
@@ -11,7 +11,7 @@
 
 class MeshManager {
  public:
-	typedef boost::shared_ptr<MeshManager> ShPtr;
+	typedef std::shared_ptr<MeshManager> ShPtr;
 
 	MeshManager();
 	

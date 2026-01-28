@@ -1,7 +1,7 @@
 #ifndef COSMOS_GAMEOBJECT_H_
 #define COSMOS_GAMEOBJECT_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //#include <vector>
 #include <string>
 
@@ -21,7 +21,7 @@
  */
 class GameObject {
  public:
-	typedef boost::shared_ptr<GameObject> ShPtr;
+	typedef std::shared_ptr<GameObject> ShPtr;
 
 	GameObject(): id_(nextId_++) {}
   const unsigned int id() const { return id_; }

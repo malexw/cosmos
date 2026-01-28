@@ -3,9 +3,7 @@
 
 #include <list>
 
-#include <boost/shared_ptr.hpp>
-
-#include "SDL/SDL.h"
+#include <memory>
 
 #include "GameObject.hpp"
 #include "util.hpp"
@@ -15,7 +13,7 @@
  */
 class GameObjectManager {
  public:
-	typedef boost::shared_ptr<GameObjectManager> ShPtr;
+	typedef std::shared_ptr<GameObjectManager> ShPtr;
 
 	GameObjectManager() {}
   static GameObjectManager& get();

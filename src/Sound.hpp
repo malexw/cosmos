@@ -3,17 +3,16 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
-#include "AL/al.h"
-#include "AL/alut.h"
+#include <AL/al.h>
 
 #include "util.hpp"
 #include "Vector3f.hpp"
 
 class Sound {
 public:
-	typedef boost::shared_ptr<Sound> ShPtr;
+	typedef std::shared_ptr<Sound> ShPtr;
 
 	Sound(std::string name, unsigned int sound_index, unsigned int buffer_index);
 	

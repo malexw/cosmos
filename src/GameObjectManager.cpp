@@ -13,7 +13,7 @@ void GameObjectManager::add_object(GameObject::ShPtr ob) {
 }
 
 GameObject::ShPtr GameObjectManager::get_object(unsigned int id) {
-  foreach (GameObject::ShPtr object, objects_) {
+  for (const GameObject::ShPtr& object : objects_) {
     if (object->id() == id) {
       return object;
     }

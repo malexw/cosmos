@@ -1,12 +1,12 @@
 #ifndef COSMOS_INPUTMANAGER_H_
 #define COSMOS_INPUTMANAGER_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //#include <vector>
 #include <list>
 #include <string>
 
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 //#include "SDL/SDL_opengl.h"
 
 #include "InputHandler.hpp"
@@ -19,7 +19,7 @@
  */
 class InputManager {
  public:
-	typedef boost::shared_ptr<InputManager> ShPtr;
+	typedef std::shared_ptr<InputManager> ShPtr;
 
 	InputManager() {}
   

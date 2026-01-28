@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
-#include "AL/al.h"
-#include "AL/alut.h"
+#include <AL/al.h>
+#include <AL/alc.h>
 
 #include "Sound.hpp"
 #include "Transform.hpp"
@@ -14,7 +14,7 @@
 
 class AudioManager {
  public:
-	typedef boost::shared_ptr<AudioManager> ShPtr;
+	typedef std::shared_ptr<AudioManager> ShPtr;
 
 	AudioManager();
 	

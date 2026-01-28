@@ -148,7 +148,7 @@ void ShaderManager::load_shaders() {
  * Uses a dumb linear search to find a font with the same name. Optimizations welcome!
  */
 const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& name) const {
-	foreach (ShaderProgram::ShPtr shaderp, programs_) {
+	for (const ShaderProgram::ShPtr& shaderp : programs_) {
 		if (shaderp->is_name(name)) {
 			return shaderp;
 		}

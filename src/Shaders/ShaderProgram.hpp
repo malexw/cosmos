@@ -3,15 +3,15 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
-#include "SDL/SDL_opengl.h"
+#include <SDL2/SDL_opengl.h>
 
 #include "util.hpp"
 
 class ShaderProgram {
 public:
-	typedef boost::shared_ptr<ShaderProgram> ShPtr;
+	typedef std::shared_ptr<ShaderProgram> ShPtr;
 
 	ShaderProgram(std::string name, int id): name_(name), shader_id_(id) {}
 	

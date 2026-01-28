@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "util.hpp"
 
 class FragmentShader {
 public:
-	typedef boost::shared_ptr<FragmentShader> ShPtr;
+	typedef std::shared_ptr<FragmentShader> ShPtr;
 
 	FragmentShader(std::string name, int id): name_(name), shader_id_(id) {}
 	
