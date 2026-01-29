@@ -135,21 +135,21 @@ int main(int argc, char* argv[]) {
 
   // -------------- SHADOWS --------------------------------------------
   GLuint shadowBuffer;
-  glGenFramebuffersEXT(1, &shadowBuffer);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);
+  glGenFramebuffers(1, &shadowBuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, TextureManager::get().get_texture("shadow_map")->get_index(), 0);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, TextureManager::get().get_texture("shadow_map")->get_index(), 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // -------------- HDR? -----------------------------------------------
   GLuint hdrFrameBuffer;
-  glGenFramebuffersEXT(1, &hdrFrameBuffer);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index(), 0);
+  glGenFramebuffers(1, &hdrFrameBuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index(), 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // -------------- OBJECTS --------------------------------------------
   Mesh::ShPtr c = MeshManager::get().get_mesh("res/meshes/cube.obj");
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
   glEnableClientState(GL_COLOR_ARRAY);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
   CosmosConfig& config = CosmosConfig::get();
 
@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
 
     //-------------- First pass for shadows
     if (config.is_shadows()) {
-      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowBuffer);	//Rendering offscreen
+      glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);	//Rendering offscreen
       glUseProgram(0);
       glViewport(0,0,1024,1024);
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -336,7 +336,7 @@ int main(int argc, char* argv[]) {
     }
 
     //-------------- Second pass for skybox
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hdrFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
     glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     // MUST call glColorMask BEFORE glClear or things get explodey
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
     glEnable(GL_LIGHTING);
       
     //------------------- Third pass to actually draw things
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
     glMatrixMode(GL_PROJECTION);

@@ -81,7 +81,6 @@ void World::draw_geometry() const {
 void World::decode(FileBlob& b) {
    
   int index = 0;
-  int triangles = 0;
   
   std::vector<Vector3f> verts;
   std::vector<Vector2f> uvs;
