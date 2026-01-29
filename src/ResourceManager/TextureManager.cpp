@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+#include <SDL2/SDL_opengl.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -59,7 +61,7 @@ void TextureManager::load_textures() {
 
 	// TODO: OMG hacks - FIXME soon!
 	// RGB
-  for (int i = 0; i < tex_count-6; ++i) {
+  for (unsigned int i = 0; i < tex_count-6; ++i) {
 		int width, height, channels;
 		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 3);
 		if (data) {
@@ -79,7 +81,7 @@ void TextureManager::load_textures() {
 		}
 	}
   // RGBA
-  for (int i = tex_count-6; i < tex_count-3; ++i) {
+  for (unsigned int i = tex_count-6; i < tex_count-3; ++i) {
 		int width, height, channels;
 		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 4);
 		if (data) {
@@ -99,7 +101,7 @@ void TextureManager::load_textures() {
 		}
 	}
   // HDR
-  for (int i = tex_count-3; i < tex_count-2; ++i) {
+  for (unsigned int i = tex_count-3; i < tex_count-2; ++i) {
 		int image_width, image_height;
     FILE* f = fopen(tex_names_[i].c_str(),"rb");
     if (f) {

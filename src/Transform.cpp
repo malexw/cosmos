@@ -63,11 +63,13 @@ void Transform::apply_rotation() {
 Transform& Transform::rotate(const Vector3f& axis, float angle) {
   Quaternion q(axis, angle);
   quat_ = q.normalize() * quat_;
+  return *this;
 }
 
 Transform& Transform::rotate_relative(const Vector3f& axis, float angle) {
   Quaternion q(quat_ * axis, angle);
   quat_ = q.normalize() * quat_;
+  return *this;
 }
 
 void Transform::set_direction(const Vector3f& dir) {
