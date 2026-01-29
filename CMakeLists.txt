@@ -9,6 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(glm REQUIRED)
 
 # Auto-discover source files
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp" "lib/*.cpp")
@@ -29,4 +30,5 @@ target_link_libraries(cosmos
     OpenGL::GL
     ${SDL2_LIBRARIES}
     ${OPENAL_LIBRARY}
+    glm::glm
 )

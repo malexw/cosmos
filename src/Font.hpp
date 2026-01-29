@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include <SDL2/SDL_opengl.h>
+
 #include "Texture.hpp"
 #include "util.hpp"
 
@@ -13,28 +15,19 @@ public:
 	typedef std::shared_ptr<Font> ShPtr;
 
 	Font(std::string name);
-	
-	// Returns the name of the font
-	std::string get_name() const;
 
-	// Compares the name of this font with another name. Returns true if they're equal, false otherwise.
+	std::string get_name() const;
 	bool is_name(const std::string& rhs) const;
 
-	// Returns the index of the display list associated with this font for rendering
-	int get_displaylist() const;
-	
-	// Sets the index of the display list for this font
-	void set_displaylist(int index);
-	
-	// Returns the texture used by the font
+	GLuint get_vbo() const { return vbo_; }
+	void set_vbo(GLuint vbo) { vbo_ = vbo; }
+
 	const Texture::ShPtr get_texture() const;
-	
-	// Sets the texture this font should use
 	void set_texture(Texture::ShPtr tex);
 
 private:
 	std::string name_;
-	int displaylist_;
+	GLuint vbo_;
 	Texture::ShPtr texture_;
 
 	DISALLOW_COPY_AND_ASSIGN(Font);

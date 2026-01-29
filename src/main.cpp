@@ -7,27 +7,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-// Replacement for gluPerspective — builds a perspective projection matrix
-// and loads it onto the current GL matrix stack via glMultMatrixf.
-static void perspectiveMatrix(float fovYDeg, float aspect, float zNear, float zFar) {
-  float fovYRad = fovYDeg * (float)M_PI / 180.0f;
-  float f = 1.0f / tanf(fovYRad / 2.0f);
-  float nf = zNear - zFar;
-
-  float m[16] = {0};
-  m[0]  = f / aspect;
-  m[5]  = f;
-  m[10] = (zFar + zNear) / nf;
-  m[11] = -1.0f;
-  m[14] = (2.0f * zFar * zNear) / nf;
-  // m[15] = 0 (already)
-
-  glMultMatrixf(m);
-}
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "PlayerInputHandler.hpp"
 #include "InputManager.hpp"
@@ -308,10 +290,12 @@ int main(int argc, char* argv[]) {
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      perspectiveMatrix(45,1,10,40000);
+      glm::mat4 shadowProj = glm::perspective(glm::radians(45.0f), 1.0f, 10.0f, 40000.0f);
+      glMultMatrixf(glm::value_ptr(shadowProj));
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
-      glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
+      glm::mat4 shadowView = Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5));
+      glMultMatrixf(glm::value_ptr(shadowView));
 
       // Draw all the things that should cast shadows
       world->draw_geometry();
@@ -332,26 +316,18 @@ int main(int argc, char* argv[]) {
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
       
-      // Configure the shadow texture
-      double modelView[16];
-      double projection[16];
-
-      const GLdouble bias[16] = {	
-      0.5, 0.0, 0.0, 0.0, 
-      0.0, 0.5, 0.0, 0.0,
-      0.0, 0.0, 0.5, 0.0,
-      0.5, 0.5, 0.5, 1.0};
-
-      glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
-      glGetDoublev(GL_PROJECTION_MATRIX, projection);
+      // Configure the shadow texture matrix using GLM
+      glm::mat4 biasMatrix(
+        0.5f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.5f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f
+      );
+      glm::mat4 shadowTexMatrix = biasMatrix * shadowProj * shadowView;
 
       glMatrixMode(GL_TEXTURE);
       glActiveTexture(GL_TEXTURE3);
-
-      glLoadIdentity();	
-      glLoadMatrixd(bias);
-      glMultMatrixd(projection);
-      glMultMatrixd(modelView);
+      glLoadMatrixf(glm::value_ptr(shadowTexMatrix));
 
       glMatrixMode(GL_MODELVIEW);
     }
@@ -367,10 +343,16 @@ int main(int argc, char* argv[]) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    perspectiveMatrix(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),0.1,3);
+    {
+      glm::mat4 skyProj = glm::perspective(glm::radians(45.0f), (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)), 0.1f, 3.0f);
+      glMultMatrixf(glm::value_ptr(skyProj));
+    }
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1)).to_array());
+    {
+      glm::mat4 skyView = Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1));
+      glMultMatrixf(glm::value_ptr(skyView));
+    }
 
     glDisable(GL_LIGHTING);
     glFrontFace(GL_CW);
@@ -393,7 +375,10 @@ int main(int argc, char* argv[]) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    perspectiveMatrix(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
+    {
+      glm::mat4 mainProj = glm::perspective(glm::radians(45.0f), (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)), 1.0f, 4000.0f);
+      glMultMatrixf(glm::value_ptr(mainProj));
+    }
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     

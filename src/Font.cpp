@@ -2,7 +2,7 @@
 
 Font::Font(std::string name)
   : name_(name),
-    displaylist_(0) { }
+    vbo_(0) { }
 
 std::string Font::get_name() const {
 	return name_;
@@ -10,14 +10,6 @@ std::string Font::get_name() const {
 
 bool Font::is_name(const std::string& rhs) const {
 	return name_.compare(rhs) == 0;
-}
-
-int Font::get_displaylist() const {
-	return displaylist_;
-}
-
-void Font::set_displaylist(int index) {
-	displaylist_ = index;
 }
 
 const Texture::ShPtr Font::get_texture() const {
