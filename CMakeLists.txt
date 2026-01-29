@@ -11,7 +11,7 @@ find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 
 # Auto-discover source files
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp" "lib/*.cpp")
 
 add_executable(cosmos ${SOURCES})
 
@@ -20,6 +20,7 @@ target_compile_definitions(cosmos PRIVATE GL_GLEXT_PROTOTYPES)
 
 target_include_directories(cosmos PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/lib
     ${SDL2_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
 )

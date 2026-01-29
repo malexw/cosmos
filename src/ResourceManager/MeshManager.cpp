@@ -66,7 +66,6 @@ const Mesh::ShPtr MeshManager::get_mesh(std::string name) const {
 Mesh::ShPtr MeshManager::decode(FileBlob& b) {
    
   int index = 0;
-  int triangles = 0;
   
   std::vector<Vector3f> verts;
   std::vector<Vector2f> uvs;
