@@ -107,7 +107,7 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         float b = std::stof(tokens[2]);*/
       } else if (tokens[0] == "Ns") {
         // Shininess
-        float s = std::stof(tokens[1]);
+        // float s = std::stof(tokens[1]);
       } else if (tokens[0] == "d") {
         // dissolve, the .OBJ's version of alpha
       } else if (tokens[0] == "illum") {

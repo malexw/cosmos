@@ -16,7 +16,7 @@ static bool loadWAV(const char* filename, ALenum* format, ALvoid** data, ALsizei
 
   // Read and verify RIFF header
   char riff[4];
-  fread(riff, 1, 4, file);
+  if (fread(riff, 1, 4, file) != 4) { fclose(file); return false; }
   if (strncmp(riff, "RIFF", 4) != 0) {
     std::cout << "AudioManager: Not a valid WAV file (no RIFF header)" << std::endl;
     fclose(file);
@@ -26,7 +26,7 @@ static bool loadWAV(const char* filename, ALenum* format, ALvoid** data, ALsizei
   fseek(file, 4, SEEK_CUR); // Skip file size
 
   char wave[4];
-  fread(wave, 1, 4, file);
+  if (fread(wave, 1, 4, file) != 4) { fclose(file); return false; }
   if (strncmp(wave, "WAVE", 4) != 0) {
     std::cout << "AudioManager: Not a valid WAV file (no WAVE format)" << std::endl;
     fclose(file);
@@ -37,17 +37,18 @@ static bool loadWAV(const char* filename, ALenum* format, ALvoid** data, ALsizei
   char chunkId[4];
   unsigned int chunkSize;
   while (fread(chunkId, 1, 4, file) == 4) {
-    fread(&chunkSize, 4, 1, file);
+    if (fread(&chunkSize, 4, 1, file) != 1) break;
     if (strncmp(chunkId, "fmt ", 4) == 0) {
       unsigned short audioFormat, numChannels, blockAlign, bitsPerSample;
       unsigned int sampleRate, byteRate;
 
-      fread(&audioFormat, 2, 1, file);
-      fread(&numChannels, 2, 1, file);
-      fread(&sampleRate, 4, 1, file);
-      fread(&byteRate, 4, 1, file);
-      fread(&blockAlign, 2, 1, file);
-      fread(&bitsPerSample, 2, 1, file);
+      if (fread(&audioFormat, 2, 1, file) != 1) break;
+      if (fread(&numChannels, 2, 1, file) != 1) break;
+      if (fread(&sampleRate, 4, 1, file) != 1) break;
+      if (fread(&byteRate, 4, 1, file) != 1) break;
+      if (fread(&blockAlign, 2, 1, file) != 1) break;
+      if (fread(&bitsPerSample, 2, 1, file) != 1) break;
+      (void)byteRate; // unused but part of WAV format
 
       // Skip any extra fmt bytes
       if (chunkSize > 16) {
@@ -65,7 +66,11 @@ static bool loadWAV(const char* filename, ALenum* format, ALvoid** data, ALsizei
     } else if (strncmp(chunkId, "data", 4) == 0) {
       *size = chunkSize;
       *data = malloc(chunkSize);
-      fread(*data, 1, chunkSize, file);
+      if (fread(*data, 1, chunkSize, file) != chunkSize) {
+        free(*data);
+        fclose(file);
+        return false;
+      }
       fclose(file);
       return true;
     } else {
@@ -121,10 +126,10 @@ void AudioManager::load_sounds() {
   alGenSources(sound_count, source_indicies.data());
 
   for (int j = 0; j < sound_count; ++j) {
-    ALenum format;
-    ALsizei size;
-    ALsizei freq;
-    ALvoid* data;
+    ALenum format = AL_FORMAT_MONO16;
+    ALsizei size = 0;
+    ALsizei freq = 44100;
+    ALvoid* data = nullptr;
 
     if (loadWAV(sound_names_[j].c_str(), &format, &data, &size, &freq)) {
       alBufferData(buffer_indicies[j], format, data, size, freq);

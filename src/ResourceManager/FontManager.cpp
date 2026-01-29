@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <SDL2/SDL_opengl.h>
+
 #include "FontManager.hpp"
 
 FontManager::FontManager() 
