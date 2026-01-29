@@ -11,6 +11,7 @@ Ubuntu/Debian:
 
 macOS:
     brew install cmake ninja sdl2 openal-soft
+    export CMAKE_PREFIX_PATH="/opt/homebrew/opt/openal-soft"
 
 ## Build
 

@@ -27,7 +27,6 @@ target_include_directories(cosmos PRIVATE
 
 target_link_libraries(cosmos
     OpenGL::GL
-    OpenGL::GLU
     ${SDL2_LIBRARIES}
     ${OPENAL_LIBRARY}
 )

@@ -1,3 +1,5 @@
 *.o
 cosmos
 build/
+.cache/
+

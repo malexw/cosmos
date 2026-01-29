@@ -4,7 +4,7 @@
 #include <iostream>
 #include "rgbe.h"
 #include <math.h>
-#include <malloc.h>
+#include <cstdlib>
 #include <string.h>
 #include <ctype.h>
 

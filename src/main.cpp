@@ -1,10 +1,33 @@
 #include <iostream>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 #include <memory>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+// Replacement for gluPerspective — builds a perspective projection matrix
+// and loads it onto the current GL matrix stack via glMultMatrixf.
+static void perspectiveMatrix(float fovYDeg, float aspect, float zNear, float zFar) {
+  float fovYRad = fovYDeg * (float)M_PI / 180.0f;
+  float f = 1.0f / tanf(fovYRad / 2.0f);
+  float nf = zNear - zFar;
+
+  float m[16] = {0};
+  m[0]  = f / aspect;
+  m[5]  = f;
+  m[10] = (zFar + zNear) / nf;
+  m[11] = -1.0f;
+  m[14] = (2.0f * zFar * zNear) / nf;
+  // m[15] = 0 (already)
+
+  glMultMatrixf(m);
+}
 
 #include "PlayerInputHandler.hpp"
 #include "InputManager.hpp"
@@ -92,8 +115,6 @@ int main(int argc, char* argv[]) {
   glShadeModel(GL_SMOOTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClearDepth(2.0f);
-
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
   if( glGetError() != GL_NO_ERROR )
   {
@@ -287,7 +308,7 @@ int main(int argc, char* argv[]) {
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      gluPerspective(45,1,10,40000);
+      perspectiveMatrix(45,1,10,40000);
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5)).to_array());
@@ -346,7 +367,7 @@ int main(int argc, char* argv[]) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),0.1,3);
+    perspectiveMatrix(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),0.1,3);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glMultMatrixf(Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1)).to_array());
@@ -372,7 +393,7 @@ int main(int argc, char* argv[]) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
+    perspectiveMatrix(45,(static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)),1,4000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     

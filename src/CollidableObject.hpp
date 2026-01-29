@@ -6,7 +6,6 @@
 #include <string>
 
 #include <SDL2/SDL_opengl.h>
-#include <GL/glu.h>
 
 #include "Transform.hpp"
 #include "Material.hpp"
@@ -29,18 +28,16 @@ class CollidableObject {
   CollidableObject(unsigned int id, unsigned int type);
   unsigned int id() const { return id_; }
   unsigned int get_type() const { return type_; }
-  
+
   void update(float delta);
   void check(CollidableObject::ShPtr rhs);
-  //void gjk(CollidableObject::ShPtr rhs);
   void render_collision();
-  //Vector3f supportSS(CollidableObject::ShPtr rhs, const Vector3f direction);
 
   CollidableObject& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }
   CollidableObject& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }
 
   Vector3f get_scale() { return scale_; }
-  
+
   Transform::ShPtr get_transform() { return transform_; }
 
  private:
@@ -49,9 +46,14 @@ class CollidableObject {
   unsigned int type_;
   Vector3f scale_;
   Vector3f velo_;
-  GLUquadricObj* quadric_;
-  //Vector3f simplex_[4];
-  
+
+  static GLuint sphere_vbo_;
+  static GLuint cylinder_vbo_;
+  static int sphere_vertex_count_;
+  static int cylinder_vertex_count_;
+  static bool geometry_initialized_;
+  static void initGeometry();
+
   DISALLOW_COPY_AND_ASSIGN(CollidableObject);
 };
 

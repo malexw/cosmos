@@ -5,7 +5,11 @@
 
 #include <memory>
 
+#ifdef __APPLE__
+#include <OpenAL/al.h>
+#else
 #include <AL/al.h>
+#endif
 
 #include "util.hpp"
 #include "Vector3f.hpp"
