@@ -14,17 +14,17 @@ public:
 	Texture(std::string name);
 	
 	// Returns the name of the texture
-	const std::string get_name() const;
-	
+	std::string get_name() const;
+
 	// Compare the name of this texture with another name. Returns true if they're equal, false otherwise.
-	const bool is_name(const std::string& rhs) const;
-	
+	bool is_name(const std::string& rhs) const;
+
 	// Return the index, AKA "OpenGL Name" of the texture. This value is meaningless unless the texture is
 	// loaded.
-	const int get_index() const;
-	
-	const int get_gltype() const;
-	const int get_bytecount() const;
+	int get_index() const;
+
+	int get_gltype() const;
+	int get_bytecount() const;
 	
 	// Set the index, AKA "OpenGL Name" of the texture - used when loading the texture.
 	void set_index(int index);

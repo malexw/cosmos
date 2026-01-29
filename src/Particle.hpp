@@ -22,7 +22,7 @@ class Particle {
 
   // constant speed particles for now
 	Particle(Renderable::ShPtr renderable)
-   : renderable_(renderable), lifetime_(0.0f) {}
+   : renderable_(renderable), pos_(), velo_(), lifetime_(0.0f) {}
 
   void update(float delta);
   void render(Transform::ShPtr cam);

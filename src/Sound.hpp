@@ -17,13 +17,13 @@ public:
 	Sound(std::string name, unsigned int sound_index, unsigned int buffer_index);
 	
 	// Returns the name of the sound
-	const std::string get_name() const;
-	
+	std::string get_name() const;
+
 	// Compare the name of this sound with another name. Returns true if they're equal, false otherwise.
-	const bool is_name(const std::string& rhs) const;
-	
+	bool is_name(const std::string& rhs) const;
+
 	// Return the source index of the sound. This value is meaningless unless the Sound is loaded.
-	const int get_index() const;
+	int get_index() const;
   
   void play();
   void pause();

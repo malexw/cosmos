@@ -16,12 +16,12 @@ public:
 	ShaderProgram(std::string name, int id): name_(name), shader_id_(id) {}
 	
 	// Returns the name of the ShaderProgram
-	const std::string get_name() const;
+	std::string get_name() const;
 	
 	// Compares the name of this ShaderProgram with another name. Returns true if they're equal, false otherwise.
-	const bool is_name(const std::string& rhs) const;
-  
-  const int get_id() const { return shader_id_; }
+	bool is_name(const std::string& rhs) const;
+
+  int get_id() const { return shader_id_; }
   
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);

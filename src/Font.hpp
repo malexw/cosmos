@@ -15,13 +15,13 @@ public:
 	Font(std::string name);
 	
 	// Returns the name of the font
-	const std::string get_name() const;
-	
+	std::string get_name() const;
+
 	// Compares the name of this font with another name. Returns true if they're equal, false otherwise.
-	const bool is_name(const std::string& rhs) const;
-	
+	bool is_name(const std::string& rhs) const;
+
 	// Returns the index of the display list associated with this font for rendering
-	const int get_displaylist() const;
+	int get_displaylist() const;
 	
 	// Sets the index of the display list for this font
 	void set_displaylist(int index);

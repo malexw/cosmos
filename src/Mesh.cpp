@@ -66,6 +66,6 @@ void Mesh::draw() const {
   }
 }
 
-const bool Mesh::is_name(const std::string& rhs) const {
+bool Mesh::is_name(const std::string& rhs) const {
 	return name_.compare(rhs) == 0;
 }

@@ -113,13 +113,13 @@ class Quaternion {
   }
   
   float& x() { return x_; }
-  const float x() const { return x_; }
+  float x() const { return x_; }
   float& y() { return y_; }
-  const float y() const { return y_; }
+  float y() const { return y_; }
   float& z() { return z_; }
-  const float z() const { return z_; }
+  float z() const { return z_; }
   float& w() { return w_; }
-  const float w() const { return w_; }
+  float w() const { return w_; }
   
   const Vector3f vector() const { return Vector3f(x_, y_, z_); }
   

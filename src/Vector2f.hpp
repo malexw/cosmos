@@ -23,9 +23,9 @@ class Vector2f {
   }
   
   float& u() { return u_; }
-  const float u() const { return u_; }
+  float u() const { return u_; }
   float& v() { return v_; }
-  const float v() const { return v_; }
+  float v() const { return v_; }
   
  private:
 

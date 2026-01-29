@@ -30,11 +30,11 @@ class Mesh {
   // Called by the engine to submit the geometry to the GPU
   void draw() const;
   
-  const bool is_name(const std::string& rhs) const;
+  bool is_name(const std::string& rhs) const;
   void set_tex_pointer() { glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]); }
-  
+
   // The number of triangles in the mesh
-	const unsigned int triangle_count() const { return triangle_count_; }
+	unsigned int triangle_count() const { return triangle_count_; }
 
  private:
   std::string name_;

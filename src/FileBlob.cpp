@@ -19,7 +19,7 @@ int FileBlob::size() const {
   return file_size_;
 }
 
-const std::string FileBlob::extension() const {
+std::string FileBlob::extension() const {
   std::string ext;
   int i = file_path_.length();
 

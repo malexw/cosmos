@@ -1,3 +1,5 @@
+#include <GL/glu.h>
+
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"
 

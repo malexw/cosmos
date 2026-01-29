@@ -43,6 +43,7 @@ class Vector3f {
     x_ += rhs.x();
     y_ += rhs.y();
     z_ += rhs.z();
+    return *this;
   }
   
   Vector3f& operator*=(float rhs) {
@@ -66,18 +67,18 @@ class Vector3f {
       x_*rhs.y() - y_*rhs.x());
   }
   
-  const float dot(const Vector3f& rhs) const { return x_*rhs.x() + y_*rhs.y() + z_*rhs.z(); }
-  const float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
-  const float length() const { return sqrt(lengthSquare()); }
+  float dot(const Vector3f& rhs) const { return x_*rhs.x() + y_*rhs.y() + z_*rhs.z(); }
+  float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
+  float length() const { return sqrt(lengthSquare()); }
   // TODO Probably need an in-place normalize : Vector3f& normalize();
   Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
-  
+
   float& x() { return x_; }
-  const float x() const { return x_; }
+  float x() const { return x_; }
   float& y() { return y_; }
-  const float y() const { return y_; }
+  float y() const { return y_; }
   float& z() { return z_; }
-  const float z() const { return z_; }
+  float z() const { return z_; }
   
  private:
 

@@ -16,7 +16,7 @@ class FileReader {
   ~FileReader();
 
   // Returns the size of the file in bytes
-  const int GetFileSize();
+  int GetFileSize();
 
   // Copy the contents of the file into the supplied buffer
   void Read(char * const buf, int fsize);

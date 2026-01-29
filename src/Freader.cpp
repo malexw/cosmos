@@ -14,7 +14,7 @@ FileReader::~FileReader() {
 
 // The other way to get the file length is via stat, but it's not supported on
 // all platforms.
-const int FileReader::GetFileSize() {
+int FileReader::GetFileSize() {
   file_stream_.seekg(0, std::ios::end);
   int length = file_stream_.tellg();
   file_stream_.seekg(0, std::ios::beg);

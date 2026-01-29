@@ -19,8 +19,8 @@ class FileBlob {
   
   const char& operator[](std::size_t position) const { return bytes_[position]; }
   int size() const;
-  const std::string extension() const;
-  const std::string path() const { return file_path_; }
+  std::string extension() const;
+  std::string path() const { return file_path_; }
   char* get_bytes() { return bytes_; }
 
  private:

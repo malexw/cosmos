@@ -8,7 +8,7 @@
 #include "World.hpp"
 
 World::World(std::string path)
- : path_(path), triangle_count_(0) {
+ : triangle_count_(0), path_(path) {
   init();
 }
 
