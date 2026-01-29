@@ -24,7 +24,7 @@ class GameObject {
 	typedef std::shared_ptr<GameObject> ShPtr;
 
 	GameObject(): id_(nextId_++) {}
-  const unsigned int id() const { return id_; }
+  unsigned int id() const { return id_; }
 
   GameObject& set_transform(Transform::ShPtr t) { transform_ = t; return *this; }
   GameObject& set_renderable(Renderable::ShPtr r) { renderable_ = r; return *this; }

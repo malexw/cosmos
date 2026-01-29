@@ -143,7 +143,7 @@ void World::decode(FileBlob& b) {
 }
 
 // Returns the index of the first character following a group of newline characters after the offset
-const unsigned int World::newline_index(const FileBlob& b, const unsigned int offset) const {
+unsigned int World::newline_index(const FileBlob& b, unsigned int offset) const {
   
   int ni = offset;
   

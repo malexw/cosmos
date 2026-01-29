@@ -32,7 +32,7 @@ class World {
   void draw() const;
   void draw_geometry() const;
   // The number of triangles in the World
-	const unsigned int triangle_count() const { return triangle_count_; }
+	unsigned int triangle_count() const { return triangle_count_; }
 
  private:
   typedef std::pair<Material::ShPtr, int> MatPair;
@@ -50,7 +50,7 @@ class World {
   // OBJ Decoding stuff -------------
   void decode(FileBlob& b);
   // Returns the index of the first character following a group of newline characters after the offset
-  const unsigned int newline_index(const FileBlob& b, const unsigned int offset) const;
+  unsigned int newline_index(const FileBlob& b, unsigned int offset) const;
   // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;

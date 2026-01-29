@@ -20,7 +20,7 @@ class Transform {
 	typedef std::shared_ptr<Transform> ShPtr;
 
   Transform(unsigned int id): id_(id), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
-  const unsigned int id() const { return id_; }
+  unsigned int id() const { return id_; }
   
   void apply();
   void apply_inverse();

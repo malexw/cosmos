@@ -36,7 +36,7 @@ class MeshManager {
   // OBJ Decoding stuff -------------
   Mesh::ShPtr decode(FileBlob& b);
   // Returns the index of the first character following a group of newline characters after the offset
-  const unsigned int newline_index(const FileBlob& b, const unsigned int offset) const;
+  unsigned int newline_index(const FileBlob& b, unsigned int offset) const;
   // Returns a collection of whitespace-separated character strings occuring between offset and the end of the
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;

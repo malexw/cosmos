@@ -17,7 +17,7 @@ class Camera {
  public:
 	typedef std::shared_ptr<Camera> ShPtr;
 
-	Camera(): scale_(Vector3f::ONES), collision_radius_(3.0f) {}
+	Camera(): collision_radius_(3.0f), scale_(Vector3f::ONES) {}
   
   Camera& set_collidable(CollidableObject::ShPtr c) { collidable_ = c; return *this; }
   CollidableObject::ShPtr get_collidable() { return collidable_; }

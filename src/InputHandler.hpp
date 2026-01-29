@@ -17,7 +17,7 @@ class InputHandler {
 	typedef std::shared_ptr<InputHandler> ShPtr;
   
 	InputHandler(unsigned int id): id_(id) {}
-  const unsigned int id() const { return id_; }
+  unsigned int id() const { return id_; }
   
   virtual void handleInput(SDL_Event e) = 0;
 

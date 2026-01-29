@@ -6,6 +6,7 @@
 #include <string>
 
 #include <SDL2/SDL_opengl.h>
+#include <GL/glu.h>
 
 #include "Transform.hpp"
 #include "Material.hpp"
@@ -26,8 +27,8 @@ class CollidableObject {
   static const unsigned int TYPE_CAPSULE;
 
   CollidableObject(unsigned int id, unsigned int type);
-  const unsigned int id() const { return id_; }
-  const unsigned int get_type() const { return type_; }
+  unsigned int id() const { return id_; }
+  unsigned int get_type() const { return type_; }
   
   void update(float delta);
   void check(CollidableObject::ShPtr rhs);

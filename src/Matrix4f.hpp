@@ -47,7 +47,7 @@ class Matrix4f {
   }
   
   float& operator[](int i) { return m_[i]; }
-  const float operator[](int i) const { return m_[i]; }
+  float operator[](int i) const { return m_[i]; }
   float* to_array() { return m_; }
   
   Matrix4f transpose() const {
