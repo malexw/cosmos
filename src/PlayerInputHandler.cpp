@@ -3,7 +3,7 @@
 #include "ResourceManager/ShaderManager.hpp"
 
 PlayerInputHandler::PlayerInputHandler(unsigned int id)
- : InputHandler(id), grabbing_(false), rot_(0, -1, -1), config_(CosmosConfig::get()) {
+ : InputHandler(id), rot_(0, -1, -1), grabbing_(false), config_(CosmosConfig::get()) {
   collidable_ = GameObjectManager::get().get_object(id)->get_collidable();
   transform_ = GameObjectManager::get().get_object(id)->get_transform();
   hdr_program_ = ShaderManager::get().get_shader_program("hdr");

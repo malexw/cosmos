@@ -15,6 +15,9 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(cosmos ${SOURCES})
 
+# Enable OpenGL extension prototypes on Linux
+target_compile_definitions(cosmos PRIVATE GL_GLEXT_PROTOTYPES)
+
 target_include_directories(cosmos PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${SDL2_INCLUDE_DIRS}
