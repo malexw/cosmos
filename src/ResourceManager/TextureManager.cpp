@@ -66,7 +66,7 @@ void TextureManager::load_textures() {
 		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 3);
 		if (data) {
 			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB,
 					GL_UNSIGNED_BYTE, data);
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -86,7 +86,7 @@ void TextureManager::load_textures() {
 		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 4);
 		if (data) {
 			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
 					GL_UNSIGNED_BYTE, data);
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -111,7 +111,7 @@ void TextureManager::load_textures() {
       fclose(f);
 
       glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, image_width, image_height, 0, GL_RGB,
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, image_width, image_height, 0, GL_RGB,
           GL_FLOAT, image);
       glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
       glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -129,9 +129,9 @@ void TextureManager::load_textures() {
   glBindTexture(GL_TEXTURE_2D, tex_indicies[tex_count-2]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
   Texture::ShPtr shadow (new Texture("shadow_map"));
   shadow->set_index(tex_indicies[tex_count-2]);
   textures_.push_back(shadow);

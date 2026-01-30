@@ -1,5 +1,9 @@
 #include <string>
 
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#endif
+
 #include "CosmosConfig.hpp"
 #include "FileBlob.hpp"
 #include "ResourceManager/MaterialManager.hpp"
@@ -8,7 +12,7 @@
 #include "World.hpp"
 
 World::World(std::string path)
- : triangle_count_(0), path_(path) {
+ : triangle_count_(0), path_(path), vao_(0), vbo_(0) {
   init();
 }
 
@@ -16,6 +20,7 @@ void World::init() {
   FileBlob::ShPtr file(new FileBlob(path_));
   std::cout << "Loading world " << path_ << std::endl;
   decode(*file);
+  uploadToGpu();
 }
 
 void World::add_triangle( Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
@@ -46,36 +51,66 @@ void World::set_material(Material::ShPtr mat) {
   mats_.push_back(m);
 }
 
+void World::uploadToGpu() {
+  int fsize = sizeof(GLfloat);
+  int vertsize = verticies_.size() * 3 * fsize;
+  int texsize = tex_coords_.size() * 2 * fsize;
+  int normsize = normals_.size() * 3 * fsize;
+  int colsize = colors_.size() * 3 * fsize;
+
+  int off0 = 0;
+  int off1 = vertsize;
+  int off2 = off1 + texsize;
+  int off3 = off2 + normsize;
+
+  glGenVertexArrays(1, &vao_);
+  glBindVertexArray(vao_);
+
+  glGenBuffers(1, &vbo_);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+  glBufferData(GL_ARRAY_BUFFER, vertsize + texsize + normsize + colsize, 0, GL_STATIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, off0, vertsize, &verticies_[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, off1, texsize, &tex_coords_[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, off2, normsize, &normals_[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, off3, colsize, &colors_[0]);
+
+  // Generic vertex attributes
+  // location 0 = position
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(off0));
+  // location 1 = texcoord
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(off1));
+  // location 2 = normal
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(off2));
+  // location 3 = color
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(off3));
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void World::draw() const {
 	if (CosmosConfig::get().is_textures()) {
     int drawn = 0;
-    //
-    //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
-    //
+    glBindVertexArray(vao_);
     for (const World::MatPair& mat : mats_) {
       glBindTexture(GL_TEXTURE_2D, mat.first->get_texture()->get_index());
-      //glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
-      glVertexPointer(3, GL_FLOAT, 0, &verticies_[drawn]);
-      glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[drawn]);
-      glNormalPointer(GL_FLOAT, 0, &normals_[drawn]);
-      glColorPointer(3, GL_FLOAT, 0, &colors_[drawn]);
-      glDrawArrays(GL_TRIANGLES, 0, mat.second * 3);
+      glDrawArrays(GL_TRIANGLES, drawn, mat.second * 3);
       drawn += mat.second * 3;
     }
-    //
-    //glUseProgram(0);
-    //
+    glBindVertexArray(0);
   } else {
     draw_geometry();
   }
 }
 
 void World::draw_geometry() const {
-  glVertexPointer(3, GL_FLOAT, 0, &verticies_[0]);
-  glTexCoordPointer(2, GL_FLOAT, 0, &tex_coords_[0]);
-  glNormalPointer(GL_FLOAT, 0, &normals_[0]);
-  glColorPointer(3, GL_FLOAT, 0, &colors_[0]);
+  glBindVertexArray(vao_);
   glDrawArrays(GL_TRIANGLES, 0, triangle_count_ * 3);
+  glBindVertexArray(0);
 }
 
 void World::decode(FileBlob& b) {

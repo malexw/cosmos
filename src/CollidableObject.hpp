@@ -6,6 +6,7 @@
 #include <string>
 
 #include <SDL2/SDL_opengl.h>
+#include <glm/glm.hpp>
 
 #include "Transform.hpp"
 #include "Material.hpp"
@@ -31,7 +32,7 @@ class CollidableObject {
 
   void update(float delta);
   void check(CollidableObject::ShPtr rhs);
-  void render_collision();
+  void render_collision(const glm::mat4& projView);
 
   CollidableObject& set_velocity(const Vector3f& velo) { velo_ = velo; return *this; }
   CollidableObject& set_scale(const Vector3f& scale) { scale_ = scale; return *this; }
@@ -48,7 +49,9 @@ class CollidableObject {
   Vector3f velo_;
 
   static GLuint sphere_vbo_;
+  static GLuint sphere_vao_;
   static GLuint cylinder_vbo_;
+  static GLuint cylinder_vao_;
   static int sphere_vertex_count_;
   static int cylinder_vertex_count_;
   static bool geometry_initialized_;

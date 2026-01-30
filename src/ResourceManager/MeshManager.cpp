@@ -124,7 +124,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
 	  }
   }
   
-  //mesh->uploadToGpu();
+  mesh->uploadToGpu();
   std::cout << "Read " << mesh->triangle_count() << " triangles" << std::endl;
   return mesh;
 }

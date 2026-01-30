@@ -54,9 +54,11 @@ int main(int argc, char* argv[]) {
      return 0;
   }
 
-  // Request OpenGL 2.1 compatibility context for legacy fixed-function support
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+  // Request OpenGL 3.2 core profile
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
@@ -82,19 +84,14 @@ int main(int argc, char* argv[]) {
 
   glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_CULL_FACE);
-  
+
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
   //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.1);
-  
-  glShadeModel(GL_SMOOTH);
+
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClearDepth(2.0f);
 
@@ -107,22 +104,12 @@ int main(int argc, char* argv[]) {
   std::cout << "Resources loaded" << std::endl;
 
   // ----------- LIGHTING ----------------------------------------------
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  //GLfloat lightVals[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-  GLfloat lightVals[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightVals);
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, lightVals);
-    
-  lightVals[0] = 1.0f; lightVals[1] = 1.0f; lightVals[2] = 1.0f; lightVals[3] = 1.0f;
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightVals);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, lightVals);
-
-  //Vector3f(5, 0, -30)-Vector3f(5, 15, 5)
-  lightVals[0] = 0.0f; lightVals[1] = -15.0f; lightVals[2] = -30.0f; lightVals[3] = 0.0f;
-  //lightVals[0] = 5.0f; lightVals[1] = 15.0f; lightVals[2] = 5.0f; lightVals[3] = 0.0f;
-  //glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
+  // Light properties (used as shader uniforms)
+  glm::vec3 lightDirWorld(0.0f, -15.0f, -30.0f);
+  glm::vec4 lightAmbient(0.0f, 0.0f, 0.0f, 1.0f);
+  glm::vec4 lightDiffuse(1.0f, 1.0f, 1.0f, 1.0f);
+  glm::vec4 lightSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+  glm::vec4 ambientGlobal(0.0f, 0.0f, 0.0f, 1.0f);
 
   // --------------
   Timer::ShPtr fps_(new Timer());
@@ -216,12 +203,6 @@ int main(int argc, char* argv[]) {
   PlayerInputHandler::ShPtr pih(new PlayerInputHandler(camera->id()));
   InputHandler::ShPtr ih(std::dynamic_pointer_cast<InputHandler>(pih));
   im.pushHandler(ih);
-  
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
   CosmosConfig& config = CosmosConfig::get();
 
@@ -279,57 +260,43 @@ int main(int argc, char* argv[]) {
     // With final positions, we can update the sound
     AudioManager::get().set_listener_transform(camera_transform);
 
+    // Compute cube model matrix (used in shadow and main passes)
+    glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 1.0f, -12.0f));
+    cubeModel = glm::rotate(cubeModel, glm::radians(r), glm::vec3(0.0f, 1.0f, 0.0f));
+    cubeModel = glm::rotate(cubeModel, glm::radians(r/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4 shadowTexMatrix(1.0f);
+
     //-------------- First pass for shadows
     if (config.is_shadows()) {
-      glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);	//Rendering offscreen
-      glUseProgram(0);
+      glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
       glViewport(0,0,1024,1024);
       glClear(GL_DEPTH_BUFFER_BIT);
       glCullFace(GL_FRONT);
       glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
       glm::mat4 shadowProj = glm::perspective(glm::radians(45.0f), 1.0f, 10.0f, 40000.0f);
-      glMultMatrixf(glm::value_ptr(shadowProj));
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
       glm::mat4 shadowView = Camera::matrixFromPositionDirection(Vector3f(5, 15, 5), Vector3f(5, 0, -30)-Vector3f(5, 15, 5));
-      glMultMatrixf(glm::value_ptr(shadowView));
 
-      // Draw all the things that should cast shadows
+      auto flatProg = ShaderManager::get().get_shader_program("flat");
+      flatProg->run();
+
+      // Draw world geometry (identity model)
+      flatProg->setMat4("mvp", shadowProj * shadowView);
       world->draw_geometry();
 
-      glPushMatrix();
-      glTranslatef(2.0f,1.0f,-12.0f);
-      glRotatef(r, 0.0f, 1.0f, 0.0f);
-      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-      glMatrixMode(GL_TEXTURE);
-      glPushMatrix();
-      glTranslatef(2.0f,1.0f,-12.0f);
-      glRotatef(r, 0.0f, 1.0f, 0.0f);
-      glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-      //
+      // Draw cube geometry
+      flatProg->setMat4("mvp", shadowProj * shadowView * cubeModel);
       cube_renderable->draw_geometry();
-      //
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
-      
-      // Configure the shadow texture matrix using GLM
+
+      // Compute shadow texture matrix for main pass
       glm::mat4 biasMatrix(
         0.5f, 0.0f, 0.0f, 0.0f,
         0.0f, 0.5f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.5f, 0.0f,
         0.5f, 0.5f, 0.5f, 1.0f
       );
-      glm::mat4 shadowTexMatrix = biasMatrix * shadowProj * shadowView;
-
-      glMatrixMode(GL_TEXTURE);
-      glActiveTexture(GL_TEXTURE3);
-      glLoadMatrixf(glm::value_ptr(shadowTexMatrix));
-
-      glMatrixMode(GL_MODELVIEW);
+      shadowTexMatrix = biasMatrix * shadowProj * shadowView;
     }
 
     //-------------- Second pass for skybox
@@ -337,114 +304,146 @@ int main(int argc, char* argv[]) {
     glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     // MUST call glColorMask BEFORE glClear or things get explodey
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-    glCullFace(GL_BACK);    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_BACK);
     glActiveTexture(GL_TEXTURE0);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
     {
       glm::mat4 skyProj = glm::perspective(glm::radians(45.0f), (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)), 0.1f, 3.0f);
-      glMultMatrixf(glm::value_ptr(skyProj));
-    }
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    {
       glm::mat4 skyView = Camera::matrixFromPositionDirection(Vector3f(0, 0, 0.8), Vector3f(0, 0, -1));
-      glMultMatrixf(glm::value_ptr(skyView));
-    }
+      glm::mat4 cameraRotInv = camera_transform->get_rotation_matrix();
+      glm::mat4 rotY180 = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+      glm::mat4 skyboxMVP = skyProj * skyView * cameraRotInv * rotY180;
 
-    glDisable(GL_LIGHTING);
-    glFrontFace(GL_CW);
-    //glUseProgram(ShaderManager::get().get_shader_program("hdr")->get_id());
-    camera_transform->apply_rotation();
-    if (config.is_hdr()) {
-      ShaderManager::get().get_shader_program("hdr")->run();
+      glFrontFace(GL_CW);
+      if (config.is_hdr()) {
+        auto hdrProg = ShaderManager::get().get_shader_program("hdr");
+        hdrProg->run();
+        hdrProg->setMat4("mvp", skyboxMVP);
+      } else {
+        auto unlitProg = ShaderManager::get().get_shader_program("unlit");
+        unlitProg->run();
+        unlitProg->setMat4("mvp", skyboxMVP);
+      }
+      skybox_renderable->render();
+      glFrontFace(GL_CCW);
     }
-    glPushMatrix();
-    glRotatef(180, 0.0, 1.0f, 0.0);
-    skybox_renderable->render();
-    glPopMatrix();
-    glUseProgram(0);
-    glFrontFace(GL_CCW);
-    glEnable(GL_LIGHTING);
       
     //------------------- Third pass to actually draw things
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    {
-      glm::mat4 mainProj = glm::perspective(glm::radians(45.0f), (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)), 1.0f, 4000.0f);
-      glMultMatrixf(glm::value_ptr(mainProj));
-    }
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
-    // "skybox"
-    // Skip drawing the background when textures are off since it obscures everything
+    glm::mat4 mainProj = glm::perspective(glm::radians(45.0f), (static_cast<float>(SCREEN_WIDTH)/static_cast<float>(SCREEN_HEIGHT)), 1.0f, 4000.0f);
+    glm::mat4 mainView = camera_transform->get_inverse_matrix();
+    glm::mat4 mainPV = mainProj * mainView;
+
+    // "skybox" HUD quad — drawn with identity view (before camera transform)
     if (config.is_textures() && config.is_skybox()) {
-      glPushMatrix();
-      glDisable(GL_LIGHTING);
-      glTranslatef(0.0f, 0.0f, -2.0f);
-      glScalef(2.7f, 1.7f, 1.0f);
-      if (config.is_textures()) {
-        glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
-      }
+      glm::mat4 hudModel = glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f)),
+        glm::vec3(2.7f, 1.7f, 1.0f));
+      auto unlitProg = ShaderManager::get().get_shader_program("unlit");
+      unlitProg->run();
+      unlitProg->setMat4("mvp", mainProj * hudModel);
+      glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
       MeshManager::get().get_mesh("res/meshes/face-center-quad.obj")->draw();
       glDrawArrays(GL_TRIANGLES, 0, 6);
-      glEnable(GL_LIGHTING);
-      glPopMatrix();
     }
-    
+
     glClear(GL_DEPTH_BUFFER_BIT);
-    
+
+    // Compute light direction in eye space (directional light: just rotate by view)
+    glm::vec3 lightPosEye = glm::mat3(mainView) * lightDirWorld;
+    glm::mat3 worldNormalMatrix = glm::transpose(glm::inverse(glm::mat3(mainView)));
+
+    // Activate shader for world draw
     if (config.is_shadows()) {
-      ShaderManager::get().get_shader_program("shadow")->run();
+      auto shadowProg = ShaderManager::get().get_shader_program("shadow");
+      shadowProg->run();
+      shadowProg->setMat4("mvp", mainPV);
+      shadowProg->setMat3("normalMatrix", worldNormalMatrix);
+      shadowProg->setMat4("shadowMatrix", shadowTexMatrix);
+      GLint loc = glGetUniformLocation(shadowProg->get_id(), "lightPosEye");
+      if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(lightPosEye));
       glActiveTexture(GL_TEXTURE3);
-      glBindTexture(GL_TEXTURE_2D,TextureManager::get().get_texture("shadow_map")->get_index());
+      glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("shadow_map")->get_index());
       glActiveTexture(GL_TEXTURE0);
+    } else if (config.is_textures()) {
+      // Simple shader with per-vertex lighting (no shadows)
+      auto simpleProg = ShaderManager::get().get_shader_program("simple");
+      simpleProg->run();
+      simpleProg->setMat4("mvp", mainPV);
+      simpleProg->setMat3("normalMatrix", worldNormalMatrix);
+      GLint loc;
+      loc = glGetUniformLocation(simpleProg->get_id(), "lightPosEye");
+      if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(lightPosEye));
+      loc = glGetUniformLocation(simpleProg->get_id(), "lightDiffuse");
+      if (loc >= 0) glUniform4fv(loc, 1, glm::value_ptr(lightDiffuse));
+      loc = glGetUniformLocation(simpleProg->get_id(), "lightAmbient");
+      if (loc >= 0) glUniform4fv(loc, 1, glm::value_ptr(lightAmbient));
+      loc = glGetUniformLocation(simpleProg->get_id(), "lightSpecular");
+      if (loc >= 0) glUniform4fv(loc, 1, glm::value_ptr(lightSpecular));
+      loc = glGetUniformLocation(simpleProg->get_id(), "ambientGlobal");
+      if (loc >= 0) glUniform4fv(loc, 1, glm::value_ptr(ambientGlobal));
+      loc = glGetUniformLocation(simpleProg->get_id(), "matSpecular");
+      if (loc >= 0) glUniform4f(loc, 0.0f, 0.0f, 0.0f, 1.0f);
+      loc = glGetUniformLocation(simpleProg->get_id(), "matShininess");
+      if (loc >= 0) glUniform1f(loc, 0.0f);
+    } else {
+      // Wireframe mode — flat shader
+      auto flatProg = ShaderManager::get().get_shader_program("flat");
+      flatProg->run();
+      flatProg->setMat4("mvp", mainPV);
+      GLint loc = glGetUniformLocation(flatProg->get_id(), "flatColor");
+      if (loc >= 0) glUniform4f(loc, 1.0f, 1.0f, 1.0f, 1.0f);
     }
-    
-    camera_transform->apply_inverse();
-    //glPushMatrix();
-    //camera_transform->apply();
-    //camera_collidable->render_collision();
-    //glPopMatrix();
-    // Remember kids, always apply your lights *after* the camera transform
-    glLightfv(GL_LIGHT0, GL_POSITION, lightVals);
 
     world->draw();
-    
-    glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
+
+    // Collidable wireframe at cube's translated position
+    glm::mat4 cubeTranslate = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 1.0f, -12.0f));
     if (config.is_collidables()) {
-      cube_collidable->render_collision();
+      cube_collidable->render_collision(mainProj * mainView * cubeTranslate);
     }
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    glTranslatef(2.0f,1.0f,-12.0f);
-    glRotatef(r, 0.0f, 1.0f, 0.0f);
-    glRotatef(r/2, 1.0f, 0.0f, 0.0f);
-    //
+
+    // Full cube model — set shader uniforms
+    {
+      glm::mat4 cubeMV = mainView * cubeModel;
+      glm::mat4 cubeMVP = mainProj * cubeMV;
+      glm::mat3 cubeNormalMatrix = glm::transpose(glm::inverse(glm::mat3(cubeMV)));
+
+      if (config.is_textures()) {
+        // Pre-set matrix and lighting uniforms on bump and bumpdec shaders
+        auto bumpProg = ShaderManager::get().get_shader_program("bump");
+        bumpProg->run();
+        bumpProg->setMat4("mvp", cubeMVP);
+        bumpProg->setMat3("normalMatrix", cubeNormalMatrix);
+        glUniform3fv(glGetUniformLocation(bumpProg->get_id(), "lightPosEye"), 1, glm::value_ptr(lightPosEye));
+
+        auto bumpdecProg = ShaderManager::get().get_shader_program("bumpdec");
+        bumpdecProg->run();
+        bumpdecProg->setMat4("mvp", cubeMVP);
+        bumpdecProg->setMat3("normalMatrix", cubeNormalMatrix);
+        glUniform3fv(glGetUniformLocation(bumpdecProg->get_id(), "lightPosEye"), 1, glm::value_ptr(lightPosEye));
+      } else {
+        // Wireframe mode — flat shader for cube
+        auto flatProg = ShaderManager::get().get_shader_program("flat");
+        flatProg->run();
+        flatProg->setMat4("mvp", cubeMVP);
+        GLint loc = glGetUniformLocation(flatProg->get_id(), "flatColor");
+        if (loc >= 0) glUniform4f(loc, 1.0f, 1.0f, 1.0f, 1.0f);
+      }
+    }
+
     cube_renderable->render();
-    //
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    
-    glUseProgram(0);
+
+    // Particles
     if (config.is_particles()) {
-      glDisable(GL_LIGHTING);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE);
       glDepthMask(GL_FALSE);
-      emitter->render(camera_transform);
+      emitter->render(camera_transform, mainPV);
       glDepthMask(GL_TRUE);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-      glEnable(GL_LIGHTING);
     }
     //////////////////////////////////////////
     SDL_GL_SwapWindow(window);

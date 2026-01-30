@@ -6,7 +6,8 @@
 //#include <vector>
 //#include <string>
 
-//#include "SDL/SDL.h"
+#include <glm/glm.hpp>
+
 #include "Camera.hpp"
 #include "Matrix4f.hpp"
 #include "Renderable.hpp"
@@ -25,7 +26,7 @@ class Particle {
    : renderable_(renderable), pos_(), velo_(), lifetime_(0.0f) {}
 
   void update(float delta);
-  void render(Transform::ShPtr cam);
+  void render(Transform::ShPtr cam, const glm::mat4& projView);
 
   void reset(Vector3f position, Vector3f velocity, float lifetime) {
     pos_ = position;

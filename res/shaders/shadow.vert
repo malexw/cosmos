@@ -1,18 +1,30 @@
+#version 150
+
+in vec3 position;
+in vec2 texCoord;
+in vec3 normal;
+in vec3 color;
+
+uniform mat4 mvp;
+uniform mat3 normalMatrix;
+uniform mat4 shadowMatrix;
+uniform vec3 lightPosEye;
+
 // Used for shadow lookup
-varying vec4 ShadowCoord;
-varying vec3 color;
-varying vec2 vTexCoords;
+out vec4 ShadowCoord;
+out vec3 vColor;
+out vec2 vTexCoords;
 
 void main()
 {
-  ShadowCoord= gl_TextureMatrix[3] * gl_Vertex;
+  ShadowCoord = shadowMatrix * vec4(position, 1.0);
 
-  vec3 norm = gl_NormalMatrix * gl_Normal;
-  // Using LightSource[0] as our directional "sun"
-  vec3 lightDir = -normalize(gl_LightSource[0].position.xyz);
+  vec3 norm = normalMatrix * normal;
+  // Using light direction as our directional "sun"
+  vec3 lightDir = -normalize(lightPosEye);
   float intensity = max(dot(norm, lightDir), 0.0);
-  color = intensity * (gl_FrontMaterial.diffuse).rgb + (gl_FrontMaterial.ambient).rgb;
-  vTexCoords = gl_MultiTexCoord0.st;
+  vColor = (0.1 + intensity) * color;
+  vTexCoords = texCoord;
 
-  gl_Position = ftransform();
+  gl_Position = mvp * vec4(position, 1.0);
 }

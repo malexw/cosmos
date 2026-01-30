@@ -37,6 +37,7 @@ class ShaderManager {
 	void load_shaders();
 
   char* load_shader(char *fn);
+  void bindStandardAttribs(int program);
 	void print_shader_log(int id);
   void print_program_log(int id);
   

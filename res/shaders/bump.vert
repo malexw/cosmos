@@ -1,19 +1,24 @@
-//varying vec4 diffuse, ambient;
-varying vec3 vVaryingNormal;
-//varying vec3 vVaryingLightDir;
-varying vec2 vTexCoords;
-varying vec2 vBumpCoords;
- 
+#version 150
+
+in vec3 position;
+in vec2 texCoord;
+in vec3 normal;
+in vec3 color;
+
+uniform mat4 mvp;
+uniform mat3 normalMatrix;
+
+out vec3 vVaryingNormal;
+out vec2 vTexCoords;
+out vec2 vBumpCoords;
+out vec3 vMatDiffuse;
+
 void main(void)
 {
+    vVaryingNormal = normalMatrix * normal;
+    vTexCoords = texCoord;
+    vBumpCoords = texCoord;
+    vMatDiffuse = color;
 
-    vVaryingNormal = gl_NormalMatrix * gl_Normal;
-    vTexCoords = gl_MultiTexCoord0.st;
-    vBumpCoords = gl_MultiTexCoord0.st;
-    
-    //diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
-    //ambient = gl_FrontMaterial.ambient * gl_LightSource[0].ambient;
-    //ambient += gl_LightModel.ambient * gl_FrontMaterial.ambient;
-
-    gl_Position = ftransform();
+    gl_Position = mvp * vec4(position, 1.0);
 }

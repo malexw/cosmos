@@ -6,6 +6,8 @@
 #include <memory>
 
 #include <SDL2/SDL_opengl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "util.hpp"
 
@@ -26,6 +28,10 @@ public:
   void run() const { glUseProgram(shader_id_); }
   void setf(std::string varname, float value);
   void seti(std::string varname, int value);
+
+  // Set matrix uniforms — program must be currently active (call run() first)
+  void setMat4(const char* name, const glm::mat4& mat) const;
+  void setMat3(const char* name, const glm::mat3& mat) const;
 
 private:
 	std::string name_;

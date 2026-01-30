@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "FileBlob.hpp"
 #include "ShaderManager.hpp"
@@ -22,6 +23,12 @@ void ShaderManager::init() {
   shader_names_.push_back(std::string("res/shaders/hdr.frag"));
   shader_names_.push_back(std::string("res/shaders/bump.vert"));
   shader_names_.push_back(std::string("res/shaders/bump.frag"));
+  shader_names_.push_back(std::string("res/shaders/flat.vert"));
+  shader_names_.push_back(std::string("res/shaders/flat.frag"));
+  shader_names_.push_back(std::string("res/shaders/unlit.vert"));
+  shader_names_.push_back(std::string("res/shaders/unlit.frag"));
+  shader_names_.push_back(std::string("res/shaders/simple.vert"));
+  shader_names_.push_back(std::string("res/shaders/simple.frag"));
   load_shaders();
 }
 
@@ -71,10 +78,10 @@ void ShaderManager::load_shaders() {
   int p = glCreateProgram();
   int v = vshaders_[0]->get_id();
   int f = fshaders_[0]->get_id();
-  
+
   glAttachShader(p,v);
   glAttachShader(p,f);
-  
+  bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
   ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
@@ -92,9 +99,10 @@ void ShaderManager::load_shaders() {
   p = glCreateProgram();
   v = vshaders_[1]->get_id();
   f = fshaders_[1]->get_id();
-  
+
   glAttachShader(p, v);
   glAttachShader(p, f);
+  bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
   ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
@@ -109,9 +117,10 @@ void ShaderManager::load_shaders() {
   p = glCreateProgram();
   v = vshaders_[2]->get_id();
   f = fshaders_[2]->get_id();
-  
+
   glAttachShader(p, v);
   glAttachShader(p, f);
+  bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
   ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
@@ -126,10 +135,10 @@ void ShaderManager::load_shaders() {
   p = glCreateProgram();
   v = vshaders_[3]->get_id();
   f = fshaders_[3]->get_id();
-  
+
   glAttachShader(p,v);
   glAttachShader(p,f);
-  
+  bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
   ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
@@ -140,6 +149,48 @@ void ShaderManager::load_shaders() {
   bumpSampler = glGetUniformLocation(p, "bump");
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
+
+  // The flat program (wireframes, depth-only passes)
+  p = glCreateProgram();
+  v = vshaders_[4]->get_id();
+  f = fshaders_[4]->get_id();
+
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr flat(new ShaderProgram("flat", p));
+  programs_.push_back(flat);
+
+  // The unlit program (textured, no lighting — skybox, HUD, particles)
+  p = glCreateProgram();
+  v = vshaders_[5]->get_id();
+  f = fshaders_[5]->get_id();
+
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr unlit(new ShaderProgram("unlit", p));
+  programs_.push_back(unlit);
+  glUseProgram(p);
+  texSampler = glGetUniformLocation(p, "tex");
+  glUniform1i(texSampler, 0);
+
+  // The simple program (per-vertex lighting, no shadows)
+  p = glCreateProgram();
+  v = vshaders_[6]->get_id();
+  f = fshaders_[6]->get_id();
+
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr simple(new ShaderProgram("simple", p));
+  programs_.push_back(simple);
 
   glUseProgram(0);
 }
@@ -158,6 +209,13 @@ const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& 
 	return ShaderProgram::ShPtr();
 }
 
+void ShaderManager::bindStandardAttribs(int program) {
+  glBindAttribLocation(program, 0, "position");
+  glBindAttribLocation(program, 1, "texCoord");
+  glBindAttribLocation(program, 2, "normal");
+  glBindAttribLocation(program, 3, "color");
+}
+
 void ShaderManager::print_shader_log(int id) {
 
   int length = 0;
@@ -166,9 +224,9 @@ void ShaderManager::print_shader_log(int id) {
   glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
   if (length > 0) {
-    char data[length];
-    glGetShaderInfoLog(id, length, &count, data);
-    std::cout << data;
+    std::vector<char> data(length);
+    glGetShaderInfoLog(id, length, &count, data.data());
+    std::cout << data.data();
   }
 }
 
@@ -180,8 +238,8 @@ void ShaderManager::print_program_log(int id) {
   glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
 
   if (length > 0) {
-    char data[length];
-    glGetProgramInfoLog(id, length, &count, data);
-    std::cout << data;
+    std::vector<char> data(length);
+    glGetProgramInfoLog(id, length, &count, data.data());
+    std::cout << data.data();
   }
 }

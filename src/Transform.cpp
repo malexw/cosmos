@@ -1,8 +1,5 @@
 #include "Transform.hpp"
 
-#include <SDL2/SDL_opengl.h>
-#include <glm/gtc/type_ptr.hpp>
-
 glm::mat4 Transform::quatToMat4(const Quaternion& q) const {
   float x = q.x(), y = q.y(), z = q.z(), w = q.w();
   float dx = x+x, dy = y+y, dz = z+z;
@@ -56,21 +53,6 @@ glm::mat4 Transform::get_inverse_matrix() const {
 glm::mat4 Transform::get_rotation_matrix() const {
   Quaternion iR = quat_.invert();
   return quatToMat4(iR);
-}
-
-void Transform::apply() {
-  glm::mat4 m = get_matrix();
-  glMultMatrixf(glm::value_ptr(m));
-}
-
-void Transform::apply_inverse() {
-  glm::mat4 m = get_inverse_matrix();
-  glMultMatrixf(glm::value_ptr(m));
-}
-
-void Transform::apply_rotation() {
-  glm::mat4 m = get_rotation_matrix();
-  glMultMatrixf(glm::value_ptr(m));
 }
 
 Transform& Transform::rotate(const Vector3f& axis, float angle) {

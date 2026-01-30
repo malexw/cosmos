@@ -8,6 +8,8 @@
 //#include <string>
 
 //#include "SDL/SDL.h"
+#include <glm/glm.hpp>
+
 #include "Camera.hpp"
 #include "Matrix4f.hpp"
 #include "Particle.hpp"
@@ -31,7 +33,7 @@ class ParticleEmitter {
   }
 
   void update(float delta);
-  void render(Transform::ShPtr cam);
+  void render(Transform::ShPtr cam, const glm::mat4& projView);
   void rotate(const Vector3f& axis, float angle);
 
  private:

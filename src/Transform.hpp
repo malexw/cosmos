@@ -33,11 +33,6 @@ class Transform {
   // Build and return just the inverse rotation matrix
   glm::mat4 get_rotation_matrix() const;
 
-  // Legacy: apply directly onto GL matrix stack (calls glMultMatrixf)
-  void apply();
-  void apply_inverse();
-  void apply_rotation();
-
   void set_direction(const Vector3f& dir);
 
   // S Q T

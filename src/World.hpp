@@ -36,7 +36,7 @@ class World {
 
  private:
   typedef std::pair<Material::ShPtr, int> MatPair;
- 
+
   unsigned int triangle_count_;
 	std::vector<Vector3f> verticies_;
 	std::vector<Vector3f> normals_;
@@ -44,8 +44,12 @@ class World {
   std::vector<Vector3f> colors_;
   std::vector<MatPair> mats_;
   std::string path_;
-  
+
+  GLuint vao_;
+  GLuint vbo_;
+
   void init();
+  void uploadToGpu();
   
   // OBJ Decoding stuff -------------
   void decode(FileBlob& b);

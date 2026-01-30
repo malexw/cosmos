@@ -1,31 +1,30 @@
-//varying vec3 lightDir;
-varying vec4 diffuse, ambient;
-varying vec3 normal, lightDir, halfVec;
+#version 150
+
+in vec3 position;
+in vec2 texCoord;
+in vec3 normal;
+in vec3 color;
+
+uniform mat4 mvp;
+uniform mat3 normalMatrix;
+uniform vec3 lightPosEye;
+uniform vec4 lightDiffuse;
+uniform vec4 lightAmbient;
+uniform vec4 lightSpecular;
+uniform vec4 ambientGlobal;
+
+out vec4 diffuse, ambient;
+out vec3 vNormal, lightDir, halfVec;
 
 void main()
-{	
-	//vec3 lightdir = normalize(vec3(gl_LightSource[0].position));
-  //intensity = dot(lightdir, gl_Normal);
-  
-  //gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-  //normal = gl_NormalMatrix * gl_Normal;
-  //lightDir = vec3(gl_LightSource[0].position) * gl_ModelViewProjectionMatrix;
-  
-  vec3 normal, lightDir;
-  vec4 diffuse, ambient, globalAmbient;
-  //float NdotL;
-  
-  normal = normalize(gl_NormalMatrix * gl_Normal);
-  lightDir = normalize(vec3(gl_LightSource[0].position));
-  halfVec = normalize(gl_LightSource[0].halfVector.xyz);
-  
-  //NdotL = max(dot(normal, lightDir), 0.0);
-  
-  diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
-  ambient = gl_FrontMaterial.ambient * gl_LightSource[0].ambient;
-  ambient += gl_LightModel.ambient * gl_FrontMaterial.ambient;
-  
-  //gl_FrontColor = NdotL * diffuse + ambient + globalAmbient;
-  
-  gl_Position = ftransform();
+{
+  vNormal = normalize(normalMatrix * normal);
+  lightDir = normalize(lightPosEye);
+  halfVec = normalize(normalize(lightPosEye) + vec3(0.0, 0.0, 1.0));
+
+  diffuse = vec4(color, 1.0) * lightDiffuse;
+  ambient = vec4(color, 1.0) * lightAmbient;
+  ambient += ambientGlobal * vec4(color, 1.0);
+
+  gl_Position = mvp * vec4(position, 1.0);
 }

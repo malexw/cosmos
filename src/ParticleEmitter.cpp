@@ -29,16 +29,10 @@ void ParticleEmitter::update(float delta) {
   //translate_ += (delta * (quat_ * velo_));
 }
 
-void ParticleEmitter::render(Transform::ShPtr cam) {
-
-  glPushMatrix();
-
+void ParticleEmitter::render(Transform::ShPtr cam, const glm::mat4& projView) {
   for (const Particle::ShPtr& part : parts_) {
-    part->render(cam);
+    part->render(cam, projView);
   }
-  
-  // restores the modelview matrix
-  glPopMatrix();
 }
 
 void ParticleEmitter::rotate(const Vector3f& axis, float angle) {

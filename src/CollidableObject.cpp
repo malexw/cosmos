@@ -1,8 +1,12 @@
 #include <cmath>
 #include <vector>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"
+#include "ResourceManager/ShaderManager.hpp"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -12,7 +16,9 @@ const unsigned int CollidableObject::TYPE_SPHERE = 0;
 const unsigned int CollidableObject::TYPE_CAPSULE = 1;
 
 GLuint CollidableObject::sphere_vbo_ = 0;
+GLuint CollidableObject::sphere_vao_ = 0;
 GLuint CollidableObject::cylinder_vbo_ = 0;
+GLuint CollidableObject::cylinder_vao_ = 0;
 int CollidableObject::sphere_vertex_count_ = 0;
 int CollidableObject::cylinder_vertex_count_ = 0;
 bool CollidableObject::geometry_initialized_ = false;
@@ -69,16 +75,26 @@ void CollidableObject::initGeometry() {
   std::vector<float> sphereVerts;
   generateSphere(sphereVerts, 16, 16);
   sphere_vertex_count_ = sphereVerts.size() / 3;
+  glGenVertexArrays(1, &sphere_vao_);
+  glBindVertexArray(sphere_vao_);
   glGenBuffers(1, &sphere_vbo_);
   glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo_);
   glBufferData(GL_ARRAY_BUFFER, sphereVerts.size() * sizeof(float), sphereVerts.data(), GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+  glBindVertexArray(0);
 
   std::vector<float> cylinderVerts;
   generateCylinder(cylinderVerts, 16, 16);
   cylinder_vertex_count_ = cylinderVerts.size() / 3;
+  glGenVertexArrays(1, &cylinder_vao_);
+  glBindVertexArray(cylinder_vao_);
   glGenBuffers(1, &cylinder_vbo_);
   glBindBuffer(GL_ARRAY_BUFFER, cylinder_vbo_);
   glBufferData(GL_ARRAY_BUFFER, cylinderVerts.size() * sizeof(float), cylinderVerts.data(), GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+  glBindVertexArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   geometry_initialized_ = true;
@@ -192,65 +208,59 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
   std::cout << "Hit" << std::endl;
 }*/
 
-void CollidableObject::render_collision() {
+void CollidableObject::render_collision(const glm::mat4& projView) {
+  auto flatProg = ShaderManager::get().get_shader_program("flat");
+  flatProg->run();
+
+  // Set wireframe color to white
+  GLint colorLoc = glGetUniformLocation(flatProg->get_id(), "flatColor");
+  if (colorLoc >= 0) glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
 
-  // Disable unused client states — VBOs only contain position data
-  glDisableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glm::mat4 base = projView;
 
   switch (type_) {
     case CollidableObject::TYPE_CAPSULE: {
-      glPushMatrix();
-      glTranslatef(0.0f, 0.0f, -(scale_.z()/2));
+      glm::mat4 offset = glm::translate(base, glm::vec3(0.0f, 0.0f, -(scale_.z()/2)));
       // Cylinder (unit geometry scaled to radius=scale_.x(), height=scale_.z())
-      glPushMatrix();
-      glScalef(scale_.x(), scale_.x(), scale_.z());
-      glBindBuffer(GL_ARRAY_BUFFER, cylinder_vbo_);
-      glVertexPointer(3, GL_FLOAT, 0, (void*)0);
-      glDrawArrays(GL_TRIANGLES, 0, cylinder_vertex_count_);
-      glPopMatrix();
+      {
+        glm::mat4 cylMVP = glm::scale(offset, glm::vec3(scale_.x(), scale_.x(), scale_.z()));
+        flatProg->setMat4("mvp", cylMVP);
+        glBindVertexArray(cylinder_vao_);
+        glDrawArrays(GL_TRIANGLES, 0, cylinder_vertex_count_);
+      }
       // Sphere at top
-      glTranslatef(0.0f, 0.0f, scale_.z());
-      glPushMatrix();
-      glScalef(scale_.x(), scale_.x(), scale_.x());
-      glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo_);
-      glVertexPointer(3, GL_FLOAT, 0, (void*)0);
-      glDrawArrays(GL_TRIANGLES, 0, sphere_vertex_count_);
-      glPopMatrix();
+      {
+        glm::mat4 topMVP = glm::scale(
+          glm::translate(offset, glm::vec3(0.0f, 0.0f, scale_.z())),
+          glm::vec3(scale_.x(), scale_.x(), scale_.x()));
+        flatProg->setMat4("mvp", topMVP);
+        glBindVertexArray(sphere_vao_);
+        glDrawArrays(GL_TRIANGLES, 0, sphere_vertex_count_);
+      }
       // Sphere at bottom
-      glTranslatef(0.0f, 0.0f, -(scale_.z()));
-      glPushMatrix();
-      glScalef(scale_.x(), scale_.x(), scale_.x());
-      glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo_);
-      glVertexPointer(3, GL_FLOAT, 0, (void*)0);
-      glDrawArrays(GL_TRIANGLES, 0, sphere_vertex_count_);
-      glPopMatrix();
-      glPopMatrix();
+      {
+        glm::mat4 botMVP = glm::scale(
+          glm::translate(offset, glm::vec3(0.0f, 0.0f, 0.0f)),
+          glm::vec3(scale_.x(), scale_.x(), scale_.x()));
+        flatProg->setMat4("mvp", botMVP);
+        glBindVertexArray(sphere_vao_);
+        glDrawArrays(GL_TRIANGLES, 0, sphere_vertex_count_);
+      }
       break;
     }
     case CollidableObject::TYPE_SPHERE: {
-      glPushMatrix();
-      glScalef(scale_.x(), scale_.x(), scale_.x());
-      glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo_);
-      glVertexPointer(3, GL_FLOAT, 0, (void*)0);
+      glm::mat4 sphereMVP = glm::scale(base, glm::vec3(scale_.x(), scale_.x(), scale_.x()));
+      flatProg->setMat4("mvp", sphereMVP);
+      glBindVertexArray(sphere_vao_);
       glDrawArrays(GL_TRIANGLES, 0, sphere_vertex_count_);
-      glPopMatrix();
       break;
     }
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  // Re-enable client states
-  glEnableClientState(GL_COLOR_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-  glEnable(GL_LIGHTING);
+  glBindVertexArray(0);
   glEnable(GL_CULL_FACE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
