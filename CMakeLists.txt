@@ -7,7 +7,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find required packages
 find_package(OpenGL REQUIRED)
-find_package(SDL3 REQUIRED CONFIG)
+find_package(SDL3 QUIET CONFIG)
+if(NOT SDL3_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
+    add_library(SDL3::SDL3 ALIAS PkgConfig::SDL3)
+endif()
 find_package(OpenAL REQUIRED)
 find_package(glm REQUIRED)
 
