@@ -22,14 +22,11 @@ jobs:
             libglu1-mesa-dev \
             libopenal-dev \
             libglm-dev \
-            libwayland-dev \
-            libxkbcommon-dev \
-            wayland-protocols
 
       - name: Build and install SDL3
         run: |
           git clone --depth 1 https://github.com/libsdl-org/SDL.git SDL3
-          cmake -S SDL3 -B SDL3/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S SDL3 -B SDL3/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSDL_UNIX_CONSOLE_BUILD=ON
           cmake --build SDL3/build
           sudo cmake --install SDL3/build
 
