@@ -38,6 +38,7 @@ void ShaderManager::init() {
   shader_names_.push_back(std::string("res/shaders/particle.frag"));
   shader_names_.push_back(std::string("res/shaders/bumpdec_instanced.vert"));
   shader_names_.push_back(std::string("res/shaders/flat_instanced.vert"));
+  shader_names_.push_back(std::string("res/shaders/resolve.frag"));
   load_shaders();
 }
 
@@ -136,14 +137,10 @@ void ShaderManager::load_shaders() {
   print_program_log(p);
   ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
   programs_.push_back(hdr);
-  glUseProgram(p);
-  GLint exp = glGetUniformLocation(p, "exposure");
-  //GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
+  // Set default exposure from HDR texture (used by resolve shader)
   Texture::ShPtr hdrTex = TextureManager::get().get_texture("res/textures/qwantani.hdr");
   float default_exp = hdrTex ? hdrTex->get_default_exposure() : 1.0f;
-  glUniform1f(exp, default_exp);
   CosmosConfig::get().set_exposure(default_exp);
-  //glUniform1i(shadowSampler, 3);
   
   // The bump program
   p = glCreateProgram();
@@ -299,6 +296,21 @@ void ShaderManager::load_shaders() {
   glUseProgram(p);
   shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(shadowSampler, 3);
+
+  // The resolve program (fullscreen HDR-to-SDR tone mapping)
+  p = glCreateProgram();
+  v = vshaders_[5]->get_id();   // unlit.vert
+  f = fshaders_[9]->get_id();   // resolve.frag
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr resolve(new ShaderProgram("resolve", p));
+  programs_.push_back(resolve);
+  glUseProgram(p);
+  texSampler = glGetUniformLocation(p, "tex");
+  glUniform1i(texSampler, 0);
 
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 #include <glm/glm.hpp>
 
 #include "Transform.hpp"

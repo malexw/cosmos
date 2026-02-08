@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "Material.hpp"
 #include "util.hpp"
@@ -24,7 +24,7 @@ class Mesh {
 		unsigned int triangle_count;
 	};
 
-	Mesh(std::string name): name_(name), triangle_count_(0), on_gpu_(false), vao_(0), vbo_address_(0) {}
+	Mesh(std::string name): name_(name), triangle_count_(0), vao_(0), vbo_address_(0), on_gpu_(false) {}
 
   // Create a 1x1 face-centered quad (2 triangles, Z-facing)
   static Mesh::ShPtr create_quad();

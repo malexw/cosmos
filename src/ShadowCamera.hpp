@@ -1,7 +1,7 @@
 #ifndef COSMOS_SHADOWCAMERA_HPP_
 #define COSMOS_SHADOWCAMERA_HPP_
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 #include <glm/glm.hpp>
 
 #include "util.hpp"

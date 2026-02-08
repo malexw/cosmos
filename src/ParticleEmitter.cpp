@@ -1,8 +1,5 @@
 #include "ParticleEmitter.hpp"
 
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#endif
 
 #include <glm/gtc/type_ptr.hpp>
 

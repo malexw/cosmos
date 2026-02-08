@@ -1,8 +1,8 @@
 #ifndef COSMOS_ENGINE_HPP_
 #define COSMOS_ENGINE_HPP_
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 
 #include <glm/glm.hpp>
 
@@ -32,6 +32,7 @@ public:
     int screen_width() const { return screen_width_; }
     int screen_height() const { return screen_height_; }
     InputManager& input_manager() { return input_manager_; }
+    SDL_Window* window() { return window_; }
 
     Camera& camera() { return camera_; }
     ShadowCamera& shadow_camera() { return shadow_camera_; }
@@ -61,6 +62,12 @@ private:
     ShadowCamera shadow_camera_;
     GLuint shadow_buffer_;
     GLuint hdr_frame_buffer_;
+    GLuint hdr_depth_rb_;
+
+    // HDR display state
+    bool hdr_enabled_;
+    float hdr_headroom_;
+    float sdr_white_level_;
 
     TileGrid tile_grid_;
     TerrainData::ShPtr terrain_;

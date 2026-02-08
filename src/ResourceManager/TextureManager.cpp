@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -154,7 +154,7 @@ void TextureManager::load_textures() {
   glBindTexture(GL_TEXTURE_2D, hdr_index);
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 960, 600, 0, GL_RGBA, GL_FLOAT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 960, 600, 0, GL_RGBA, GL_FLOAT, 0);
   Texture::ShPtr hdrTarget(new Texture("hdr target"));
   hdrTarget->set_index(hdr_index);
   textures_.push_back(hdrTarget);

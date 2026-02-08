@@ -5,7 +5,7 @@
 //#include <vector>
 #include <string>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 //#include "SDL/SDL_opengl.h"
 
 #include "CollidableObject.hpp"
@@ -23,11 +23,12 @@ class PlayerInputHandler : public InputHandler {
  public:
 	typedef std::shared_ptr<PlayerInputHandler> ShPtr;
   
-  PlayerInputHandler(Transform::ShPtr transform, CollidableObject::ShPtr collidable);
+  PlayerInputHandler(SDL_Window* window, Transform::ShPtr transform, CollidableObject::ShPtr collidable);
   
   virtual void handleInput(SDL_Event e);
 
  private:
+  SDL_Window* window_;
   Vector3f velo_;
   Vector3f rot_;
   CollidableObject::ShPtr collidable_;

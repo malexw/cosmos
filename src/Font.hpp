@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "Texture.hpp"
 #include "util.hpp"

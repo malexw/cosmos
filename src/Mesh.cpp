@@ -1,8 +1,5 @@
 #include "Mesh.hpp"
 
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#endif
 
 void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                         Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,

@@ -1,4 +1,4 @@
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "Material.hpp"
 #include "CosmosConfig.hpp"

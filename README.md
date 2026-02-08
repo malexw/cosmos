@@ -2,10 +2,6 @@
 
 My playground for game engine architecture and graphics experiments
 
--ry 270
--t 0 0 -0.5
--t -1.5 0 1.5
-
 ## Dependencies
 
 - CMake 3.16+
@@ -36,16 +32,18 @@ From the project root (so it can find res/):
 ## To-do
 
 - [ ] Dear ImGui integration
-- [ ] Resource packages
+- [x] Resource packages
 - [x] Particle system improvements
-- [ ] SDL3
+- [x] SDL3
+- [x] HDR
+- [ ] SSAO
+- [ ] Multiple light sources and types
+- [ ] Emissive particles
+- [ ] Multiple shadow casters and shadow types
 - [ ] Migrate from OpenAL to Steam Audio + miniaudio
 - [ ] Physically-based rendering
 - [ ] glTF 2.0 support
 - [ ] Animation system
-- [ ] SSAO
-- [ ] HDR
 - [ ] Vulkan backend
 - [ ] Improved keybinding; prep for OpenXR's actions
 - [ ] Support VR with OpenXR
-

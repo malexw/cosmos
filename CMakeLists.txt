@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find required packages
 find_package(OpenGL REQUIRED)
-find_package(SDL2 REQUIRED)
+find_package(SDL3 REQUIRED CONFIG)
 find_package(OpenAL REQUIRED)
 find_package(glm REQUIRED)
 
@@ -25,13 +25,12 @@ target_compile_definitions(cosmos PRIVATE GL_SILENCE_DEPRECATION)
 target_include_directories(cosmos PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/lib
-    ${SDL2_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
 )
 
 target_link_libraries(cosmos
     OpenGL::GL
-    ${SDL2_LIBRARIES}
+    SDL3::SDL3
     ${OPENAL_LIBRARY}
     glm::glm
 )

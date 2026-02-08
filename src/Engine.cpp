@@ -21,6 +21,10 @@ Engine::Engine(int width, int height, const char* title)
       gl_context_(nullptr),
       shadow_buffer_(0),
       hdr_frame_buffer_(0),
+      hdr_depth_rb_(0),
+      hdr_enabled_(false),
+      hdr_headroom_(1.0f),
+      sdr_white_level_(1.0f),
       light_dir_(0.0f),
       light_ambient_(0.0f),
       light_diffuse_(0.0f),
@@ -29,23 +33,23 @@ Engine::Engine(int width, int height, const char* title)
 
     srand(31337);
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cout << "SDL_Init failed: " << SDL_GetError();
         return;
     }
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
 
     window_ = SDL_CreateWindow(
         title,
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         screen_width_, screen_height_,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
+        SDL_WINDOW_OPENGL
     );
     if (window_ == nullptr) {
         std::cout << "SDL_CreateWindow failed: " << SDL_GetError();
@@ -98,8 +102,11 @@ Engine::~Engine() {
     if (hdr_frame_buffer_) {
         glDeleteFramebuffers(1, &hdr_frame_buffer_);
     }
+    if (hdr_depth_rb_) {
+        glDeleteRenderbuffers(1, &hdr_depth_rb_);
+    }
     if (gl_context_) {
-        SDL_GL_DeleteContext(gl_context_);
+        SDL_GL_DestroyContext(gl_context_);
     }
     if (window_) {
         SDL_DestroyWindow(window_);
@@ -120,10 +127,21 @@ void Engine::init_fbos() {
     // HDR FBO
     glGenFramebuffers(1, &hdr_frame_buffer_);
     glBindFramebuffer(GL_FRAMEBUFFER, hdr_frame_buffer_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-        TextureManager::get().get_texture("hdr target")->get_index(), 0);
+    GLuint hdr_tex = TextureManager::get().get_texture("hdr target")->get_index();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdr_tex, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Resize HDR color target to match window
+    glBindTexture(GL_TEXTURE_2D, hdr_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width_, screen_height_, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    // Attach depth renderbuffer
+    glGenRenderbuffers(1, &hdr_depth_rb_);
+    glBindRenderbuffer(GL_RENDERBUFFER, hdr_depth_rb_);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screen_width_, screen_height_);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdr_depth_rb_);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -143,13 +161,20 @@ void Engine::run(GameScript& game) {
         if (!game.update(dt)) break;
 
         update_engine(dt);
+
+        // Query HDR display state
+        SDL_PropertiesID props = SDL_GetWindowProperties(window_);
+        hdr_enabled_ = SDL_GetBooleanProperty(props, SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN, false);
+        hdr_headroom_ = SDL_GetFloatProperty(props, SDL_PROP_WINDOW_HDR_HEADROOM_FLOAT, 1.0f);
+        sdr_white_level_ = SDL_GetFloatProperty(props, SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT, 1.0f);
+
         render();
         SDL_GL_SwapWindow(window_);
 
         timer_.frame_stop();
         float elapsed = timer_.frame_length();
         if (elapsed < target_frame_time) {
-            SDL_Delay(static_cast<int>((target_frame_time - elapsed) * 1000.0f));
+            SDL_Delay(static_cast<Uint32>((target_frame_time - elapsed) * 1000.0f));
         }
     }
 
@@ -222,7 +247,7 @@ void Engine::render() {
         }
     }
 
-    // --- Skybox pass ---
+    // --- HDR pass: all rendering goes to hdr_frame_buffer_ ---
     glBindFramebuffer(GL_FRAMEBUFFER, hdr_frame_buffer_);
     glViewport(0, 0, width, height);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -230,7 +255,8 @@ void Engine::render() {
     glCullFace(GL_BACK);
     glActiveTexture(GL_TEXTURE0);
 
-    if (skybox_) {
+    // Skybox
+    if (skybox_ && config.is_textures() && config.is_skybox()) {
         glm::mat4 skyProj = glm::perspective(glm::radians(45.0f),
             (static_cast<float>(width) / static_cast<float>(height)), 0.1f, 3.0f);
         glm::mat4 skyView = Camera::matrixFromPositionDirection(
@@ -242,35 +268,17 @@ void Engine::render() {
         auto hdrProg = ShaderManager::get().get_shader_program("hdr");
         hdrProg->run();
         hdrProg->setMat4("mvp", skyboxMVP);
-        hdrProg->setf("exposure", config.exposure());
         skybox_->renderable().draw_geometry();
         glFrontFace(GL_CCW);
     }
 
-    // --- Main pass ---
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Clear depth so scene draws on top of skybox
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 mainProj = glm::perspective(glm::radians(45.0f),
         (static_cast<float>(width) / static_cast<float>(height)), 1.0f, 4000.0f);
     glm::mat4 mainView = camera_.transform()->get_inverse_matrix();
     glm::mat4 mainPV = mainProj * mainView;
-
-    // HUD quad (skybox texture on screen)
-    if (config.is_textures() && config.is_skybox()) {
-        glm::mat4 hudModel = glm::scale(
-            glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f)),
-            glm::vec3(2.7f, 1.7f, 1.0f));
-        auto unlitProg = ShaderManager::get().get_shader_program("unlit");
-        unlitProg->run();
-        unlitProg->setMat4("mvp", mainProj * hudModel);
-        glBindTexture(GL_TEXTURE_2D,
-            TextureManager::get().get_texture("hdr target")->get_index());
-        hud_quad_->bind();
-        glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
-    }
-
-    glClear(GL_DEPTH_BUFFER_BIT);
 
     // Compute light direction in eye space
     glm::vec3 lightPosEye = glm::mat3(mainView) * light_dir_;
@@ -403,6 +411,28 @@ void Engine::render() {
         glDepthMask(GL_TRUE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
+
+    // --- Resolve pass: tone-map HDR FBO to screen ---
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, width, height);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    auto resolveProg = ShaderManager::get().get_shader_program("resolve");
+    resolveProg->run();
+    resolveProg->seti("hdr_output", hdr_enabled_ ? 1 : 0);
+    resolveProg->setf("sdr_white", sdr_white_level_);
+    resolveProg->setf("hdr_headroom", hdr_headroom_);
+    resolveProg->setf("exposure", config.exposure());
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
+    glm::mat4 resolveProj = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f);
+    resolveProg->setMat4("mvp", resolveProj);
+    hud_quad_->bind();
+    glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Engine::update_engine(float dt) {

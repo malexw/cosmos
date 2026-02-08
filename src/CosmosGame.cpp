@@ -36,7 +36,7 @@ void CosmosGame::init(Engine& engine) {
     // Input handler (game-specific, not in scene file)
     Camera& cam = engine.camera();
     PlayerInputHandler::ShPtr pih(
-        new PlayerInputHandler(cam.transform(), cam.collidable()));
+        new PlayerInputHandler(engine.window(), cam.transform(), cam.collidable()));
     InputHandler::ShPtr ih(std::dynamic_pointer_cast<InputHandler>(pih));
     engine.input_manager().pushHandler(ih);
 }
