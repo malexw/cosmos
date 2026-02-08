@@ -1,15 +1,21 @@
 #version 150
 
+const float PI = 3.14159265359;
+
 uniform sampler2D tex;
 uniform float exposure;
 
-in vec2 vTexCoords;
+in vec3 vPosition;
 
 out vec4 fragColor;
 
 void main()
 {
-  vec4 texel = texture(tex, vTexCoords.st);
+  vec3 dir = normalize(vPosition);
+  vec2 uv = vec2(0.5 + atan(dir.z, dir.x) / (2.0 * PI),
+                  0.5 - asin(dir.y) / PI);
+
+  vec4 texel = texture(tex, uv);
 
   // SOURCE
   // High Dynamic Range Rendering in OpenGL

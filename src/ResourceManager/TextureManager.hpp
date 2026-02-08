@@ -8,18 +8,27 @@
 #include "Texture.hpp"
 #include "util.hpp"
 
+enum class TexFilter { Nearest, Linear };
+enum class TexWrap { Repeat, Clamp, Mirror };
+
 class TextureManager {
  public:
 	typedef std::shared_ptr<TextureManager> ShPtr;
 
 	TextureManager();
-	
+
   static TextureManager& get();
-  
+
 	// Iterates through the list of loaded textures searching for a texture with the same name as "name".
 	// Returns the first texture found with a matching name. Returns an empty pointer if no matching texture
 	// is found.
 	const Texture::ShPtr get_texture(const std::string name) const;
+
+  // Loads a texture from the given path if it hasn't been loaded yet.
+  // Returns the existing texture if already loaded.
+  Texture::ShPtr load_texture(const std::string& path,
+                              TexFilter filter = TexFilter::Linear,
+                              TexWrap wrap = TexWrap::Repeat);
 
  private:
 	bool loaded_;

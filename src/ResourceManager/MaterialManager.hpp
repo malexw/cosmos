@@ -22,6 +22,13 @@ class MaterialManager {
 	// is found.
 	const Material::ShPtr get_material(const std::string name) const;
 
+  // Loads a material from the given path if it hasn't been loaded yet.
+  // Returns the existing material if already loaded.
+  Material::ShPtr load_material(const std::string& path);
+
+  // Loads all materials from an MTL file, storing each under its newmtl name.
+  void load_mtl_library(const std::string& path);
+
  private:
 	bool loaded_;
 	std::vector<std::string> mat_names_;

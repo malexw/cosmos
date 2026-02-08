@@ -3,6 +3,8 @@
 #include <string>
 
 #include "MaterialManager.hpp"
+#include "ResourceManager.hpp"
+#include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 
 MaterialManager::MaterialManager() 
@@ -16,14 +18,6 @@ MaterialManager::MaterialManager()
  * hand
  */
 void MaterialManager::init() {
-	//mat_names_.push_back(std::string("res/textures/default.png"));
-	//mat_names_.push_back(std::string("res/textures/terminal.png"));
-  mat_names_.push_back(std::string("res/materials/default.mtl"));
-  mat_names_.push_back(std::string("res/materials/terminal.mtl"));
-  mat_names_.push_back(std::string("res/materials/tronish.mtl"));
-  mat_names_.push_back(std::string("res/materials/skybox.mtl"));
-  mat_names_.push_back(std::string("res/materials/ion.mtl"));
-  mat_names_.push_back(std::string("res/materials/hdrbox.mtl"));
   load_materials();
 }
 
@@ -35,25 +29,32 @@ MaterialManager& MaterialManager::get() {
   return instance;
 }
 
-/*
- *
- */
+Material::ShPtr MaterialManager::load_material(const std::string& path) {
+  // Return existing material if already loaded
+  for (const Material::ShPtr& mat : mats_) {
+    if (mat->is_name(path)) {
+      return mat;
+    }
+  }
+
+  std::cout << "Decoding " << path << std::endl;
+  FileBlob::ShPtr file(new FileBlob(path));
+  Material::ShPtr mat = decode(*file);
+  mats_.push_back(mat);
+  return mat;
+}
+
 void MaterialManager::load_materials() {
 	if (loaded_) {
-		std::cout << "TextureMan: Error - textures already loaded" << std::endl;
+		std::cout << "MaterialMan: Error - materials already loaded" << std::endl;
 		return;
 	}
-	
-  int mat_count = mat_names_.size();
-    
-  for (int j = 0; j < mat_count; ++j) {
-    // For now, assuming one material per .mat file.
-    std::cout << "Decoding " << mat_names_[j] << std::endl;
-    FileBlob::ShPtr file(new FileBlob(mat_names_[j]));
-    mats_.push_back(decode(*file));
+
+  for (unsigned int j = 0; j < mat_names_.size(); ++j) {
+    load_material(mat_names_[j]);
 	}
-	
-	loaded_ = true;	
+
+	loaded_ = true;
 }
 
 /*
@@ -65,8 +66,6 @@ const Material::ShPtr MaterialManager::get_material(std::string name) const {
 			return mat;
 		}
 	}
-	
-  std::cout << "Error: material <" << name << "> not found" << std::endl;
 	return Material::ShPtr();
 }
 
@@ -91,20 +90,22 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
 			  // the name of the material is tokens[1]
 		  } else if (tokens[0] == "Ka") {
 			  // Ambient lighting color
-        /*float r = std::stof(tokens[1]);
+        float r = std::stof(tokens[1]);
 			  float g = std::stof(tokens[2]);
-        float b = std::stof(tokens[2]);*/
+        float b = std::stof(tokens[3]);
+        mat->set_ambient_color(Vector3f(r, g, b));
 		  } else if (tokens[0] == "Kd") {
 			  // Diffuse lighting color
         float r = std::stof(tokens[1]);
 			  float g = std::stof(tokens[2]);
-        float b = std::stof(tokens[2]);
-        mat->set_diff_color(Vector3f(r, g, b));
+        float b = std::stof(tokens[3]);
+        mat->set_diffuse_color(Vector3f(r, g, b));
 		  } else if (tokens[0] == "Ks") {
         // Specular lighting color
-        /*float r = std::stof(tokens[1]);
+        float r = std::stof(tokens[1]);
 			  float g = std::stof(tokens[2]);
-        float b = std::stof(tokens[2]);*/
+        float b = std::stof(tokens[3]);
+        mat->set_specular_color(Vector3f(r, g, b));
       } else if (tokens[0] == "Ns") {
         // Shininess
         // float s = std::stof(tokens[1]);
@@ -117,15 +118,20 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
         // ambient texture map
       } else if (tokens[0] == "map_Kd") {
         // diffuse texture map
-        mat->set_texture(TextureManager::get().get_texture("res/textures/" + tokens[1]));  
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_texture(ResourceManager::get().get_texture(tex_path));
       } else if (tokens[0] == "map_Ks") {
-        // specular texture map 
+        // specular texture map
       } else if (tokens[0] == "map_d") {
-        // dissolve texture map 
+        // dissolve texture map
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_decal_tex(ResourceManager::get().get_texture(tex_path));
       } else if (tokens[0] == "map_bump") {
-        mat->set_bump_tex(TextureManager::get().get_texture("res/textures/" + tokens[1]));
-        //mat->set_n11n_tex(TextureManager::get().get_texture("normalization_map");
-        // bump map
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_bump_tex(ResourceManager::get().get_texture(tex_path));
       } else {
         std::cout << ".mtl processing warning: unknown token <" << tokens[0] << ">" << std::endl;
       }
@@ -135,8 +141,79 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
       break;
     }
   }
-  
+
+  if (mat->is_textured()) {
+    mat->set_shader(ShaderManager::get().get_shader_program("bumpdec"));
+  } else {
+    mat->set_shader(ShaderManager::get().get_shader_program("blinn"));
+  }
+
   return mat;
+}
+
+void MaterialManager::load_mtl_library(const std::string& path) {
+  FileBlob::ShPtr file(new FileBlob(path));
+  std::cout << "Loading MTL library " << path << std::endl;
+
+  int index = 0;
+  Material::ShPtr mat;
+  std::vector<std::string> tokens;
+
+  auto finalize_mat = [this](Material::ShPtr& m) {
+    if (!m) return;
+    if (m->is_textured()) {
+      m->set_shader(ShaderManager::get().get_shader_program("bumpdec"));
+    } else {
+      m->set_shader(ShaderManager::get().get_shader_program("blinn"));
+    }
+    mats_.push_back(m);
+  };
+
+  while (index < file->size()) {
+    tokens = Tokenize(*file, index);
+
+    if (tokens.size() > 0) {
+      if (tokens[0] == "#") {
+        // comment
+      } else if (tokens[0] == "newmtl") {
+        finalize_mat(mat);
+        mat = Material::ShPtr(new Material(tokens[1]));
+      } else if (tokens[0] == "Ka") {
+        float r = std::stof(tokens[1]);
+        float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[3]);
+        mat->set_ambient_color(Vector3f(r, g, b));
+      } else if (tokens[0] == "Kd") {
+        float r = std::stof(tokens[1]);
+        float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[3]);
+        mat->set_diffuse_color(Vector3f(r, g, b));
+      } else if (tokens[0] == "Ks") {
+        float r = std::stof(tokens[1]);
+        float g = std::stof(tokens[2]);
+        float b = std::stof(tokens[3]);
+        mat->set_specular_color(Vector3f(r, g, b));
+      } else if (tokens[0] == "map_Kd") {
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_texture(ResourceManager::get().get_texture(tex_path));
+      } else if (tokens[0] == "map_d") {
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_decal_tex(ResourceManager::get().get_texture(tex_path));
+      } else if (tokens[0] == "map_bump") {
+        std::string tex_path = "res/textures/" + tokens[1];
+        ResourceManager::get().load_resource(tex_path);
+        mat->set_bump_tex(ResourceManager::get().get_texture(tex_path));
+      }
+
+      index = newline_index(*file, index+1);
+    } else {
+      break;
+    }
+  }
+
+  finalize_mat(mat);
 }
 
 // Returns the index of the first character following a group of newline characters after the offset

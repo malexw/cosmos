@@ -2,7 +2,8 @@
 
 Texture::Texture(std::string name)
   : name_(name),
-    texture_index_(0) { }
+    texture_index_(0),
+    default_exposure_(1.0f) { }
 
 std::string Texture::get_name() const {
 	return name_;
@@ -26,4 +27,12 @@ int Texture::get_bytecount() const {
 
 void Texture::set_index(int index) {
 	texture_index_ = index;
+}
+
+float Texture::get_default_exposure() const {
+	return default_exposure_;
+}
+
+void Texture::set_default_exposure(float exposure) {
+	default_exposure_ = exposure;
 }

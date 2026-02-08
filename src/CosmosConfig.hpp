@@ -53,6 +53,21 @@ public:
   void set_quit(bool value) { quit_ = value; invalidate(); }
   bool is_quit() const { return quit_; }
 
+  void set_shadow_debug(bool value) { shadow_debug_ = value; }
+  bool is_shadow_debug() const { return shadow_debug_; }
+
+  void set_pcf_mode(int value) { pcf_mode_ = value; }
+  int pcf_mode() const { return pcf_mode_; }
+
+  void set_gl_debug(bool value) { gl_debug_ = value; }
+  bool is_gl_debug() const { return gl_debug_; }
+
+  void set_show_axes(bool value) { show_axes_ = value; }
+  bool is_show_axes() const { return show_axes_; }
+
+  void set_exposure(float value) { exposure_ = value; }
+  float exposure() const { return exposure_; }
+
 private:
   bool valid_;
   bool hdr_;
@@ -66,6 +81,11 @@ private:
   bool shadows_;
   bool sounds_;
   bool quit_;
+  bool shadow_debug_;
+  int pcf_mode_;
+  bool gl_debug_;
+  bool show_axes_;
+  float exposure_;
 
 	DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
 };

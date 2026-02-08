@@ -1,0 +1,12 @@
+[resource type="ParticleEmitter"]
+texture = "res/textures/ion.tres"
+emission_rate = 30
+lifetime = 2.0
+speed = 3.0
+spread = 20
+start_color = "0.3 0.5 1.0 1.0"
+end_color = "0.1 0.2 1.0 0.0"
+start_size = 1.0
+end_size = 0.3
+gravity = "0.0 -1.0 0.0"
+blend_mode = "additive"

@@ -39,7 +39,7 @@ void FontManager::load_fonts() {
   int font_count = font_names_.size();
 
   for (int j = 0; j < font_count; ++j) {
-		const Texture::ShPtr fonttex = texman.get_texture(font_names_.at(j));
+		const Texture::ShPtr fonttex = texman.load_texture(font_names_.at(j));
 
 		if (fonttex) {
 			// Build vertex data for all 256 characters

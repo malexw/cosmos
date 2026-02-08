@@ -103,7 +103,10 @@ void CollidableObject::initGeometry() {
 CollidableObject::CollidableObject(unsigned int id, unsigned int type)
  : id_(id), type_(type), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {
   transform_ = GameObjectManager::get().get_object(id)->get_transform();
-  initGeometry();
+}
+
+CollidableObject::CollidableObject(Transform::ShPtr transform, unsigned int type)
+ : transform_(transform), id_(0), type_(type), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {
 }
 
 void CollidableObject::update(float delta) {
@@ -209,6 +212,7 @@ void CollidableObject::check(CollidableObject::ShPtr rhs) {
 }*/
 
 void CollidableObject::render_collision(const glm::mat4& projView) {
+  initGeometry();
   auto flatProg = ShaderManager::get().get_shader_program("flat");
   flatProg->run();
 

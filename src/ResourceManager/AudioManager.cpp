@@ -113,32 +113,43 @@ AudioManager& AudioManager::get() {
   return instance;
 }
 
+Sound::ShPtr AudioManager::load_sound(const std::string& path) {
+  // Return existing sound if already loaded
+  for (const Sound::ShPtr& sound : sounds_) {
+    if (sound->is_name(path)) {
+      return sound;
+    }
+  }
+
+  ALuint source_index, buffer_index;
+  alGenBuffers(1, &buffer_index);
+  alGenSources(1, &source_index);
+
+  ALenum format = AL_FORMAT_MONO16;
+  ALsizei size = 0;
+  ALsizei freq = 44100;
+  ALvoid* data = nullptr;
+
+  if (loadWAV(path.c_str(), &format, &data, &size, &freq)) {
+    alBufferData(buffer_index, format, data, size, freq);
+    free(data);
+    Sound::ShPtr s(new Sound(path, source_index, buffer_index));
+    sounds_.push_back(s);
+    return s;
+  } else {
+    std::cout << "AudioManager: Failed to load " << path << std::endl;
+    return Sound::ShPtr();
+  }
+}
+
 void AudioManager::load_sounds() {
   if (loaded_) {
-    std::cout << "SoundManager: Error - sounds already loaded" << std::endl;
+    std::cout << "AudioManager: Error - sounds already loaded" << std::endl;
     return;
   }
 
-  int sound_count = sound_names_.size();
-  std::vector<unsigned int> source_indicies(sound_count);
-  std::vector<unsigned int> buffer_indicies(sound_count);
-  alGenBuffers(sound_count, buffer_indicies.data());
-  alGenSources(sound_count, source_indicies.data());
-
-  for (int j = 0; j < sound_count; ++j) {
-    ALenum format = AL_FORMAT_MONO16;
-    ALsizei size = 0;
-    ALsizei freq = 44100;
-    ALvoid* data = nullptr;
-
-    if (loadWAV(sound_names_[j].c_str(), &format, &data, &size, &freq)) {
-      alBufferData(buffer_indicies[j], format, data, size, freq);
-      free(data);
-      Sound::ShPtr s(new Sound(sound_names_[j], source_indicies[j], buffer_indicies[j]));
-      sounds_.push_back(s);
-    } else {
-      std::cout << "AudioManager: Failed to load " << sound_names_[j] << std::endl;
-    }
+  for (unsigned int j = 0; j < sound_names_.size(); ++j) {
+    load_sound(sound_names_[j]);
   }
 
   loaded_ = true;

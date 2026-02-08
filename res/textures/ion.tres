@@ -1,0 +1,4 @@
+[resource type="Texture"]
+source = "res/textures/ion.png"
+filter = "linear"
+wrap = "clamp"

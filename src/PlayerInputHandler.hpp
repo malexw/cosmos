@@ -11,7 +11,6 @@
 #include "CollidableObject.hpp"
 #include "CosmosConfig.hpp"
 #include "InputHandler.hpp"
-#include "Shaders/ShaderProgram.hpp"
 #include "Transform.hpp"
 #include "util.hpp"
 //#include "Vector2f.hpp"
@@ -24,7 +23,7 @@ class PlayerInputHandler : public InputHandler {
  public:
 	typedef std::shared_ptr<PlayerInputHandler> ShPtr;
   
-  PlayerInputHandler(unsigned int id);
+  PlayerInputHandler(Transform::ShPtr transform, CollidableObject::ShPtr collidable);
   
   virtual void handleInput(SDL_Event e);
 
@@ -35,7 +34,6 @@ class PlayerInputHandler : public InputHandler {
   Transform::ShPtr transform_;
   bool grabbing_;
   
-  ShaderProgram::ShPtr hdr_program_;
   CosmosConfig& config_;
   
   DISALLOW_COPY_AND_ASSIGN(PlayerInputHandler);

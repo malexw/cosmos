@@ -2,6 +2,11 @@
 
 #include <glm/glm.hpp>
 
+Camera::Camera()
+    : transform_(new Transform(0)),
+      collidable_(new CollidableObject(transform_, CollidableObject::TYPE_SPHERE)) {
+}
+
 glm::mat4 Camera::matrixFromPositionDirection(Vector3f position, Vector3f direction) {
   Vector3f ndir = -(direction.normalize());
   Vector3f vx = Vector3f::UNIT_Y.cross(ndir).normalize();

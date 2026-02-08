@@ -2,4 +2,4 @@
 cosmos
 build/
 .cache/
-
+.DS_Store

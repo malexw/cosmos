@@ -1,0 +1,27 @@
+{
+  "meshes": [
+    { "name": "grass", "uri": "res/meshes/grass.obj" },
+    { "name": "grass_rise", "uri": "res/meshes/grass_rise.obj" },
+    { "name": "grass_dip", "uri": "res/meshes/grass_dip.obj" },
+    { "name": "river", "uri": "res/meshes/river.obj" },
+    { "name": "river_corner", "uri": "res/meshes/river_corner.obj" },
+    { "name": "cliff", "uri": "res/meshes/cliff_top.obj" },
+    { "name": "cliff_top_corner", "uri": "res/meshes/cliff_top_corner.obj" },
+    { "name": "waterfall_top", "uri": "res/meshes/waterfall_top.obj" }
+  ],
+  "instances": [
+    { "mesh": "grass", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1] },
+    { "mesh": "grass_rise", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 3,0,0,1] },
+    { "mesh": "river", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 6,0,0,1] },
+    { "mesh": "grass_dip", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-3,1] },
+    { "mesh": "grass", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 3,0,-3,1] },
+    { "mesh": "river", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 6,0,-3,1] },
+    { "mesh": "grass", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-6,1] },
+    { "mesh": "grass", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 3,0,-6,1] },
+    { "mesh": "river", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 6,0,-6,1] },
+    { "mesh": "cliff", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-9,1] },
+    { "mesh": "cliff", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 3,0,-9,1] },
+    { "mesh": "waterfall_top", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 6,0,-9,1] },
+    { "mesh": "cliff_top_corner", "transform": [1,0,0,0, 0,1,0,0, 0,0,1,0, 9,0,-9,1] }
+  ]
+}

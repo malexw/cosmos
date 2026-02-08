@@ -9,6 +9,7 @@
 #include "CollidableObject.hpp"
 #include "Matrix4f.hpp"
 #include "Quaternion.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -19,17 +20,16 @@ class Camera {
  public:
 	typedef std::shared_ptr<Camera> ShPtr;
 
-	Camera(): collision_radius_(3.0f), scale_(Vector3f::ONES) {}
+	Camera();
 
-  Camera& set_collidable(CollidableObject::ShPtr c) { collidable_ = c; return *this; }
-  CollidableObject::ShPtr get_collidable() { return collidable_; }
+  Transform::ShPtr transform() { return transform_; }
+  CollidableObject::ShPtr collidable() { return collidable_; }
 
   static glm::mat4 matrixFromPositionDirection(Vector3f position, Vector3f direction);
 
  private:
+  Transform::ShPtr transform_;
   CollidableObject::ShPtr collidable_;
-  float collision_radius_;
-  Vector3f scale_;
 
   DISALLOW_COPY_AND_ASSIGN(Camera);
 };

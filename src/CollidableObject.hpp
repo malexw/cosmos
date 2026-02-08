@@ -27,6 +27,7 @@ class CollidableObject {
   static const unsigned int TYPE_CAPSULE;
 
   CollidableObject(unsigned int id, unsigned int type);
+  CollidableObject(Transform::ShPtr transform, unsigned int type);
   unsigned int id() const { return id_; }
   unsigned int get_type() const { return type_; }
 

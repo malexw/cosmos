@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include <SDL2/SDL_opengl.h>
 
@@ -15,24 +16,7 @@ TextureManager::TextureManager()
 	init();
 }
 
-/*
- * This initialization function is just to make it easier to manually edit the 'to-be-loaded' textures list.
- * In the future, TextureManager should read from some kind of resource file so we don't need to specify these
- * by hand
- */
 void TextureManager::init() {
-  // RGB
-	tex_names_.push_back(std::string("res/textures/default.png"));
-	tex_names_.push_back(std::string("res/textures/terminal.png"));
-  tex_names_.push_back(std::string("res/textures/tronish.png"));
-  tex_names_.push_back(std::string("res/textures/earth.png"));
-  tex_names_.push_back(std::string("res/textures/normal_map.png"));
-  // RGBA
-  tex_names_.push_back(std::string("res/textures/decal-test.png"));
-  tex_names_.push_back(std::string("res/textures/ion.png"));
-  tex_names_.push_back(std::string("res/textures/spacebox.png"));
-  // HDR
-  tex_names_.push_back(std::string("res/textures/grace_cross.hdr"));
   load_textures();
 }
 
@@ -44,114 +28,139 @@ TextureManager& TextureManager::get() {
   return instance;
 }
 
+Texture::ShPtr TextureManager::load_texture(const std::string& path,
+                                            TexFilter filter, TexWrap wrap) {
+  // Return existing texture if already loaded
+  for (const Texture::ShPtr& tex : textures_) {
+    if (tex->is_name(path)) {
+      return tex;
+    }
+  }
+
+  GLenum gl_filter = (filter == TexFilter::Nearest) ? GL_NEAREST : GL_LINEAR;
+  GLenum gl_wrap;
+  switch (wrap) {
+    case TexWrap::Clamp:  gl_wrap = GL_CLAMP_TO_EDGE; break;
+    case TexWrap::Mirror: gl_wrap = GL_MIRRORED_REPEAT; break;
+    default:              gl_wrap = GL_REPEAT; break;
+  }
+
+  GLuint tex_index;
+  glGenTextures(1, &tex_index);
+
+  if (stbi_is_hdr(path.c_str())) {
+    // HDR float image via RGBE
+    int image_width, image_height;
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f) {
+      std::cout << "TextureMan: Error loading texture " << path << std::endl;
+      return Texture::ShPtr();
+    }
+
+    RGBE_ReadHeader(f, &image_width, &image_height, NULL);
+    float* image = (float *)malloc(sizeof(float) * 3 * image_width * image_height);
+    RGBE_ReadPixels_RLE(f, image, image_width, image_height);
+    fclose(f);
+
+    glBindTexture(GL_TEXTURE_2D, tex_index);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, image_width, image_height, 0, GL_RGB,
+        GL_FLOAT, image);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrap);
+
+    // Compute log-average luminance for a reasonable default exposure
+    int pixel_count = image_width * image_height;
+    double log_sum = 0.0;
+    for (int p = 0; p < pixel_count; ++p) {
+      float r = image[p * 3];
+      float g = image[p * 3 + 1];
+      float b = image[p * 3 + 2];
+      float lum = 0.30f * r + 0.59f * g + 0.11f * b;
+      log_sum += std::log(0.001f + lum);
+    }
+    float avg_lum = std::exp(log_sum / pixel_count);
+    float default_exposure = 0.18f / avg_lum;
+    std::cout << "HDR avg luminance: " << avg_lum << ", default exposure: " << default_exposure << std::endl;
+
+    Texture::ShPtr tex(new Texture(path));
+    tex->set_index(tex_index);
+    tex->set_default_exposure(default_exposure);
+    textures_.push_back(tex);
+
+    free(image);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return tex;
+  } else {
+    // LDR image — auto-detect channel count
+    int width, height, channels;
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (!data) {
+      std::cout << "TextureMan: Error loading texture " << path << std::endl;
+      return Texture::ShPtr();
+    }
+
+    GLenum internal_fmt = (channels == 4) ? GL_RGBA8 : GL_RGB8;
+    GLenum fmt = (channels == 4) ? GL_RGBA : GL_RGB;
+
+    glBindTexture(GL_TEXTURE_2D, tex_index);
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_fmt, width, height, 0, fmt,
+        GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrap);
+
+    Texture::ShPtr tex(new Texture(path));
+    tex->set_index(tex_index);
+    textures_.push_back(tex);
+
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return tex;
+  }
+}
+
 /*
  * load_textures iterates through each texture in the tex_names_ collection and attempts to load the texture.
- * This implementation is guided mostly by NeHe Lesson 06:
- * http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=06
  */
 void TextureManager::load_textures() {
 	if (loaded_) {
 		std::cout << "TextureMan: Error - textures already loaded" << std::endl;
 		return;
 	}
-	
-	unsigned int tex_count = tex_names_.size() + 2;
-	std::vector<unsigned int> tex_indicies(tex_count);
-	glGenTextures(tex_count, tex_indicies.data());
 
-	// TODO: OMG hacks - FIXME soon!
-	// RGB
-  for (unsigned int i = 0; i < tex_count-6; ++i) {
-		int width, height, channels;
-		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 3);
-		if (data) {
-			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB,
-					GL_UNSIGNED_BYTE, data);
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  for (unsigned int i = 0; i < tex_names_.size(); ++i) {
+    load_texture(tex_names_[i]);
+  }
 
-			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-			tex->set_index(tex_indicies[i]);
-			textures_.push_back(tex);
-
-			stbi_image_free(data);
-		} else {
-			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-		}
-	}
-  // RGBA
-  for (unsigned int i = tex_count-6; i < tex_count-3; ++i) {
-		int width, height, channels;
-		unsigned char* data = stbi_load(tex_names_.at(i).c_str(), &width, &height, &channels, 4);
-		if (data) {
-			glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
-					GL_UNSIGNED_BYTE, data);
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-			Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-			tex->set_index(tex_indicies[i]);
-			textures_.push_back(tex);
-
-			stbi_image_free(data);
-		} else {
-			std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-		}
-	}
-  // HDR
-  for (unsigned int i = tex_count-3; i < tex_count-2; ++i) {
-		int image_width, image_height;
-    FILE* f = fopen(tex_names_[i].c_str(),"rb");
-    if (f) {
-      RGBE_ReadHeader(f,&image_width,&image_height,NULL);
-      float* image = (float *)malloc(sizeof(float)*3*image_width*image_height);
-      RGBE_ReadPixels_RLE(f,image,image_width,image_height);
-      fclose(f);
-
-      glBindTexture(GL_TEXTURE_2D, tex_indicies[i]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, image_width, image_height, 0, GL_RGB,
-          GL_FLOAT, image);
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-      Texture::ShPtr tex (new Texture(tex_names_.at(i)));
-      tex->set_index(tex_indicies[i]);
-      textures_.push_back(tex);
-
-      free(image);
-    } else {
-      std::cout << "TextureMan: Error loading texture " << tex_names_.at(i) << std::endl;
-    }
-	}
   // Generate a texture as a target for the shadow mapping FBO
-  glBindTexture(GL_TEXTURE_2D, tex_indicies[tex_count-2]);
+  GLuint shadow_index;
+  glGenTextures(1, &shadow_index);
+  glBindTexture(GL_TEXTURE_2D, shadow_index);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
   Texture::ShPtr shadow (new Texture("shadow_map"));
-  shadow->set_index(tex_indicies[tex_count-2]);
+  shadow->set_index(shadow_index);
   textures_.push_back(shadow);
-  
+
   // Generate a texture as a target for the HDR rendering FBO
-  glBindTexture(GL_TEXTURE_2D, tex_indicies[tex_count-1]);
+  GLuint hdr_index;
+  glGenTextures(1, &hdr_index);
+  glBindTexture(GL_TEXTURE_2D, hdr_index);
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 960, 600, 0, GL_RGBA, GL_FLOAT, 0);
   Texture::ShPtr hdrTarget(new Texture("hdr target"));
-  hdrTarget->set_index(tex_indicies[tex_count-1]);
+  hdrTarget->set_index(hdr_index);
   textures_.push_back(hdrTarget);
-  
-  /*glBindTexture(GL_TEXTURE_CUBE_MAP, tex_indicies[tex_count]);
-  generate_norm_map();
-  Texture::ShPtr tex (new Texture("normalization_map"));
-  tex->set_index(tex_indicies[tex_count]);
-  textures_.push_back(tex);*/
+
 	glBindTexture(GL_TEXTURE_2D, 0);
-	loaded_ = true;	
+	loaded_ = true;
 }
 
 /*

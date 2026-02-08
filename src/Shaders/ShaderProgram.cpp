@@ -11,19 +11,13 @@ bool ShaderProgram::is_name(const std::string& rhs) const {
 }
 
 void ShaderProgram::setf(std::string varname, float value) {
-  glUseProgram(shader_id_);
   GLint var_index = glGetUniformLocation(shader_id_, varname.c_str());
-  // TODO check for errors here
-  glUniform1f(var_index, value);
-  glUseProgram(0);
+  if (var_index >= 0) glUniform1f(var_index, value);
 }
 
 void ShaderProgram::seti(std::string varname, int value) {
-  glUseProgram(shader_id_);
   GLint var_index = glGetUniformLocation(shader_id_, varname.c_str());
-  // TODO check for errors here
-  glUniform1i(var_index, value);
-  glUseProgram(0);
+  if (var_index >= 0) glUniform1i(var_index, value);
 }
 
 void ShaderProgram::setMat4(const char* name, const glm::mat4& mat) const {

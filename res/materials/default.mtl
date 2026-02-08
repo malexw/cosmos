@@ -5,8 +5,8 @@ Ks 1.0 1.0 1.0
 Ns 10.0
 d 1.0
 illum 2
-map_Ka default.png
-map_Kd default.png
-map_Ks default.png
-map_d default.png
-map_bump normal_map.png
+map_Ka default.tres
+map_Kd default.tres
+map_Ks default.tres
+map_d decal-test.tres
+map_bump normal_map.tres

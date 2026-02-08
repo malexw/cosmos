@@ -29,11 +29,15 @@ public:
 	// Set the index, AKA "OpenGL Name" of the texture - used when loading the texture.
 	void set_index(int index);
 
+	float get_default_exposure() const;
+	void set_default_exposure(float exposure);
+
 private:
 	std::string name_;
 	int texture_index_;
 	int gltype_;
 	int bytecount_;
+	float default_exposure_;
 
 	DISALLOW_COPY_AND_ASSIGN(Texture);
 };

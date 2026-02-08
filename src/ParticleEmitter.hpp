@@ -2,19 +2,18 @@
 #define COSMOS_PARTICLEEMITTER_H_
 
 #include <memory>
-#include <iostream>
+#include <vector>
 #include <math.h>
-//#include <vector>
-//#include <string>
 
-//#include "SDL/SDL.h"
+#include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
 
-#include "Camera.hpp"
-#include "Matrix4f.hpp"
+#include "Mesh.hpp"
 #include "Particle.hpp"
+#include "ParticleEmitterDef.hpp"
 #include "Quaternion.hpp"
-#include "Renderable.hpp"
+#include "Texture.hpp"
+#include "Transform.hpp"
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -25,33 +24,41 @@ class ParticleEmitter {
  public:
 	typedef std::shared_ptr<ParticleEmitter> ShPtr;
 
-	ParticleEmitter(Renderable::ShPtr renderable, Vector3f position, Vector3f normal, Vector3f up, float speed, float lifetime, float radius, float generation_rate/*, int count*/)
-   : renderable_(renderable), speed_(speed), pos_(position), norm_(normal), up_(up),
-     part_count_((generation_rate*lifetime)+1), radius_(radius), generation_rate_(1/generation_rate),
-     generation_remainder_(1/generation_rate), next_part_(0), lifetime_(lifetime) {
-    init();
-  }
+	ParticleEmitter(ParticleEmitterDef::ShPtr def, Vector3f position, Vector3f direction, Vector3f up);
+  ~ParticleEmitter();
 
   void update(float delta);
   void render(Transform::ShPtr cam, const glm::mat4& projView);
   void rotate(const Vector3f& axis, float angle);
+  void set_position(const Vector3f& pos) { pos_ = pos; }
+  ParticleBlendMode blend_mode() const { return def_->blend_mode; }
 
  private:
-  Renderable::ShPtr renderable_; // Should not use these - designed for objects
-  float speed_;
+  struct ParticleInstance {
+      glm::vec3 position;  // 12 bytes
+      glm::vec4 color;     // 16 bytes
+      float scale;          // 4 bytes
+  };                        // 32 bytes total
+
+  ParticleEmitterDef::ShPtr def_;
+  Mesh::ShPtr mesh_;
+  Texture::ShPtr texture_;
+
   Vector3f pos_;
   Vector3f norm_;
   Vector3f up_;
   std::vector<Particle::ShPtr> parts_;
   int part_count_;
-  float radius_;
   float generation_rate_;
   float generation_remainder_;
   int next_part_;
-  float lifetime_;
-  
+
+  GLuint particle_vao_;
+  GLuint instance_vbo_;
+  int max_particles_;
+
   void init();
-  
+
   DISALLOW_COPY_AND_ASSIGN(ParticleEmitter);
 };
 

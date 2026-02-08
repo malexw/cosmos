@@ -1,0 +1,56 @@
+[resource type="Scene"]
+
+[terrain]
+source = res/terrain/world1.terrain.json
+
+[skybox]
+mesh = "res/meshes/hdrbox.obj"
+
+[camera]
+position = "-1.5 5.0 5.0"
+direction = "0.5 -0.25 -0.75"
+collision_scale = "3.0 3.0 3.0"
+
+[light]
+direction = "-0.428714 -0.848049 -0.311478"
+ambient = "0.0 0.0 0.0 1.0"
+diffuse = "1.0 1.0 1.0 1.0"
+specular = "1.0 1.0 1.0 1.0"
+ambient_global = "0.0 0.0 0.0 1.0"
+
+[shadow]
+position = "22.9 25.4 -0.7"
+direction = "-0.428714 -0.848049 -0.311478"
+
+[object "pit"]
+mesh = "res/meshes/fire_pit.obj"
+position = "2.6 0.3 -4.6"
+
+[object "firewood"]
+mesh = "res/meshes/firewood.obj"
+position = "3.1 0.3 -5.1"
+
+[object "spinning_cube"]
+mesh = "res/meshes/cube.obj"
+position = "10.0 2.0 -10.0"
+collision_type = "sphere"
+collision_scale = "1.732 1.732 10.0"
+
+[emitter "ion_fountain"]
+source = "res/particles/ion_fountain.tres"
+position = "7.0 1.0 -20.0"
+direction = "0.0 1.0 0.0"
+up = "1.0 0.0 0.0"
+
+[emitter "campfire"]
+source = "res/particles/campfire.tres"
+position = "3.5 0.6 -5.5"
+direction = "0.0 1.0 0.0"
+up = "1.0 0.0 0.0"
+
+[sound "engine_hum"]
+source = "res/sounds/starshipmono.wav"
+position = "7.0 1.0 -20.0"
+gain = 1.0
+looping = true
+rolloff = 0.5

@@ -1,0 +1,4 @@
+[resource type="Texture"]
+source = "res/textures/terminal.png"
+filter = "nearest"
+wrap = "clamp"

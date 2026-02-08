@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include <glm/glm.hpp>
+
 #include "Shaders/VertexShader.hpp"
 #include "Shaders/FragmentShader.hpp"
 #include "Shaders/ShaderProgram.hpp"
@@ -23,8 +25,13 @@ class ShaderManager {
 	// is found.
 	const ShaderProgram::ShPtr get_shader_program(const std::string& name) const;
 
+	void set_per_frame(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& lightPosEye, const glm::mat4& shadowMatrix);
+	void set_per_draw(const glm::mat4& model, const glm::mat3& normalMatrix);
+
  private:
 	bool loaded_;
+	GLuint per_frame_ubo_;
+	GLuint per_draw_ubo_;
 	std::vector<std::string> shader_names_;
 	std::vector<ShaderProgram::ShPtr> programs_;
 	std::vector<VertexShader::ShPtr> vshaders_;

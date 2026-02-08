@@ -17,10 +17,14 @@ class MeshManager {
 	
   static MeshManager& get();
 	
-	// Iterates through the list of loaded textures searching for a texture with the same name as "name".
-	// Returns the first texture found with a matching name. Returns an empty pointer if no matching texture
+	// Iterates through the list of loaded meshes searching for a mesh with the same name as "name".
+	// Returns the first mesh found with a matching name. Returns an empty pointer if no matching mesh
 	// is found.
 	const Mesh::ShPtr get_mesh(const std::string name) const;
+
+  // Loads a mesh from the given path if it hasn't been loaded yet.
+  // Returns the existing mesh if already loaded.
+  Mesh::ShPtr load_mesh(const std::string& path);
 
  private:
 	bool loaded_;

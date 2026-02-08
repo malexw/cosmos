@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 
-#include "Material.hpp"
 #include "Mesh.hpp"
 #include "util.hpp"
 
@@ -18,7 +17,6 @@ class Renderable {
 	Renderable(unsigned int id): id_(id) {}
   unsigned int id() const { return id_; }
   
-  Renderable& set_material(Material::ShPtr mat) { material_ = mat; textured_ = mat->is_textured(); return *this; }
   Renderable& set_mesh(Mesh::ShPtr mesh) { mesh_ = mesh; return *this; }
   
   void render() const;
@@ -26,11 +24,9 @@ class Renderable {
 
  protected:
   //Single mesh per object for now
-  Material::ShPtr material_;
   Mesh::ShPtr mesh_;
 
  private:
-  bool textured_;
   const unsigned int id_;
   
   DISALLOW_COPY_AND_ASSIGN(Renderable);

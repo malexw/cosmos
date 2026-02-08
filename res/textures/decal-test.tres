@@ -1,0 +1,4 @@
+[resource type="Texture"]
+source = "res/textures/decal-test.png"
+filter = "linear"
+wrap = "repeat"

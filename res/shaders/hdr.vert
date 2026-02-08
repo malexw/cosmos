@@ -1,15 +1,14 @@
 #version 150
 
 in vec3 position;
-in vec2 texCoord;
 
 uniform mat4 mvp;
 
-out vec2 vTexCoords;
+out vec3 vPosition;
 
 void main()
 {
-  vTexCoords = texCoord;
+  vPosition = position;
 
   gl_Position = mvp * vec4(position, 1.0);
 }

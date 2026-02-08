@@ -2,15 +2,7 @@
 #define COSMOS_PARTICLE_H_
 
 #include <memory>
-#include <iostream>
-//#include <vector>
-//#include <string>
 
-#include <glm/glm.hpp>
-
-#include "Camera.hpp"
-#include "Matrix4f.hpp"
-#include "Renderable.hpp"
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -21,25 +13,36 @@ class Particle {
  public:
 	typedef std::shared_ptr<Particle> ShPtr;
 
-  // constant speed particles for now
-	Particle(Renderable::ShPtr renderable)
-   : renderable_(renderable), pos_(), velo_(), lifetime_(0.0f) {}
+	Particle()
+   : pos_(), velo_(), lifetime_(0.0f), initial_lifetime_(1.0f) {}
 
-  void update(float delta);
-  void render(Transform::ShPtr cam, const glm::mat4& projView);
+  void update(float delta, const Vector3f& gravity);
 
   void reset(Vector3f position, Vector3f velocity, float lifetime) {
     pos_ = position;
     velo_ = velocity;
     lifetime_ = lifetime;
+    initial_lifetime_ = lifetime;
+  }
+
+  bool is_alive() const { return lifetime_ > 0.0f; }
+  const Vector3f& position() const { return pos_; }
+
+  // Returns 0 at birth, 1 at death
+  float age_normalized() const {
+    if (initial_lifetime_ <= 0.0f) return 1.0f;
+    float t = 1.0f - (lifetime_ / initial_lifetime_);
+    if (t < 0.0f) return 0.0f;
+    if (t > 1.0f) return 1.0f;
+    return t;
   }
 
  private:
-  Renderable::ShPtr renderable_; // Shouldn't use this - designed for GameObjects
   Vector3f pos_; // position in world coordinates
   Vector3f velo_;
   float lifetime_; // lifetime in seconds
-  
+  float initial_lifetime_;
+
   DISALLOW_COPY_AND_ASSIGN(Particle);
 };
 
