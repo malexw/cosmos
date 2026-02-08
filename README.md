@@ -16,7 +16,8 @@ Ubuntu 25.04+ / Debian:
 
 On Ubuntu 24.04 and earlier, SDL3 is not in the package repos and must be built from source:
 
-    sudo apt install cmake ninja-build libglu1-mesa-dev libopenal-dev libglm-dev
+    sudo apt install cmake ninja-build libglu1-mesa-dev libopenal-dev libglm-dev \
+        libwayland-dev libxkbcommon-dev wayland-protocols
     git clone --depth 1 https://github.com/libsdl-org/SDL.git SDL3
     cmake -S SDL3 -B SDL3/build -G Ninja -DCMAKE_BUILD_TYPE=Release
     cmake --build SDL3/build

@@ -21,7 +21,10 @@ jobs:
             ninja-build \
             libglu1-mesa-dev \
             libopenal-dev \
-            libglm-dev
+            libglm-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            wayland-protocols
 
       - name: Build and install SDL3
         run: |
