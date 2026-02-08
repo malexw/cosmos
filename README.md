@@ -6,15 +6,15 @@ My playground for game engine architecture and graphics experiments
 
 - CMake 3.16+
 - Ninja
-- SDL2
+- SDL3
 - OpenGL
 - OpenAL
 
 Ubuntu/Debian:
-    sudo apt install cmake ninja-build libsdl2-dev libglu1-mesa-dev libopenal-dev
+    sudo apt install cmake ninja-build libsdl3-dev libglu1-mesa-dev libopenal-dev
 
 macOS:
-    brew install cmake ninja sdl2 openal-soft
+    brew install cmake ninja sdl3 openal-soft
     export CMAKE_PREFIX_PATH="/opt/homebrew/opt/openal-soft"
 
 ## Build
