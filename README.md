@@ -41,11 +41,12 @@ From the project root (so it can find res/):
 
 ## To-do
 
-- [ ] Dear ImGui integration
+- [x] Dear ImGui integration
 - [x] Resource packages
 - [x] Particle system improvements
 - [x] SDL3
 - [x] HDR
+- [x] Improved keybinding; prep for OpenXR's actions
 - [ ] SSAO
 - [ ] Multiple light sources and types
 - [ ] Emissive particles
@@ -55,5 +56,4 @@ From the project root (so it can find res/):
 - [ ] glTF 2.0 support
 - [ ] Animation system
 - [ ] Vulkan backend
-- [ ] Improved keybinding; prep for OpenXR's actions
 - [ ] Support VR with OpenXR

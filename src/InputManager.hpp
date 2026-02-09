@@ -1,37 +1,25 @@
 #ifndef COSMOS_INPUTMANAGER_H_
 #define COSMOS_INPUTMANAGER_H_
 
-#include <memory>
-//#include <vector>
-#include <list>
-#include <string>
-
-#include <SDL3/SDL.h>
-//#include "SDL/SDL_opengl.h"
-
-#include "InputHandler.hpp"
+#include "ActionMap.hpp"
+#include "ActionState.hpp"
+#include "InputState.hpp"
 #include "util.hpp"
-//#include "Vector2f.hpp"
-//#include "Vector3f.hpp"
 
-/*
- * A class for managing things that can handle input
- */
 class InputManager {
- public:
-	typedef std::shared_ptr<InputManager> ShPtr;
+public:
+    InputManager() {}
 
-	InputManager() {}
-  
-  void handleInput() const;
-  void pushHandler(InputHandler::ShPtr handler) { handlers_.push_back(handler); }
-  void popHandler() { handlers_.pop_back(); }
-  InputHandler::ShPtr getHandler(unsigned int id);
+    void update();
+    const InputState& input_state() const { return input_state_; }
+    const ActionState& action_state() const { return action_state_; }
 
- private:
-  std::list<InputHandler::ShPtr> handlers_;
-  
-  DISALLOW_COPY_AND_ASSIGN(InputManager);
+private:
+    InputState input_state_;
+    ActionMap action_map_;
+    ActionState action_state_;
+
+    DISALLOW_COPY_AND_ASSIGN(InputManager);
 };
 
 #endif

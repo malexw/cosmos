@@ -3,6 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui_impl_sdl3.h>
+
 #include "Engine.hpp"
 #include "CosmosConfig.hpp"
 #include "GameObjectManager.hpp"
@@ -14,9 +16,9 @@
 #include "ResourceManager/TextureManager.hpp"
 #include "Vector3f.hpp"
 
-Engine::Engine(int width, int height, const char* title)
-    : screen_width_(width),
-      screen_height_(height),
+Engine::Engine(const DisplayConfig& display, const char* title)
+    : screen_width_(0),
+      screen_height_(0),
       window_(nullptr),
       gl_context_(nullptr),
       shadow_buffer_(0),
@@ -33,7 +35,7 @@ Engine::Engine(int width, int height, const char* title)
 
     srand(31337);
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         std::cout << "SDL_Init failed: " << SDL_GetError();
         return;
     }
@@ -46,16 +48,20 @@ Engine::Engine(int width, int height, const char* title)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
 
-    window_ = SDL_CreateWindow(
-        title,
-        screen_width_, screen_height_,
-        SDL_WINDOW_OPENGL
-    );
+    if (display.windowed_fullscreen) {
+        window_ = SDL_CreateWindow(title, 0, 0,
+            SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+    } else {
+        window_ = SDL_CreateWindow(title, display.width, display.height,
+            SDL_WINDOW_OPENGL);
+    }
     if (window_ == nullptr) {
         std::cout << "SDL_CreateWindow failed: " << SDL_GetError();
         SDL_Quit();
         return;
     }
+
+    SDL_GetWindowSizeInPixels(window_, &screen_width_, &screen_height_);
 
     gl_context_ = SDL_GL_CreateContext(window_);
     if (gl_context_ == nullptr) {
@@ -67,6 +73,11 @@ Engine::Engine(int width, int height, const char* title)
     }
 
     SDL_RaiseWindow(window_);
+
+    // Enable adaptive VSync, fall back to standard VSync
+    if (!SDL_GL_SetSwapInterval(-1)) {
+        SDL_GL_SetSwapInterval(1);
+    }
 
     glViewport(0, 0, screen_width_, screen_height_);
 
@@ -93,6 +104,16 @@ Engine::Engine(int width, int height, const char* title)
     debug_axes_.init();
 
     std::cout << "Resources loaded" << std::endl;
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL3_InitForOpenGL(window_, gl_context_);
+    ImGui_ImplOpenGL3_Init("#version 410");
 }
 
 Engine::~Engine() {
@@ -105,6 +126,9 @@ Engine::~Engine() {
     if (hdr_depth_rb_) {
         glDeleteRenderbuffers(1, &hdr_depth_rb_);
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
     if (gl_context_) {
         SDL_GL_DestroyContext(gl_context_);
     }
@@ -151,11 +175,15 @@ void Engine::run(GameScript& game) {
     init_fbos();
     game.init(*this);
 
-    const float target_frame_time = 1.0f / 60.0f;
-
     while (true) {
         timer_.frame_start();
-        input_manager_.handleInput();
+
+        input_manager_.update();
+
+        // Begin ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
 
         float dt = timer_.frame_delta();
         if (!game.update(dt)) break;
@@ -169,13 +197,12 @@ void Engine::run(GameScript& game) {
         sdr_white_level_ = SDL_GetFloatProperty(props, SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT, 1.0f);
 
         render();
-        SDL_GL_SwapWindow(window_);
 
-        timer_.frame_stop();
-        float elapsed = timer_.frame_length();
-        if (elapsed < target_frame_time) {
-            SDL_Delay(static_cast<Uint32>((target_frame_time - elapsed) * 1000.0f));
-        }
+        // Render ImGui on top of the resolved framebuffer
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        SDL_GL_SwapWindow(window_);
     }
 
     game.shutdown();

@@ -3,32 +3,22 @@
 
 #include <sys/time.h>
 
-#include <memory>
-
 #include "util.hpp"
 
 class Timer {
  public:
-  typedef std::shared_ptr<Timer> ShPtr;
-  
-  Timer(): paused_(false), frame_counter_(1) { gettimeofday(&frame_start_, NULL); }
+  static constexpr float PAUSE_THRESHOLD = 1.0f / 10.0f;
+  static constexpr float PAUSE_DT = 1.0f / 30.0f;
+
+  Timer() { gettimeofday(&frame_start_, NULL); last_start_ = frame_start_; }
 
   void frame_start();
-  void frame_stop();
-  void pause() { paused_ = true; }
-  void unpause() { paused_ = false; }
-  bool is_paused() { return paused_; }
-
-  float frame_length() { return (frame_end_.tv_sec - frame_start_.tv_sec) + (frame_end_.tv_usec - frame_start_.tv_usec) / 1000000.0f; }
-  float frame_delta() { return (frame_start_.tv_sec - last_start_.tv_sec) + (frame_start_.tv_usec - last_start_.tv_usec) / 1000000.0f; }
+  float frame_delta() const;
 
  private:
-  timeval frame_start_, frame_end_;
+  timeval frame_start_;
   timeval last_start_;
-  bool paused_;
-  float fps_counter_;
-  int frame_counter_;
-  
+
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 

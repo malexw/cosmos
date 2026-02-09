@@ -1,10 +1,13 @@
 #ifndef COSMOS_COSMOSGAME_HPP_
 #define COSMOS_COSMOSGAME_HPP_
 
+#include <memory>
+
 #include "GameScript.hpp"
 #include "GameObject.hpp"
 #include "CollidableObject.hpp"
 #include "ParticleEmitter.hpp"
+#include "PlayerController.hpp"
 #include "Renderable.hpp"
 #include "SkyBox.hpp"
 #include "Sound.hpp"
@@ -32,6 +35,11 @@ private:
 
     // Game state
     float rotation_angle_;
+
+    // Debug menu
+    bool debug_menu_open_ = false;
+
+    std::unique_ptr<PlayerController> player_controller_;
 };
 
 #endif

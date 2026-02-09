@@ -1,21 +1,14 @@
-#include <iostream>
-
 #include "InputManager.hpp"
 
-void InputManager::handleInput() const {
-  SDL_Event e;
-  while (SDL_PollEvent(&e)) {
-    handlers_.back()->handleInput(e);
-  }
-}
+#include <imgui_impl_sdl3.h>
+#include <SDL3/SDL.h>
 
-InputHandler::ShPtr InputManager::getHandler(unsigned int id) {
-  for (const InputHandler::ShPtr& handler : handlers_) {
-    if (handler->id() == id) {
-      return handler;
+void InputManager::update() {
+    input_state_.begin_frame();
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        input_state_.update(e);
+        ImGui_ImplSDL3_ProcessEvent(&e);
     }
-  }
-  
-  std::cout << "ERROR: InputHandler not found" << std::endl;
-  return InputHandler::ShPtr();
+    action_state_ = action_map_.resolve(input_state_, action_state_);
 }

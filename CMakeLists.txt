@@ -1,9 +1,27 @@
 cmake_minimum_required(VERSION 3.16)
 project(cosmos)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(FetchContent)
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG        docking
+)
+FetchContent_MakeAvailable(imgui)
+
+set(IMGUI_SOURCES
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
 
 # Find required packages
 find_package(OpenGL REQUIRED)
@@ -19,7 +37,7 @@ find_package(glm REQUIRED)
 # Auto-discover source files
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp" "lib/*.cpp")
 
-add_executable(cosmos ${SOURCES})
+add_executable(cosmos ${SOURCES} ${IMGUI_SOURCES})
 
 # Enable OpenGL extension prototypes on Linux
 target_compile_definitions(cosmos PRIVATE GL_GLEXT_PROTOTYPES)
@@ -31,6 +49,8 @@ target_include_directories(cosmos PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/lib
     ${OPENAL_INCLUDE_DIR}
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
 )
 
 target_link_libraries(cosmos

@@ -1,5 +1,6 @@
 #include <cstring>
 
+#include "DisplayConfig.hpp"
 #include "Engine.hpp"
 #include "CosmosConfig.hpp"
 #include "CosmosGame.hpp"
@@ -12,7 +13,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    Engine engine(960, 600, "Cosmos");
+    DisplayConfig display = DisplayConfig::load("cosmos.cfg");
+    Engine engine(display, "Cosmos");
     CosmosGame game;
     engine.run(game);
     return 0;

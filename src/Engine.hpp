@@ -4,12 +4,16 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+
 #include <glm/glm.hpp>
 
 #include <vector>
 
 #include "Camera.hpp"
 #include "DebugAxes.hpp"
+#include "DisplayConfig.hpp"
 #include "InputManager.hpp"
 #include "TileGrid.hpp"
 #include "ParticleEmitter.hpp"
@@ -24,7 +28,7 @@ class GameScript;
 
 class Engine {
 public:
-    Engine(int width, int height, const char* title);
+    Engine(const DisplayConfig& display, const char* title);
     ~Engine();
 
     void run(GameScript& game);
