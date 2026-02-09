@@ -36,7 +36,7 @@ Engine::Engine(const DisplayConfig& display, const char* title)
     srand(31337);
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-        std::cout << "SDL_Init failed: " << SDL_GetError();
+        std::cout << "SDL_Init failed: " << SDL_GetError() << std::endl;
         return;
     }
 
@@ -46,17 +46,29 @@ Engine::Engine(const DisplayConfig& display, const char* title)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
 
+    // Try float framebuffer for HDR output, fall back to integer
+    SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
+    Uint64 flags = SDL_WINDOW_OPENGL;
     if (display.windowed_fullscreen) {
-        window_ = SDL_CreateWindow(title, 0, 0,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+        flags |= SDL_WINDOW_FULLSCREEN;
+    }
+    if (display.windowed_fullscreen) {
+        window_ = SDL_CreateWindow(title, 0, 0, flags);
     } else {
-        window_ = SDL_CreateWindow(title, display.width, display.height,
-            SDL_WINDOW_OPENGL);
+        window_ = SDL_CreateWindow(title, display.width, display.height, flags);
     }
     if (window_ == nullptr) {
-        std::cout << "SDL_CreateWindow failed: " << SDL_GetError();
+        std::cout << "Float framebuffer not available, falling back to integer" << std::endl;
+        SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 0);
+        if (display.windowed_fullscreen) {
+            window_ = SDL_CreateWindow(title, 0, 0, flags);
+        } else {
+            window_ = SDL_CreateWindow(title, display.width, display.height, flags);
+        }
+    }
+    if (window_ == nullptr) {
+        std::cout << "SDL_CreateWindow failed: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return;
     }
@@ -65,7 +77,7 @@ Engine::Engine(const DisplayConfig& display, const char* title)
 
     gl_context_ = SDL_GL_CreateContext(window_);
     if (gl_context_ == nullptr) {
-        std::cout << "SDL_GL_CreateContext failed: " << SDL_GetError();
+        std::cout << "SDL_GL_CreateContext failed: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window_);
         window_ = nullptr;
         SDL_Quit();
@@ -126,9 +138,11 @@ Engine::~Engine() {
     if (hdr_depth_rb_) {
         glDeleteRenderbuffers(1, &hdr_depth_rb_);
     }
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
+    if (gl_context_) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+    }
     if (gl_context_) {
         SDL_GL_DestroyContext(gl_context_);
     }
