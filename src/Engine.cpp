@@ -73,8 +73,6 @@ Engine::Engine(const DisplayConfig& display, const char* title)
         return;
     }
 
-    SDL_GetWindowSizeInPixels(window_, &screen_width_, &screen_height_);
-
     gl_context_ = SDL_GL_CreateContext(window_);
     if (gl_context_ == nullptr) {
         std::cout << "SDL_GL_CreateContext failed: " << SDL_GetError() << std::endl;
@@ -83,6 +81,11 @@ Engine::Engine(const DisplayConfig& display, const char* title)
         SDL_Quit();
         return;
     }
+
+    // Query pixel size after context creation — on Wayland the compositor
+    // configures the fullscreen window size asynchronously, and the EGL
+    // surface creation above forces that round-trip to complete.
+    SDL_GetWindowSizeInPixels(window_, &screen_width_, &screen_height_);
 
     SDL_RaiseWindow(window_);
 
