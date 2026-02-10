@@ -21,10 +21,10 @@
  */
 class CollidableObject {
  public:
-	typedef std::shared_ptr<CollidableObject> ShPtr;
+	using ShPtr = std::shared_ptr<CollidableObject>;
 
-  static const unsigned int TYPE_SPHERE;
-  static const unsigned int TYPE_CAPSULE;
+  static constexpr unsigned int TYPE_SPHERE = 0;
+  static constexpr unsigned int TYPE_CAPSULE = 1;
 
   CollidableObject(unsigned int id, unsigned int type);
   CollidableObject(Transform::ShPtr transform, unsigned int type);
@@ -58,7 +58,8 @@ class CollidableObject {
   static bool geometry_initialized_;
   static void initGeometry();
 
-  DISALLOW_COPY_AND_ASSIGN(CollidableObject);
+  CollidableObject(const CollidableObject&) = delete;
+  CollidableObject& operator=(const CollidableObject&) = delete;
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include <sstream>
@@ -173,7 +174,7 @@ void ResourceManager::load_particle_emitter_tres(const std::string& tres_path) {
     return;
   }
 
-  ParticleEmitterDef::ShPtr def(new ParticleEmitterDef());
+  auto def = std::make_shared<ParticleEmitterDef>();
   bool header_found = false;
 
   std::string line;

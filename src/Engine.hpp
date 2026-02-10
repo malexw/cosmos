@@ -96,7 +96,8 @@ private:
     void render();
     void update_engine(float dt);
 
-    DISALLOW_COPY_AND_ASSIGN(Engine);
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
 };
 
 #endif

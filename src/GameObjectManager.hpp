@@ -16,7 +16,7 @@
  */
 class GameObjectManager {
  public:
-	typedef std::shared_ptr<GameObjectManager> ShPtr;
+	using ShPtr = std::shared_ptr<GameObjectManager>;
 
 	GameObjectManager() {}
   static GameObjectManager& get();
@@ -34,7 +34,8 @@ class GameObjectManager {
   std::list<GameObject::ShPtr> objects_;
   std::unordered_map<std::string, GameObject::ShPtr> named_objects_;
   
-  DISALLOW_COPY_AND_ASSIGN(GameObjectManager);
+  GameObjectManager(const GameObjectManager&) = delete;
+  GameObjectManager& operator=(const GameObjectManager&) = delete;
 };
 
 #endif

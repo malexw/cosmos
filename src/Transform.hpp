@@ -21,7 +21,7 @@
  */
 class Transform {
  public:
-	typedef std::shared_ptr<Transform> ShPtr;
+	using ShPtr = std::shared_ptr<Transform>;
 
   Transform(unsigned int id): id_(id), scale_(Vector3f(1.0f, 1.0f, 1.0f)) {}
   unsigned int id() const { return id_; }
@@ -57,7 +57,8 @@ class Transform {
   // Helper: build a rotation matrix from the internal quaternion
   glm::mat4 quatToMat4(const Quaternion& q) const;
 
-  DISALLOW_COPY_AND_ASSIGN(Transform);
+  Transform(const Transform&) = delete;
+  Transform& operator=(const Transform&) = delete;
 };
 
 #endif

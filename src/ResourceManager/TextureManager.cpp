@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <cmath>
 
@@ -57,7 +58,7 @@ Texture::ShPtr TextureManager::load_texture(const std::string& path,
       return Texture::ShPtr();
     }
 
-    RGBE_ReadHeader(f, &image_width, &image_height, NULL);
+    RGBE_ReadHeader(f, &image_width, &image_height, nullptr);
     float* image = (float *)malloc(sizeof(float) * 3 * image_width * image_height);
     RGBE_ReadPixels_RLE(f, image, image_width, image_height);
     fclose(f);
@@ -84,7 +85,7 @@ Texture::ShPtr TextureManager::load_texture(const std::string& path,
     float default_exposure = 0.18f / avg_lum;
     std::cout << "HDR avg luminance: " << avg_lum << ", default exposure: " << default_exposure << std::endl;
 
-    Texture::ShPtr tex(new Texture(path));
+    auto tex = std::make_shared<Texture>(path);
     tex->set_index(tex_index);
     tex->set_default_exposure(default_exposure);
     textures_.push_back(tex);
@@ -112,7 +113,7 @@ Texture::ShPtr TextureManager::load_texture(const std::string& path,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrap);
 
-    Texture::ShPtr tex(new Texture(path));
+    auto tex = std::make_shared<Texture>(path);
     tex->set_index(tex_index);
     textures_.push_back(tex);
 
@@ -131,8 +132,8 @@ void TextureManager::load_textures() {
 		return;
 	}
 
-  for (unsigned int i = 0; i < tex_names_.size(); ++i) {
-    load_texture(tex_names_[i]);
+  for (const auto& name : tex_names_) {
+    load_texture(name);
   }
 
   // Generate a texture as a target for the shadow mapping FBO
@@ -144,7 +145,7 @@ void TextureManager::load_textures() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-  Texture::ShPtr shadow (new Texture("shadow_map"));
+  auto shadow = std::make_shared<Texture>("shadow_map");
   shadow->set_index(shadow_index);
   textures_.push_back(shadow);
 
@@ -155,7 +156,7 @@ void TextureManager::load_textures() {
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1, 1, 0, GL_RGBA, GL_FLOAT, 0);
-  Texture::ShPtr hdrTarget(new Texture("hdr target"));
+  auto hdrTarget = std::make_shared<Texture>("hdr target");
   hdrTarget->set_index(hdr_index);
   textures_.push_back(hdrTarget);
 
@@ -166,7 +167,7 @@ void TextureManager::load_textures() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1, 1, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-  Texture::ShPtr hdrDepth(new Texture("hdr depth"));
+  auto hdrDepth = std::make_shared<Texture>("hdr depth");
   hdrDepth->set_index(hdr_depth_index);
   textures_.push_back(hdrDepth);
 
@@ -177,7 +178,7 @@ void TextureManager::load_textures() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 1, 1, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-  Texture::ShPtr ssaoRaw(new Texture("ssao raw"));
+  auto ssaoRaw = std::make_shared<Texture>("ssao raw");
   ssaoRaw->set_index(ssao_raw_index);
   textures_.push_back(ssaoRaw);
 
@@ -188,7 +189,7 @@ void TextureManager::load_textures() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 1, 1, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-  Texture::ShPtr ssaoBlurred(new Texture("ssao blurred"));
+  auto ssaoBlurred = std::make_shared<Texture>("ssao blurred");
   ssaoBlurred->set_index(ssao_blur_index);
   textures_.push_back(ssaoBlurred);
 

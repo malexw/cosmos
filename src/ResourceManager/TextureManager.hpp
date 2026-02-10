@@ -13,7 +13,7 @@ enum class TexWrap { Repeat, Clamp, Mirror };
 
 class TextureManager {
  public:
-	typedef std::shared_ptr<TextureManager> ShPtr;
+	using ShPtr = std::shared_ptr<TextureManager>;
 
 	TextureManager();
 
@@ -41,7 +41,8 @@ class TextureManager {
 	// textures have been loaded to prevent duplicate loadings
 	void load_textures();
 	
-	DISALLOW_COPY_AND_ASSIGN(TextureManager);
+	TextureManager(const TextureManager&) = delete;
+	TextureManager& operator=(const TextureManager&) = delete;
 };
 
 #endif

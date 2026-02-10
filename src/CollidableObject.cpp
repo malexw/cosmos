@@ -12,9 +12,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-const unsigned int CollidableObject::TYPE_SPHERE = 0;
-const unsigned int CollidableObject::TYPE_CAPSULE = 1;
-
 GLuint CollidableObject::sphere_vbo_ = 0;
 GLuint CollidableObject::sphere_vao_ = 0;
 GLuint CollidableObject::cylinder_vbo_ = 0;

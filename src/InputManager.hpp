@@ -19,7 +19,8 @@ private:
     ActionMap action_map_;
     ActionState action_state_;
 
-    DISALLOW_COPY_AND_ASSIGN(InputManager);
+    InputManager(const InputManager&) = delete;
+    InputManager& operator=(const InputManager&) = delete;
 };
 
 #endif

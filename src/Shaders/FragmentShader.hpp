@@ -9,7 +9,7 @@
 
 class FragmentShader {
 public:
-	typedef std::shared_ptr<FragmentShader> ShPtr;
+	using ShPtr = std::shared_ptr<FragmentShader>;
 
 	FragmentShader(std::string name, int id): name_(name), shader_id_(id) {}
 	
@@ -25,7 +25,8 @@ private:
 	std::string name_;
 	int shader_id_;
 
-	DISALLOW_COPY_AND_ASSIGN(FragmentShader);
+	FragmentShader(const FragmentShader&) = delete;
+	FragmentShader& operator=(const FragmentShader&) = delete;
 };
 
 #endif

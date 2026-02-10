@@ -9,12 +9,6 @@ GLuint ShadowCamera::frustum_vao_ = 0;
 GLuint ShadowCamera::frustum_vbo_ = 0;
 bool ShadowCamera::frustum_initialized_ = false;
 
-const glm::mat4 ShadowCamera::bias_matrix_(
-    0.5f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.5f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.5f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f);
-
 ShadowCamera::ShadowCamera()
     : position_(5.0f, 15.0f, 5.0f),
       direction_(0.0f, -15.0f, -30.0f),

@@ -15,7 +15,7 @@
 
 class TerrainData {
 public:
-    typedef std::shared_ptr<TerrainData> ShPtr;
+    using ShPtr = std::shared_ptr<TerrainData>;
 
     TerrainData();
 
@@ -69,7 +69,8 @@ private:
 
     void build_groups();
 
-    DISALLOW_COPY_AND_ASSIGN(TerrainData);
+    TerrainData(const TerrainData&) = delete;
+    TerrainData& operator=(const TerrainData&) = delete;
 };
 
 #endif

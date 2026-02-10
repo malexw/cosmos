@@ -4,7 +4,7 @@
 
 void Timer::frame_start() {
     last_start_ = frame_start_;
-    gettimeofday(&frame_start_, NULL);
+    gettimeofday(&frame_start_, nullptr);
 }
 
 float Timer::frame_delta() const {

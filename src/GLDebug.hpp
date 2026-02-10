@@ -23,7 +23,7 @@ inline void glCheckError_(const char* file, int line, const char* expr) {
     if (!CosmosConfig::get().is_gl_debug()) return;
 
     static int error_count = 0;
-    static const int max_errors = 10;
+    static constexpr int max_errors = 10;
 
     GLenum err = glGetError();
     while (err != GL_NO_ERROR) {

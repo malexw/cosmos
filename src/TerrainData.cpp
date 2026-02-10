@@ -1,6 +1,7 @@
 #include "TerrainData.hpp"
 
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 
 #include "CosmosConfig.hpp"
@@ -171,7 +172,7 @@ void TerrainData::build_groups() {
 
             auto git = group_map.find(key);
             if (git == group_map.end()) {
-                InstanceGroup::ShPtr group(new InstanceGroup(mesh, mat, i));
+                auto group = std::make_shared<InstanceGroup>(mesh, mat, i);
                 group_map[key] = group;
                 git = group_map.find(key);
             }
@@ -181,9 +182,9 @@ void TerrainData::build_groups() {
     }
 
     // Upload all groups
-    for (auto& kv : group_map) {
-        kv.second->upload_instances();
-        groups_.push_back(kv.second);
+    for (auto& [key, group] : group_map) {
+        group->upload_instances();
+        groups_.push_back(group);
     }
 
     pending_instances_.clear();

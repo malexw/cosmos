@@ -8,7 +8,7 @@
 enum class ParticleBlendMode { Additive, Alpha };
 
 struct ParticleEmitterDef {
-    typedef std::shared_ptr<ParticleEmitterDef> ShPtr;
+    using ShPtr = std::shared_ptr<ParticleEmitterDef>;
 
     std::string mesh_path;     // .tres path for particle mesh
     std::string texture_path;  // .tres path for particle texture

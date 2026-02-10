@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include <string>
 
@@ -38,7 +39,7 @@ Material::ShPtr MaterialManager::load_material(const std::string& path) {
   }
 
   std::cout << "Decoding " << path << std::endl;
-  FileBlob::ShPtr file(new FileBlob(path));
+  auto file = std::make_shared<FileBlob>(path);
   Material::ShPtr mat = decode(*file);
   mats_.push_back(mat);
   return mat;
@@ -50,8 +51,8 @@ void MaterialManager::load_materials() {
 		return;
 	}
 
-  for (unsigned int j = 0; j < mat_names_.size(); ++j) {
-    load_material(mat_names_[j]);
+  for (const auto& name : mat_names_) {
+    load_material(name);
 	}
 
 	loaded_ = true;
@@ -76,7 +77,7 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
   //std::vector<Vector3f> verts;
   //std::vector<Vector2f> uvs;
   //std::vector<Vector3f> norms;
-  Material::ShPtr mat(new Material(b.path()));
+  auto mat = std::make_shared<Material>(b.path());
   
   std::vector<std::string> tokens;
   
@@ -152,7 +153,7 @@ Material::ShPtr MaterialManager::decode(FileBlob& b) {
 }
 
 void MaterialManager::load_mtl_library(const std::string& path) {
-  FileBlob::ShPtr file(new FileBlob(path));
+  auto file = std::make_shared<FileBlob>(path);
   std::cout << "Loading MTL library " << path << std::endl;
 
   int index = 0;
@@ -177,7 +178,7 @@ void MaterialManager::load_mtl_library(const std::string& path) {
         // comment
       } else if (tokens[0] == "newmtl") {
         finalize_mat(mat);
-        mat = Material::ShPtr(new Material(tokens[1]));
+        mat = std::make_shared<Material>(tokens[1]);
       } else if (tokens[0] == "Ka") {
         float r = std::stof(tokens[1]);
         float g = std::stof(tokens[2]);

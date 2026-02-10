@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include "AudioManager.hpp"
@@ -91,12 +92,12 @@ AudioManager::AudioManager()
 
 void AudioManager::init() {
   // Initialize OpenAL directly (no ALUT)
-  ALCdevice* device = alcOpenDevice(NULL);
+  ALCdevice* device = alcOpenDevice(nullptr);
   if (!device) {
     std::cout << "AudioManager: Failed to open audio device" << std::endl;
     return;
   }
-  ALCcontext* context = alcCreateContext(device, NULL);
+  ALCcontext* context = alcCreateContext(device, nullptr);
   if (!context) {
     std::cout << "AudioManager: Failed to create audio context" << std::endl;
     alcCloseDevice(device);
@@ -104,7 +105,7 @@ void AudioManager::init() {
   }
   alcMakeContextCurrent(context);
 
-  sound_names_.push_back(std::string("res/sounds/starshipmono.wav"));
+  sound_names_.emplace_back("res/sounds/starshipmono.wav");
   load_sounds();
 }
 
@@ -133,7 +134,7 @@ Sound::ShPtr AudioManager::load_sound(const std::string& path) {
   if (loadWAV(path.c_str(), &format, &data, &size, &freq)) {
     alBufferData(buffer_index, format, data, size, freq);
     free(data);
-    Sound::ShPtr s(new Sound(path, source_index, buffer_index));
+    auto s = std::make_shared<Sound>(path, source_index, buffer_index);
     sounds_.push_back(s);
     return s;
   } else {
@@ -148,8 +149,8 @@ void AudioManager::load_sounds() {
     return;
   }
 
-  for (unsigned int j = 0; j < sound_names_.size(); ++j) {
-    load_sound(sound_names_[j]);
+  for (const auto& name : sound_names_) {
+    load_sound(name);
   }
 
   loaded_ = true;

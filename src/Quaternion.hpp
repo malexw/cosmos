@@ -12,7 +12,7 @@
 // Represents an axis of rotation and an angle
 class Quaternion {
  public: 
-	typedef std::shared_ptr<Quaternion> ShPtr;
+	using ShPtr = std::shared_ptr<Quaternion>;
 
   Quaternion(): x_(0.0f), y_(0.0f), z_(0.0f), w_(1.0f) {}
   Quaternion(float x, float y, float z, float w): x_(x), y_(y), z_(z), w_(w) {}
@@ -92,13 +92,13 @@ class Quaternion {
     return *this;
   }
   
-  const Quaternion normalize() const {
+  [[nodiscard]] const Quaternion normalize() const {
     float f = 1/sqrt(x_*x_ + y_*y_ + z_*z_ + w_*w_);
     return Quaternion(x_*f, y_*f, z_*f, w_*f);
   }
   
   //Quaternion& invert() { x_ = -x_; y_ = -y_; z = -z_; return *this; }
-  const Quaternion invert() const { return Quaternion(-(vector().x()), -(vector().y()), -(vector().z()), w()); }
+  [[nodiscard]] const Quaternion invert() const { return Quaternion(-(vector().x()), -(vector().y()), -(vector().z()), w()); }
   
   Vector3f operator*(const Vector3f& v) const {
     // nVidia SDK implementation

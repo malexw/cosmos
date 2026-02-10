@@ -14,7 +14,7 @@
 
 class ShaderManager {
  public:
-	typedef std::shared_ptr<ShaderManager> ShPtr;
+	using ShPtr = std::shared_ptr<ShaderManager>;
 
 	ShaderManager();
 	
@@ -48,7 +48,8 @@ class ShaderManager {
 	void print_shader_log(int id);
   void print_program_log(int id);
   
-	DISALLOW_COPY_AND_ASSIGN(ShaderManager);
+	ShaderManager(const ShaderManager&) = delete;
+	ShaderManager& operator=(const ShaderManager&) = delete;
 };
 
 #endif

@@ -11,7 +11,7 @@
 // Basic object for representing a vector in 3 dimensions
 class Vector3f {
  public:
-	typedef std::shared_ptr<Vector3f> ShPtr;
+	using ShPtr = std::shared_ptr<Vector3f>;
   static const Vector3f UNIT_X;
   static const Vector3f NEGATIVE_X;
   static const Vector3f UNIT_Y;
@@ -60,18 +60,17 @@ class Vector3f {
     return *this;
   }
   
-  Vector3f cross(const Vector3f& rhs) const {
+  [[nodiscard]] Vector3f cross(const Vector3f& rhs) const {
     return Vector3f(
       y_*rhs.z() - z_*rhs.y(),
       z_*rhs.x() - x_*rhs.z(),
       x_*rhs.y() - y_*rhs.x());
   }
   
-  float dot(const Vector3f& rhs) const { return x_*rhs.x() + y_*rhs.y() + z_*rhs.z(); }
-  float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
-  float length() const { return sqrt(lengthSquare()); }
-  // TODO Probably need an in-place normalize : Vector3f& normalize();
-  Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
+  [[nodiscard]] float dot(const Vector3f& rhs) const { return x_*rhs.x() + y_*rhs.y() + z_*rhs.z(); }
+  [[nodiscard]] float lengthSquare() const { return x_*x_ + y_*y_ + z_*z_; }
+  [[nodiscard]] float length() const { return sqrt(lengthSquare()); }
+  [[nodiscard]] Vector3f normalize() const { float len = 1.0f/length(); return Vector3f(x_*len, y_*len, z_*len); }
 
   float& x() { return x_; }
   float x() const { return x_; }
@@ -109,5 +108,14 @@ inline std::ostream& operator <<(std::ostream& os, const Vector3f& v)
 {
   return os << "v<" << v.x() << "," << v.y() << "," << v.z() << ">";
 }
+
+inline const Vector3f Vector3f::UNIT_X{1.0f, 0.0f, 0.0f};
+inline const Vector3f Vector3f::NEGATIVE_X{-1.0f, 0.0f, 0.0f};
+inline const Vector3f Vector3f::UNIT_Y{0.0f, 1.0f, 0.0f};
+inline const Vector3f Vector3f::NEGATIVE_Y{0.0f, -1.0f, 0.0f};
+inline const Vector3f Vector3f::UNIT_Z{0.0f, 0.0f, 1.0f};
+inline const Vector3f Vector3f::NEGATIVE_Z{0.0f, 0.0f, -1.0f};
+inline const Vector3f Vector3f::ZEROS{0.0f, 0.0f, 0.0f};
+inline const Vector3f Vector3f::ONES{1.0f, 1.0f, 1.0f};
 
 #endif

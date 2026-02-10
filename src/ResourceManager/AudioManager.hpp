@@ -19,7 +19,7 @@
 
 class AudioManager {
  public:
-	typedef std::shared_ptr<AudioManager> ShPtr;
+	using ShPtr = std::shared_ptr<AudioManager>;
 
 	AudioManager();
 	
@@ -47,7 +47,8 @@ class AudioManager {
 	// textures have been loaded to prevent duplicate loadings
 	void load_sounds();
 	
-	DISALLOW_COPY_AND_ASSIGN(AudioManager);
+	AudioManager(const AudioManager&) = delete;
+	AudioManager& operator=(const AudioManager&) = delete;
 };
 
 #endif

@@ -9,7 +9,7 @@
 
 class VertexShader {
 public:
-	typedef std::shared_ptr<VertexShader> ShPtr;
+	using ShPtr = std::shared_ptr<VertexShader>;
 
 	VertexShader(std::string name, int id): name_(name), shader_id_(id) {}
 	
@@ -25,7 +25,8 @@ private:
 	std::string name_;
 	int shader_id_;
 
-	DISALLOW_COPY_AND_ASSIGN(VertexShader);
+	VertexShader(const VertexShader&) = delete;
+	VertexShader& operator=(const VertexShader&) = delete;
 };
 
 #endif

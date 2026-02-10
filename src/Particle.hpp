@@ -11,7 +11,7 @@
  */
 class Particle {
  public:
-	typedef std::shared_ptr<Particle> ShPtr;
+	using ShPtr = std::shared_ptr<Particle>;
 
 	Particle()
    : pos_(), velo_(), lifetime_(0.0f), initial_lifetime_(1.0f) {}
@@ -43,7 +43,8 @@ class Particle {
   float lifetime_; // lifetime in seconds
   float initial_lifetime_;
 
-  DISALLOW_COPY_AND_ASSIGN(Particle);
+  Particle(const Particle&) = delete;
+  Particle& operator=(const Particle&) = delete;
 };
 
 #endif

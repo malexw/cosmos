@@ -1,9 +1,11 @@
 #ifndef COSMOS_MESH_H_
 #define COSMOS_MESH_H_
 
+#include <array>
 #include <memory>
-#include <vector>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include <SDL3/SDL_opengl.h>
 
@@ -17,7 +19,7 @@
  */
 class Mesh {
  public:
-	typedef std::shared_ptr<Mesh> ShPtr;
+	using ShPtr = std::shared_ptr<Mesh>;
 
 	struct Submesh {
 		Material::ShPtr material;
@@ -39,7 +41,7 @@ class Mesh {
   // Bind the VAO
   void bind() const;
 
-  bool is_name(const std::string& rhs) const;
+  bool is_name(std::string_view rhs) const;
 
 	unsigned int triangle_count() const { return triangle_count_; }
   GLuint vbo() const { return vbo_address_; }
@@ -74,9 +76,10 @@ class Mesh {
   GLuint vao_;
   GLuint vbo_address_;
   bool on_gpu_;
-  int offsets_[6];
+  std::array<int, 6> offsets_;
 
-  DISALLOW_COPY_AND_ASSIGN(Mesh);
+  Mesh(const Mesh&) = delete;
+  Mesh& operator=(const Mesh&) = delete;
 };
 
 #endif

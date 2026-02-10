@@ -2,6 +2,7 @@
 #define COSMOS_TEXTURE_H_
 
 #include <string>
+#include <string_view>
 
 #include <memory>
 
@@ -9,7 +10,7 @@
 
 class Texture {
 public:
-	typedef std::shared_ptr<Texture> ShPtr;
+	using ShPtr = std::shared_ptr<Texture>;
 
 	Texture(std::string name);
 	
@@ -17,7 +18,7 @@ public:
 	std::string get_name() const;
 
 	// Compare the name of this texture with another name. Returns true if they're equal, false otherwise.
-	bool is_name(const std::string& rhs) const;
+	bool is_name(std::string_view rhs) const;
 
 	// Return the index, AKA "OpenGL Name" of the texture. This value is meaningless unless the texture is
 	// loaded.
@@ -39,7 +40,8 @@ private:
 	int bytecount_;
 	float default_exposure_;
 
-	DISALLOW_COPY_AND_ASSIGN(Texture);
+	Texture(const Texture&) = delete;
+	Texture& operator=(const Texture&) = delete;
 };
 
 #endif

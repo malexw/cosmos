@@ -10,7 +10,7 @@
 // Basic object for representing a vector in 2 dimensions
 class Vector2f {
  public: 
-	typedef std::shared_ptr<Vector2f> ShPtr;
+	using ShPtr = std::shared_ptr<Vector2f>;
   
   Vector2f(): u_(0.0f), v_(0.0f) {}
 	Vector2f(float u, float v): u_(u), v_(v) {}

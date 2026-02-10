@@ -10,7 +10,7 @@
 
 class CosmosConfig {
 public:
-	typedef std::shared_ptr<CosmosConfig> ShPtr;
+	using ShPtr = std::shared_ptr<CosmosConfig>;
 
 	CosmosConfig();
 
@@ -103,7 +103,8 @@ private:
   float ssao_bias_;
   float ssao_power_;
 
-	DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
+	CosmosConfig(const CosmosConfig&) = delete;
+	CosmosConfig& operator=(const CosmosConfig&) = delete;
 };
 
 #endif

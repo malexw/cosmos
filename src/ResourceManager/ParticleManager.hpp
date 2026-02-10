@@ -12,7 +12,7 @@
 
 class ParticleManager {
 public:
-    typedef std::shared_ptr<ParticleManager> ShPtr;
+    using ShPtr = std::shared_ptr<ParticleManager>;
     ParticleManager();
     static ParticleManager& get();
 
@@ -28,7 +28,8 @@ public:
 private:
     std::unordered_map<std::string, ParticleEmitterDef::ShPtr> defs_;
     void init();
-    DISALLOW_COPY_AND_ASSIGN(ParticleManager);
+    ParticleManager(const ParticleManager&) = delete;
+    ParticleManager& operator=(const ParticleManager&) = delete;
 };
 
 #endif

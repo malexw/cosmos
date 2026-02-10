@@ -14,7 +14,7 @@
  */
 class GameObject {
  public:
-	typedef std::shared_ptr<GameObject> ShPtr;
+	using ShPtr = std::shared_ptr<GameObject>;
 
 	GameObject(): id_(nextId_++) {}
   unsigned int id() const { return id_; }
@@ -36,7 +36,8 @@ class GameObject {
   const unsigned int id_;
   static unsigned int nextId_;
 
-  DISALLOW_COPY_AND_ASSIGN(GameObject);
+  GameObject(const GameObject&) = delete;
+  GameObject& operator=(const GameObject&) = delete;
 };
 
 #endif

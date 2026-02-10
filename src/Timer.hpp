@@ -10,7 +10,7 @@ class Timer {
   static constexpr float PAUSE_THRESHOLD = 1.0f / 10.0f;
   static constexpr float PAUSE_DT = 1.0f / 30.0f;
 
-  Timer() { gettimeofday(&frame_start_, NULL); last_start_ = frame_start_; }
+  Timer() { gettimeofday(&frame_start_, nullptr); last_start_ = frame_start_; }
 
   void frame_start();
   float frame_delta() const;
@@ -19,7 +19,8 @@ class Timer {
   timeval frame_start_;
   timeval last_start_;
 
-  DISALLOW_COPY_AND_ASSIGN(Timer);
+  Timer(const Timer&) = delete;
+  Timer& operator=(const Timer&) = delete;
 };
 
 #endif

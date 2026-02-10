@@ -4,13 +4,6 @@
 #include <string>
 #include <vector>
 
-// A macro to disallow the copy constructor and operator= functions
-// This should be used in the private: declarations for a class
-// Sourced from Google - see also: Effective C++ by Scott Meyers
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
-  void operator=(const TypeName&)
-
 // Simple string split function (replaces boost::split)
 inline std::vector<std::string> split(const std::string& str, const std::string& delimiters) {
   std::vector<std::string> tokens;

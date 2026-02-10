@@ -1,10 +1,12 @@
 #include "Camera.hpp"
 
+#include <memory>
+
 #include <glm/glm.hpp>
 
 Camera::Camera()
-    : transform_(new Transform(0)),
-      collidable_(new CollidableObject(transform_, CollidableObject::TYPE_SPHERE)) {
+    : transform_(std::make_shared<Transform>(0)),
+      collidable_(std::make_shared<CollidableObject>(transform_, CollidableObject::TYPE_SPHERE)) {
 }
 
 glm::mat4 Camera::matrixFromPositionDirection(Vector3f position, Vector3f direction) {

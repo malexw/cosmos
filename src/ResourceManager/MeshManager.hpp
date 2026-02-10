@@ -11,7 +11,7 @@
 
 class MeshManager {
  public:
-	typedef std::shared_ptr<MeshManager> ShPtr;
+	using ShPtr = std::shared_ptr<MeshManager>;
 
 	MeshManager();
 	
@@ -45,7 +45,8 @@ class MeshManager {
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;
 	
-	DISALLOW_COPY_AND_ASSIGN(MeshManager);
+	MeshManager(const MeshManager&) = delete;
+	MeshManager& operator=(const MeshManager&) = delete;
 };
 
 #endif

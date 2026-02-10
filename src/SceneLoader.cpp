@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -199,7 +200,7 @@ SceneInstances SceneLoader::instantiate(const SceneDefinition& scene, Engine& en
     SceneInstances instances;
 
     // Skybox
-    instances.skybox = SkyBox::ShPtr(new SkyBox());
+    instances.skybox = std::make_shared<SkyBox>();
     instances.skybox->renderable().set_mesh(
         MeshManager::get().get_mesh(scene.skybox.mesh));
     engine.set_skybox(instances.skybox);
@@ -220,7 +221,7 @@ SceneInstances SceneLoader::instantiate(const SceneDefinition& scene, Engine& en
             if (obj_def.collision_type == "capsule") {
                 col_type = CollidableObject::TYPE_CAPSULE;
             }
-            CollidableObject::ShPtr col(new CollidableObject(obj->id(), col_type));
+            auto col = std::make_shared<CollidableObject>(obj->id(), col_type);
             col->set_scale(obj_def.collision_scale);
             obj->set_collidable(col);
         }

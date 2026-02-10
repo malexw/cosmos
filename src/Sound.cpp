@@ -13,8 +13,8 @@ std::string Sound::get_name() const {
 	return name_;
 }
 
-bool Sound::is_name(const std::string& rhs) const {
-	return name_.compare(rhs) == 0;
+bool Sound::is_name(std::string_view rhs) const {
+	return name_ == rhs;
 }
 
 int Sound::get_index() const {

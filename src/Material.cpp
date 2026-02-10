@@ -10,8 +10,8 @@ std::string Material::get_name() const {
 	return name_;
 }
 
-bool Material::is_name(const std::string& rhs) const {
-	return name_.compare(rhs) == 0;
+bool Material::is_name(std::string_view rhs) const {
+	return name_ == rhs;
 }
 
 void Material::bind() const {

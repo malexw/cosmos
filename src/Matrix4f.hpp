@@ -11,7 +11,7 @@
 // Basic object for representing a vector in 3 dimensions
 class Matrix4f {
  public: 
-	typedef std::shared_ptr<Matrix4f> ShPtr;
+	using ShPtr = std::shared_ptr<Matrix4f>;
 
   Matrix4f() {
     m_[0]=1.0f; m_[1]=0.0f; m_[2]=0.0f; m_[3]=0.0f;
@@ -50,7 +50,7 @@ class Matrix4f {
   float operator[](int i) const { return m_[i]; }
   float* to_array() { return m_; }
   
-  Matrix4f transpose() const {
+  [[nodiscard]] Matrix4f transpose() const {
     return Matrix4f(m_[0], m_[4], m_[8], m_[12],
                     m_[1], m_[5], m_[9], m_[13],
                     m_[2], m_[6], m_[10], m_[14],

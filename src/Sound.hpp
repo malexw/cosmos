@@ -2,6 +2,7 @@
 #define COSMOS_SOUND_H_
 
 #include <string>
+#include <string_view>
 
 #include <memory>
 
@@ -16,7 +17,7 @@
 
 class Sound {
 public:
-	typedef std::shared_ptr<Sound> ShPtr;
+	using ShPtr = std::shared_ptr<Sound>;
 
 	Sound(std::string name, unsigned int sound_index, unsigned int buffer_index);
 	
@@ -24,7 +25,7 @@ public:
 	std::string get_name() const;
 
 	// Compare the name of this sound with another name. Returns true if they're equal, false otherwise.
-	bool is_name(const std::string& rhs) const;
+	bool is_name(std::string_view rhs) const;
 
 	// Return the source index of the sound. This value is meaningless unless the Sound is loaded.
 	int get_index() const;
@@ -41,7 +42,8 @@ private:
 	unsigned int sound_index_;
 	unsigned int buffer_index_;
 
-	DISALLOW_COPY_AND_ASSIGN(Sound);
+	Sound(const Sound&) = delete;
+	Sound& operator=(const Sound&) = delete;
 };
 
 #endif

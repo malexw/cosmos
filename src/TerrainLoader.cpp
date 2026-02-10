@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #include "json.hpp"
 
@@ -86,7 +87,7 @@ TerrainDefinition TerrainLoader::load_definition(const std::string& path) {
 }
 
 TerrainData::ShPtr TerrainLoader::instantiate(const TerrainDefinition& def) {
-    TerrainData::ShPtr terrain(new TerrainData());
+    auto terrain = std::make_shared<TerrainData>();
     terrain->build_from_definition(def);
     return terrain;
 }

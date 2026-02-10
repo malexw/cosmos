@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include <SDL3/SDL_opengl.h>
@@ -85,7 +86,7 @@ void FontManager::load_fonts() {
 			glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-			Font::ShPtr f(new Font(font_names_.at(j)));
+			auto f = std::make_shared<Font>(font_names_.at(j));
 			f->set_vbo(vbo);
 			f->set_texture(fonttex);
 			fonts_.push_back(f);

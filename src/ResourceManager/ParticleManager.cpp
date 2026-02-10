@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "ParticleManager.hpp"
 
@@ -34,6 +35,6 @@ ParticleEmitter::ShPtr ParticleManager::create_emitter(
     ParticleEmitterDef::ShPtr def = get_emitter_def(def_path);
     if (!def) return ParticleEmitter::ShPtr();
 
-    ParticleEmitter::ShPtr emitter(new ParticleEmitter(def, position, direction, up));
+    auto emitter = std::make_shared<ParticleEmitter>(def, position, direction, up);
     return emitter;
 }

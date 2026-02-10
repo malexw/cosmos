@@ -11,7 +11,7 @@
 
 class MaterialManager {
  public:
-	typedef std::shared_ptr<MaterialManager> ShPtr;
+	using ShPtr = std::shared_ptr<MaterialManager>;
 
 	MaterialManager();
 	
@@ -48,7 +48,8 @@ class MaterialManager {
   // line
   const std::vector<std::string> Tokenize(const FileBlob& b, const unsigned int offset) const;
 	
-	DISALLOW_COPY_AND_ASSIGN(MaterialManager);
+	MaterialManager(const MaterialManager&) = delete;
+	MaterialManager& operator=(const MaterialManager&) = delete;
 };
 
 #endif

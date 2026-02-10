@@ -18,7 +18,7 @@
  */
 class Camera {
  public:
-	typedef std::shared_ptr<Camera> ShPtr;
+	using ShPtr = std::shared_ptr<Camera>;
 
 	Camera();
 
@@ -31,7 +31,8 @@ class Camera {
   Transform::ShPtr transform_;
   CollidableObject::ShPtr collidable_;
 
-  DISALLOW_COPY_AND_ASSIGN(Camera);
+  Camera(const Camera&) = delete;
+  Camera& operator=(const Camera&) = delete;
 };
 
 #endif

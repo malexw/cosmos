@@ -9,8 +9,8 @@ std::string Texture::get_name() const {
 	return name_;
 }
 
-bool Texture::is_name(const std::string& rhs) const {
-	return name_.compare(rhs) == 0;
+bool Texture::is_name(std::string_view rhs) const {
+	return name_ == rhs;
 }
 
 int Texture::get_index() const {

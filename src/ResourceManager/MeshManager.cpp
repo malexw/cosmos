@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "MaterialManager.hpp"
@@ -33,7 +34,7 @@ Mesh::ShPtr MeshManager::load_mesh(const std::string& path) {
     }
   }
 
-  FileBlob::ShPtr file(new FileBlob(path));
+  auto file = std::make_shared<FileBlob>(path);
   std::cout << "Decoding " << file->path() << std::endl;
   Mesh::ShPtr mesh = decode(*file);
   meshes_.push_back(mesh);
@@ -76,7 +77,7 @@ Mesh::ShPtr MeshManager::decode(FileBlob& b) {
   std::vector<Vector3f> norms;
   
   std::vector<std::string> tokens;
-  Mesh::ShPtr mesh (new Mesh(b.path()));
+  auto mesh = std::make_shared<Mesh>(b.path());
   Material::ShPtr mat;
   
   while (index < b.size()) {

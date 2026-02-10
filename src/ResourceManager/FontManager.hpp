@@ -11,7 +11,7 @@
 
 class FontManager {
  public:
-	typedef std::shared_ptr<FontManager> ShPtr;
+	using ShPtr = std::shared_ptr<FontManager>;
 
 	FontManager();
 	
@@ -33,7 +33,8 @@ class FontManager {
 	// textures have been loaded to prevent duplicate loadings
 	void load_fonts();
 	
-	DISALLOW_COPY_AND_ASSIGN(FontManager);
+	FontManager(const FontManager&) = delete;
+	FontManager& operator=(const FontManager&) = delete;
 };
 
 #endif

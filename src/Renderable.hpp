@@ -12,7 +12,7 @@
  */
 class Renderable {
  public:
-	typedef std::shared_ptr<Renderable> ShPtr;
+	using ShPtr = std::shared_ptr<Renderable>;
 
 	Renderable(unsigned int id): id_(id) {}
   unsigned int id() const { return id_; }
@@ -29,7 +29,8 @@ class Renderable {
  private:
   const unsigned int id_;
   
-  DISALLOW_COPY_AND_ASSIGN(Renderable);
+  Renderable(const Renderable&) = delete;
+  Renderable& operator=(const Renderable&) = delete;
 };
 
 #endif

@@ -22,7 +22,7 @@
  */
 class ParticleEmitter {
  public:
-	typedef std::shared_ptr<ParticleEmitter> ShPtr;
+	using ShPtr = std::shared_ptr<ParticleEmitter>;
 
 	ParticleEmitter(ParticleEmitterDef::ShPtr def, Vector3f position, Vector3f direction, Vector3f up);
   ~ParticleEmitter();
@@ -59,7 +59,8 @@ class ParticleEmitter {
 
   void init();
 
-  DISALLOW_COPY_AND_ASSIGN(ParticleEmitter);
+  ParticleEmitter(const ParticleEmitter&) = delete;
+  ParticleEmitter& operator=(const ParticleEmitter&) = delete;
 };
 
 #endif

@@ -12,7 +12,7 @@
 
 class ResourceManager {
  public:
-	typedef std::shared_ptr<ResourceManager> ShPtr;
+	using ShPtr = std::shared_ptr<ResourceManager>;
 
 	ResourceManager();
 
@@ -36,7 +36,8 @@ class ResourceManager {
 
   std::unordered_map<std::string, Texture::ShPtr> textures_;
 
-	DISALLOW_COPY_AND_ASSIGN(ResourceManager);
+	ResourceManager(const ResourceManager&) = delete;
+	ResourceManager& operator=(const ResourceManager&) = delete;
 };
 
 #endif

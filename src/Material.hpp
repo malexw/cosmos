@@ -2,6 +2,7 @@
 #define COSMOS_MATERIAL_H_
 
 #include <string>
+#include <string_view>
 
 #include <memory>
 
@@ -12,7 +13,7 @@
 
 class Material {
 public:
-	typedef std::shared_ptr<Material> ShPtr;
+	using ShPtr = std::shared_ptr<Material>;
 
 	Material(std::string name);
 	
@@ -20,7 +21,7 @@ public:
 	std::string get_name() const;
 
 	// Compare the name of this Material with another name. Returns true if they're equal, false otherwise.
-	bool is_name(const std::string& rhs) const;
+	bool is_name(std::string_view rhs) const;
 
 	Material& set_texture(Texture::ShPtr tex) { diff_tex_ = tex; textured_ = true; return *this; }
   const Texture::ShPtr get_texture() const { return diff_tex_; }
@@ -64,7 +65,8 @@ private:
   Texture::ShPtr decal_tex_;
   ShaderProgram::ShPtr shader_;
 
-	DISALLOW_COPY_AND_ASSIGN(Material);
+	Material(const Material&) = delete;
+	Material& operator=(const Material&) = delete;
 };
 
 #endif

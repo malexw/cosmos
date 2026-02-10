@@ -8,7 +8,7 @@
 
 class DebugAxes {
 public:
-    typedef std::shared_ptr<DebugAxes> ShPtr;
+    using ShPtr = std::shared_ptr<DebugAxes>;
 
     DebugAxes();
     ~DebugAxes();

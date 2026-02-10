@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -19,28 +20,28 @@ ShaderManager::ShaderManager()
  * hand
  */
 void ShaderManager::init() {
-	shader_names_.push_back(std::string("res/shaders/bumpdec.vert"));
-  shader_names_.push_back(std::string("res/shaders/bumpdec.frag"));
-  shader_names_.push_back(std::string("res/shaders/shadow.vert"));
-  shader_names_.push_back(std::string("res/shaders/shadow.frag"));
-  shader_names_.push_back(std::string("res/shaders/hdr.vert"));
-  shader_names_.push_back(std::string("res/shaders/hdr.frag"));
-  shader_names_.push_back(std::string("res/shaders/bump.vert"));
-  shader_names_.push_back(std::string("res/shaders/bump.frag"));
-  shader_names_.push_back(std::string("res/shaders/flat.vert"));
-  shader_names_.push_back(std::string("res/shaders/flat.frag"));
-  shader_names_.push_back(std::string("res/shaders/unlit.vert"));
-  shader_names_.push_back(std::string("res/shaders/unlit.frag"));
-  shader_names_.push_back(std::string("res/shaders/simple.vert"));
-  shader_names_.push_back(std::string("res/shaders/simple.frag"));
-  shader_names_.push_back(std::string("res/shaders/blinn.frag"));
-  shader_names_.push_back(std::string("res/shaders/particle.vert"));
-  shader_names_.push_back(std::string("res/shaders/particle.frag"));
-  shader_names_.push_back(std::string("res/shaders/bumpdec_instanced.vert"));
-  shader_names_.push_back(std::string("res/shaders/flat_instanced.vert"));
-  shader_names_.push_back(std::string("res/shaders/resolve.frag"));
-  shader_names_.push_back(std::string("res/shaders/ssao.frag"));
-  shader_names_.push_back(std::string("res/shaders/ssao_blur.frag"));
+	shader_names_.emplace_back("res/shaders/bumpdec.vert");
+  shader_names_.emplace_back("res/shaders/bumpdec.frag");
+  shader_names_.emplace_back("res/shaders/shadow.vert");
+  shader_names_.emplace_back("res/shaders/shadow.frag");
+  shader_names_.emplace_back("res/shaders/hdr.vert");
+  shader_names_.emplace_back("res/shaders/hdr.frag");
+  shader_names_.emplace_back("res/shaders/bump.vert");
+  shader_names_.emplace_back("res/shaders/bump.frag");
+  shader_names_.emplace_back("res/shaders/flat.vert");
+  shader_names_.emplace_back("res/shaders/flat.frag");
+  shader_names_.emplace_back("res/shaders/unlit.vert");
+  shader_names_.emplace_back("res/shaders/unlit.frag");
+  shader_names_.emplace_back("res/shaders/simple.vert");
+  shader_names_.emplace_back("res/shaders/simple.frag");
+  shader_names_.emplace_back("res/shaders/blinn.frag");
+  shader_names_.emplace_back("res/shaders/particle.vert");
+  shader_names_.emplace_back("res/shaders/particle.frag");
+  shader_names_.emplace_back("res/shaders/bumpdec_instanced.vert");
+  shader_names_.emplace_back("res/shaders/flat_instanced.vert");
+  shader_names_.emplace_back("res/shaders/resolve.frag");
+  shader_names_.emplace_back("res/shaders/ssao.frag");
+  shader_names_.emplace_back("res/shaders/ssao_blur.frag");
   load_shaders();
 }
 
@@ -65,10 +66,10 @@ void ShaderManager::load_shaders() {
     
   for (int j = 0; j < shader_count; ++j) {
     std::cout << "Processing " << shader_names_[j] << std::endl;
-    FileBlob::ShPtr file(new FileBlob(shader_names_[j]));
+    auto file = std::make_shared<FileBlob>(shader_names_[j]);
     if (file->extension() == "vert") {
       int vname = glCreateShader(GL_VERTEX_SHADER);
-      VertexShader::ShPtr vshader(new VertexShader(shader_names_[j], vname));
+      auto vshader = std::make_shared<VertexShader>(shader_names_[j], vname);
       vshaders_.push_back(vshader);
       const char* src = file->get_bytes();
       glShaderSource(vname, 1, &src, 0);
@@ -76,7 +77,7 @@ void ShaderManager::load_shaders() {
       print_shader_log(vname);
     } else if (file->extension() == "frag") {
       int fname = glCreateShader(GL_FRAGMENT_SHADER);
-      FragmentShader::ShPtr fshader(new FragmentShader(shader_names_[j], fname));
+      auto fshader = std::make_shared<FragmentShader>(shader_names_[j], fname);
       fshaders_.push_back(fshader);
       const char* src = file->get_bytes();
       glShaderSource(fname, 1, &src, 0);
@@ -96,7 +97,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr program(new ShaderProgram("bumpdec", p));
+  auto program = std::make_shared<ShaderProgram>("bumpdec", p);
   programs_.push_back(program);
   glUseProgram(p);
   
@@ -119,7 +120,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr shadow(new ShaderProgram("shadow", p));
+  auto shadow = std::make_shared<ShaderProgram>("shadow", p);
   programs_.push_back(shadow);
   glUseProgram(p);
   texSampler = glGetUniformLocation(p, "tex");
@@ -137,7 +138,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr hdr(new ShaderProgram("hdr", p));
+  auto hdr = std::make_shared<ShaderProgram>("hdr", p);
   programs_.push_back(hdr);
   // Set default exposure from HDR texture (used by resolve shader)
   Texture::ShPtr hdrTex = TextureManager::get().get_texture("res/textures/qwantani.hdr");
@@ -154,7 +155,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr bump(new ShaderProgram("bump", p));
+  auto bump = std::make_shared<ShaderProgram>("bump", p);
   programs_.push_back(bump);
   glUseProgram(p);
   
@@ -173,7 +174,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr flat(new ShaderProgram("flat", p));
+  auto flat = std::make_shared<ShaderProgram>("flat", p);
   programs_.push_back(flat);
 
   // The unlit program (textured, no lighting — skybox, HUD, particles)
@@ -186,7 +187,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr unlit(new ShaderProgram("unlit", p));
+  auto unlit = std::make_shared<ShaderProgram>("unlit", p);
   programs_.push_back(unlit);
   glUseProgram(p);
   texSampler = glGetUniformLocation(p, "tex");
@@ -202,7 +203,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr simple(new ShaderProgram("simple", p));
+  auto simple = std::make_shared<ShaderProgram>("simple", p);
   programs_.push_back(simple);
 
   // The blinn program (untextured diffuse lighting — bumpdec.vert + blinn.frag)
@@ -215,7 +216,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr blinn(new ShaderProgram("blinn", p));
+  auto blinn = std::make_shared<ShaderProgram>("blinn", p);
   programs_.push_back(blinn);
   glUseProgram(p);
   shadowSampler = glGetUniformLocation(p, "shadowMap");
@@ -233,7 +234,7 @@ void ShaderManager::load_shaders() {
   glBindAttribLocation(p, 8, "instanceScale");
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr particle(new ShaderProgram("particle", p));
+  auto particle = std::make_shared<ShaderProgram>("particle", p);
   programs_.push_back(particle);
   glUseProgram(p);
   GLint particleTexLoc = glGetUniformLocation(p, "tex");
@@ -252,7 +253,7 @@ void ShaderManager::load_shaders() {
   glBindAttribLocation(p, 9, "instanceModelCol3");
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr bumpdecInst(new ShaderProgram("bumpdec_instanced", p));
+  auto bumpdecInst = std::make_shared<ShaderProgram>("bumpdec_instanced", p);
   programs_.push_back(bumpdecInst);
   glUseProgram(p);
   texSampler = glGetUniformLocation(p, "tex");
@@ -277,7 +278,7 @@ void ShaderManager::load_shaders() {
   glBindAttribLocation(p, 9, "instanceModelCol3");
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr flatInst(new ShaderProgram("flat_instanced", p));
+  auto flatInst = std::make_shared<ShaderProgram>("flat_instanced", p);
   programs_.push_back(flatInst);
 
   // The blinn_instanced program (instanced untextured materials)
@@ -293,7 +294,7 @@ void ShaderManager::load_shaders() {
   glBindAttribLocation(p, 9, "instanceModelCol3");
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr blinnInst(new ShaderProgram("blinn_instanced", p));
+  auto blinnInst = std::make_shared<ShaderProgram>("blinn_instanced", p);
   programs_.push_back(blinnInst);
   glUseProgram(p);
   shadowSampler = glGetUniformLocation(p, "shadowMap");
@@ -308,7 +309,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr resolve(new ShaderProgram("resolve", p));
+  auto resolve = std::make_shared<ShaderProgram>("resolve", p);
   programs_.push_back(resolve);
   glUseProgram(p);
   texSampler = glGetUniformLocation(p, "tex");
@@ -325,7 +326,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr ssao(new ShaderProgram("ssao", p));
+  auto ssao = std::make_shared<ShaderProgram>("ssao", p);
   programs_.push_back(ssao);
   glUseProgram(p);
   GLint depthSampler = glGetUniformLocation(p, "depthTex");
@@ -342,7 +343,7 @@ void ShaderManager::load_shaders() {
   bindStandardAttribs(p);
   glLinkProgram(p);
   print_program_log(p);
-  ShaderProgram::ShPtr ssaoBlur(new ShaderProgram("ssao_blur", p));
+  auto ssaoBlur = std::make_shared<ShaderProgram>("ssao_blur", p);
   programs_.push_back(ssaoBlur);
   glUseProgram(p);
   GLint ssaoTexSampler = glGetUniformLocation(p, "ssaoTex");

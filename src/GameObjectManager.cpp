@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "GameObjectManager.hpp"
 #include "ResourceManager/ResourceManager.hpp"
@@ -17,14 +18,14 @@ void GameObjectManager::add_object(GameObject::ShPtr ob) {
 GameObject::ShPtr GameObjectManager::create_object(const std::string& mesh_tres, const Vector3f& position) {
   ResourceManager::get().load_resource(mesh_tres);
 
-  GameObject::ShPtr obj(new GameObject());
+  auto obj = std::make_shared<GameObject>();
   add_object(obj);
 
-  Transform::ShPtr transform(new Transform(obj->id()));
+  auto transform = std::make_shared<Transform>(obj->id());
   transform->set_translate(position);
   obj->set_transform(transform);
 
-  Renderable::ShPtr renderable(new Renderable(obj->id()));
+  auto renderable = std::make_shared<Renderable>(obj->id());
   obj->set_renderable(renderable);
 
   Mesh::ShPtr mesh = MeshManager::get().get_mesh(mesh_tres);
@@ -42,8 +43,7 @@ GameObject::ShPtr GameObjectManager::create_object(const std::string& mesh_tres,
 }
 
 GameObject::ShPtr GameObjectManager::get_object_by_name(const std::string& name) const {
-  auto it = named_objects_.find(name);
-  if (it != named_objects_.end()) return it->second;
+  if (auto it = named_objects_.find(name); it != named_objects_.end()) return it->second;
   std::cout << "ERROR: GameObject not found with name: " << name << std::endl;
   return GameObject::ShPtr();
 }

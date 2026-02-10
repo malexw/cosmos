@@ -31,14 +31,19 @@ private:
     glm::mat4 projection_;
     bool enabled_;
 
-    static const glm::mat4 bias_matrix_;
+    inline static const glm::mat4 bias_matrix_{
+        0.5f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.5f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f};
 
     static GLuint frustum_vao_;
     static GLuint frustum_vbo_;
     static bool frustum_initialized_;
     static void initFrustumGeometry();
 
-    DISALLOW_COPY_AND_ASSIGN(ShadowCamera);
+    ShadowCamera(const ShadowCamera&) = delete;
+    ShadowCamera& operator=(const ShadowCamera&) = delete;
 };
 
 #endif

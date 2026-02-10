@@ -8,10 +8,10 @@
 
 class SkyBox {
 public:
-    typedef std::shared_ptr<SkyBox> ShPtr;
+    using ShPtr = std::shared_ptr<SkyBox>;
 
     SkyBox()
-        : renderable_(new Renderable(0)) {}
+        : renderable_(std::make_shared<Renderable>(0)) {}
 
     Renderable& renderable() { return *renderable_; }
     const Renderable& renderable() const { return *renderable_; }
@@ -19,7 +19,8 @@ public:
 private:
     Renderable::ShPtr renderable_;
 
-    DISALLOW_COPY_AND_ASSIGN(SkyBox);
+    SkyBox(const SkyBox&) = delete;
+    SkyBox& operator=(const SkyBox&) = delete;
 };
 
 #endif

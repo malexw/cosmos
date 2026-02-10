@@ -13,7 +13,7 @@
 
 class ShaderProgram {
 public:
-	typedef std::shared_ptr<ShaderProgram> ShPtr;
+	using ShPtr = std::shared_ptr<ShaderProgram>;
 
 	ShaderProgram(std::string name, int id): name_(name), shader_id_(id) {}
 	
@@ -37,7 +37,8 @@ private:
 	std::string name_;
 	int shader_id_;
 
-	DISALLOW_COPY_AND_ASSIGN(ShaderProgram);
+	ShaderProgram(const ShaderProgram&) = delete;
+	ShaderProgram& operator=(const ShaderProgram&) = delete;
 };
 
 #endif

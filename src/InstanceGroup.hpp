@@ -13,7 +13,7 @@
 
 class InstanceGroup {
 public:
-    typedef std::shared_ptr<InstanceGroup> ShPtr;
+    using ShPtr = std::shared_ptr<InstanceGroup>;
 
     InstanceGroup(Mesh::ShPtr mesh, Material::ShPtr material, int submesh_index);
     ~InstanceGroup();
@@ -42,7 +42,8 @@ private:
 
     void setup_vao();
 
-    DISALLOW_COPY_AND_ASSIGN(InstanceGroup);
+    InstanceGroup(const InstanceGroup&) = delete;
+    InstanceGroup& operator=(const InstanceGroup&) = delete;
 };
 
 #endif

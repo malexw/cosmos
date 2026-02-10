@@ -1,5 +1,6 @@
 #include "ParticleEmitter.hpp"
 
+#include <memory>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -34,7 +35,7 @@ ParticleEmitter::~ParticleEmitter() {
 void ParticleEmitter::init() {
     // Create particle pool
     for (int i = 0; i < part_count_; ++i) {
-        Particle::ShPtr p(new Particle());
+        auto p = std::make_shared<Particle>();
         parts_.push_back(p);
     }
 

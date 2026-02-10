@@ -1,5 +1,6 @@
 #include "Mesh.hpp"
 
+#include <memory>
 
 void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
                         Vector3f v2, Vector2f vt2, Vector3f vn2, Vector3f c2,
@@ -95,12 +96,12 @@ void Mesh::bind() const {
   }
 }
 
-bool Mesh::is_name(const std::string& rhs) const {
-	return name_.compare(rhs) == 0;
+bool Mesh::is_name(std::string_view rhs) const {
+	return name_ == rhs;
 }
 
 Mesh::ShPtr Mesh::create_quad() {
-    Mesh::ShPtr mesh(new Mesh("__quad"));
+    auto mesh = std::make_shared<Mesh>("__quad");
     mesh->begin_submesh(Material::ShPtr());
 
     Vector3f v0(-0.5f,  0.5f, 0.0f);  // top-left

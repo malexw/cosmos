@@ -12,7 +12,7 @@
 
 class Font {
 public:
-	typedef std::shared_ptr<Font> ShPtr;
+	using ShPtr = std::shared_ptr<Font>;
 
 	Font(std::string name);
 
@@ -30,7 +30,8 @@ private:
 	GLuint vbo_;
 	Texture::ShPtr texture_;
 
-	DISALLOW_COPY_AND_ASSIGN(Font);
+	Font(const Font&) = delete;
+	Font& operator=(const Font&) = delete;
 };
 
 #endif
