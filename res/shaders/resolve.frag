@@ -1,7 +1,9 @@
 #version 150
 
 uniform sampler2D tex;
+uniform sampler2D aoTex;
 uniform bool hdr_output;
+uniform bool ao_enabled;
 uniform float sdr_white;
 uniform float hdr_headroom;
 uniform float exposure;
@@ -13,6 +15,9 @@ void main()
 {
     vec3 color = texture(tex, vTexCoord).rgb;
     color *= exposure;
+
+    float ao = ao_enabled ? texture(aoTex, vTexCoord).r : 1.0;
+    color *= ao;
 
     if (hdr_output) {
         // HDR path: output linear scRGB scaled to SDR white level

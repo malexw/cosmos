@@ -47,11 +47,11 @@ From the project root (so it can find res/):
 - [x] SDL3
 - [x] HDR
 - [x] Improved keybinding; prep for OpenXR's actions
-- [ ] SSAO
+- [x] SSAO
+- [ ] Multiple shadow casters and shadow types
 - [ ] Multiple light sources and types
 - [ ] Emissive particles
-- [ ] Multiple shadow casters and shadow types
-- [ ] Migrate from OpenAL to Steam Audio + miniaudio
+- [ ] Migrate from OpenAL to Steam Audio + SDL3 audio
 - [ ] Physically-based rendering
 - [ ] glTF 2.0 support
 - [ ] Animation system

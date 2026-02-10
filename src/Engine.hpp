@@ -35,6 +35,7 @@ public:
 
     int screen_width() const { return screen_width_; }
     int screen_height() const { return screen_height_; }
+    bool float_framebuffer() const { return float_framebuffer_; }
     InputManager& input_manager() { return input_manager_; }
     SDL_Window* window() { return window_; }
 
@@ -66,9 +67,13 @@ private:
     ShadowCamera shadow_camera_;
     GLuint shadow_buffer_;
     GLuint hdr_frame_buffer_;
-    GLuint hdr_depth_rb_;
+    GLuint ssao_fbo_;
+    GLuint ssao_blur_fbo_;
+    GLuint ssao_noise_tex_;
+    std::vector<glm::vec3> ssao_kernel_;
 
     // HDR display state
+    bool float_framebuffer_;
     bool hdr_enabled_;
     float hdr_headroom_;
     float sdr_white_level_;

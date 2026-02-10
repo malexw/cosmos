@@ -99,6 +99,20 @@ bool CosmosGame::update(float dt) {
             bool particles = config.is_particles();
             if (ImGui::Checkbox("Particles", &particles)) config.set_particles(particles);
 
+            bool ssao = config.is_ssao();
+            if (ImGui::Checkbox("SSAO", &ssao)) config.set_ssao(ssao);
+
+            if (config.is_ssao()) {
+                float ssaoRadius = config.ssao_radius();
+                if (ImGui::SliderFloat("SSAO Radius", &ssaoRadius, 0.1f, 2.0f)) config.set_ssao_radius(ssaoRadius);
+
+                float ssaoBias = config.ssao_bias();
+                if (ImGui::SliderFloat("SSAO Bias", &ssaoBias, 0.01f, 0.5f)) config.set_ssao_bias(ssaoBias);
+
+                float ssaoPower = config.ssao_power();
+                if (ImGui::SliderFloat("SSAO Power", &ssaoPower, 0.5f, 4.0f)) config.set_ssao_power(ssaoPower);
+            }
+
             bool axes = config.is_show_axes();
             if (ImGui::Checkbox("Show Axes", &axes)) config.set_show_axes(axes);
         }
@@ -126,6 +140,11 @@ bool CosmosGame::update(float dt) {
         if (ImGui::CollapsingHeader("Audio")) {
             bool sounds = config.is_sounds();
             if (ImGui::Checkbox("Sounds", &sounds)) config.set_sounds(sounds);
+        }
+
+        if (ImGui::CollapsingHeader("Display")) {
+            ImGui::Text("Resolution: %dx%d", engine_->screen_width(), engine_->screen_height());
+            ImGui::Text("Framebuffer: %s", engine_->float_framebuffer() ? "Float (HDR)" : "Integer (SDR)");
         }
 
         if (ImGui::CollapsingHeader("Tone Mapping", ImGuiTreeNodeFlags_DefaultOpen)) {

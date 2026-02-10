@@ -39,6 +39,8 @@ void ShaderManager::init() {
   shader_names_.push_back(std::string("res/shaders/bumpdec_instanced.vert"));
   shader_names_.push_back(std::string("res/shaders/flat_instanced.vert"));
   shader_names_.push_back(std::string("res/shaders/resolve.frag"));
+  shader_names_.push_back(std::string("res/shaders/ssao.frag"));
+  shader_names_.push_back(std::string("res/shaders/ssao_blur.frag"));
   load_shaders();
 }
 
@@ -311,6 +313,42 @@ void ShaderManager::load_shaders() {
   glUseProgram(p);
   texSampler = glGetUniformLocation(p, "tex");
   glUniform1i(texSampler, 0);
+  GLint aoSampler = glGetUniformLocation(p, "aoTex");
+  glUniform1i(aoSampler, 1);
+
+  // The SSAO program (unlit.vert + ssao.frag)
+  p = glCreateProgram();
+  v = vshaders_[5]->get_id();   // unlit.vert
+  f = fshaders_[10]->get_id();  // ssao.frag
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr ssao(new ShaderProgram("ssao", p));
+  programs_.push_back(ssao);
+  glUseProgram(p);
+  GLint depthSampler = glGetUniformLocation(p, "depthTex");
+  GLint noiseSampler = glGetUniformLocation(p, "noiseTex");
+  glUniform1i(depthSampler, 0);
+  glUniform1i(noiseSampler, 1);
+
+  // The SSAO blur program (unlit.vert + ssao_blur.frag)
+  p = glCreateProgram();
+  v = vshaders_[5]->get_id();   // unlit.vert
+  f = fshaders_[11]->get_id();  // ssao_blur.frag
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  ShaderProgram::ShPtr ssaoBlur(new ShaderProgram("ssao_blur", p));
+  programs_.push_back(ssaoBlur);
+  glUseProgram(p);
+  GLint ssaoTexSampler = glGetUniformLocation(p, "ssaoTex");
+  glUniform1i(ssaoTexSampler, 0);
+  GLint blurDepthSampler = glGetUniformLocation(p, "depthTex");
+  glUniform1i(blurDepthSampler, 1);
 
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);

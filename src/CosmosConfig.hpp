@@ -68,6 +68,18 @@ public:
   void set_exposure(float value) { exposure_ = value; }
   float exposure() const { return exposure_; }
 
+  void set_ssao(bool value) { ssao_ = value; }
+  bool is_ssao() const { return ssao_; }
+
+  void set_ssao_radius(float value) { ssao_radius_ = value; }
+  float ssao_radius() const { return ssao_radius_; }
+
+  void set_ssao_bias(float value) { ssao_bias_ = value; }
+  float ssao_bias() const { return ssao_bias_; }
+
+  void set_ssao_power(float value) { ssao_power_ = value; }
+  float ssao_power() const { return ssao_power_; }
+
 private:
   bool valid_;
   bool hdr_;
@@ -86,6 +98,10 @@ private:
   bool gl_debug_;
   bool show_axes_;
   float exposure_;
+  bool ssao_;
+  float ssao_radius_;
+  float ssao_bias_;
+  float ssao_power_;
 
 	DISALLOW_COPY_AND_ASSIGN(CosmosConfig);
 };

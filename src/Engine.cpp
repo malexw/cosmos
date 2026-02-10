@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <random>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -23,7 +25,10 @@ Engine::Engine(const DisplayConfig& display, const char* title)
       gl_context_(nullptr),
       shadow_buffer_(0),
       hdr_frame_buffer_(0),
-      hdr_depth_rb_(0),
+      ssao_fbo_(0),
+      ssao_blur_fbo_(0),
+      ssao_noise_tex_(0),
+      float_framebuffer_(false),
       hdr_enabled_(false),
       hdr_headroom_(1.0f),
       sdr_white_level_(1.0f),
@@ -47,25 +52,28 @@ Engine::Engine(const DisplayConfig& display, const char* title)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    // Try float framebuffer for HDR output, fall back to integer
-    SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
+    // Determine window dimensions
+    int win_w = display.width;
+    int win_h = display.height;
     Uint64 flags = SDL_WINDOW_OPENGL;
     if (display.windowed_fullscreen) {
         flags |= SDL_WINDOW_FULLSCREEN;
+        const SDL_DisplayMode* mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+        if (mode) {
+            win_w = mode->w;
+            win_h = mode->h;
+        }
     }
-    if (display.windowed_fullscreen) {
-        window_ = SDL_CreateWindow(title, 0, 0, flags);
+
+    // Try float framebuffer for HDR output, fall back to integer
+    SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 1);
+    window_ = SDL_CreateWindow(title, win_w, win_h, flags);
+    if (window_ != nullptr) {
+        float_framebuffer_ = true;
     } else {
-        window_ = SDL_CreateWindow(title, display.width, display.height, flags);
-    }
-    if (window_ == nullptr) {
         std::cout << "Float framebuffer not available, falling back to integer" << std::endl;
         SDL_GL_SetAttribute(SDL_GL_FLOATBUFFERS, 0);
-        if (display.windowed_fullscreen) {
-            window_ = SDL_CreateWindow(title, 0, 0, flags);
-        } else {
-            window_ = SDL_CreateWindow(title, display.width, display.height, flags);
-        }
+        window_ = SDL_CreateWindow(title, win_w, win_h, flags);
     }
     if (window_ == nullptr) {
         std::cout << "SDL_CreateWindow failed: " << SDL_GetError() << std::endl;
@@ -138,8 +146,14 @@ Engine::~Engine() {
     if (hdr_frame_buffer_) {
         glDeleteFramebuffers(1, &hdr_frame_buffer_);
     }
-    if (hdr_depth_rb_) {
-        glDeleteRenderbuffers(1, &hdr_depth_rb_);
+    if (ssao_fbo_) {
+        glDeleteFramebuffers(1, &ssao_fbo_);
+    }
+    if (ssao_blur_fbo_) {
+        glDeleteFramebuffers(1, &ssao_blur_fbo_);
+    }
+    if (ssao_noise_tex_) {
+        glDeleteTextures(1, &ssao_noise_tex_);
     }
     if (gl_context_) {
         ImGui_ImplOpenGL3_Shutdown();
@@ -177,13 +191,63 @@ void Engine::init_fbos() {
     glBindTexture(GL_TEXTURE_2D, hdr_tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width_, screen_height_, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    // Attach depth renderbuffer
-    glGenRenderbuffers(1, &hdr_depth_rb_);
-    glBindRenderbuffer(GL_RENDERBUFFER, hdr_depth_rb_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screen_width_, screen_height_);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdr_depth_rb_);
+    // Attach depth texture (readable by SSAO)
+    GLuint depth_tex = TextureManager::get().get_texture("hdr depth")->get_index();
+    glBindTexture(GL_TEXTURE_2D, depth_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screen_width_, screen_height_, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_tex, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // SSAO FBO
+    GLuint ssao_raw_tex = TextureManager::get().get_texture("ssao raw")->get_index();
+    glBindTexture(GL_TEXTURE_2D, ssao_raw_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen_width_, screen_height_, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glGenFramebuffers(1, &ssao_fbo_);
+    glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_raw_tex, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // SSAO blur FBO
+    GLuint ssao_blur_tex = TextureManager::get().get_texture("ssao blurred")->get_index();
+    glBindTexture(GL_TEXTURE_2D, ssao_blur_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen_width_, screen_height_, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glGenFramebuffers(1, &ssao_blur_fbo_);
+    glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_blur_tex, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // SSAO noise texture (4x4 random tangent-space rotations)
+    std::mt19937 rng(42);
+    std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+    std::vector<float> noise_data(16 * 4); // 16 pixels, RGBA
+    for (int i = 0; i < 16; ++i) {
+        noise_data[i * 4 + 0] = dist(rng);
+        noise_data[i * 4 + 1] = dist(rng);
+        noise_data[i * 4 + 2] = 0.0f;
+        noise_data[i * 4 + 3] = 0.0f;
+    }
+    glGenTextures(1, &ssao_noise_tex_);
+    glBindTexture(GL_TEXTURE_2D, ssao_noise_tex_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGBA, GL_FLOAT, noise_data.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // SSAO sample kernel (64 hemisphere samples)
+    std::uniform_real_distribution<float> dist01(0.0f, 1.0f);
+    ssao_kernel_.resize(64);
+    for (int i = 0; i < 64; ++i) {
+        glm::vec3 sample(dist(rng), dist(rng), dist01(rng));
+        sample = glm::normalize(sample);
+        sample *= dist01(rng);
+        // Scale samples to cluster near origin
+        float scale = static_cast<float>(i) / 64.0f;
+        scale = 0.1f + scale * scale * (1.0f - 0.1f);
+        sample *= scale;
+        ssao_kernel_[i] = sample;
+    }
 }
 
 void Engine::run(GameScript& game) {
@@ -456,6 +520,56 @@ void Engine::render() {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    // --- SSAO pass ---
+    if (config.is_ssao()) {
+        glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo_);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        auto ssaoProg = ShaderManager::get().get_shader_program("ssao");
+        ssaoProg->run();
+        ssaoProg->setMat4("projection", mainProj);
+        GLint samplesLoc = glGetUniformLocation(ssaoProg->get_id(), "samples");
+        glUniform3fv(samplesLoc, 64, glm::value_ptr(ssao_kernel_[0]));
+        ssaoProg->setf("radius", config.ssao_radius());
+        ssaoProg->setf("bias", config.ssao_bias());
+        ssaoProg->setf("power", config.ssao_power());
+        GLint screenSizeLoc = glGetUniformLocation(ssaoProg->get_id(), "screenSize");
+        glUniform2f(screenSizeLoc, static_cast<float>(width), static_cast<float>(height));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr depth")->get_index());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, ssao_noise_tex_);
+
+        glm::mat4 ssaoOrtho = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f);
+        ssaoProg->setMat4("mvp", ssaoOrtho);
+        hud_quad_->bind();
+        glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+
+        glActiveTexture(GL_TEXTURE0);
+
+        // --- SSAO blur pass ---
+        glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo_);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        auto ssaoBlurProg = ShaderManager::get().get_shader_program("ssao_blur");
+        ssaoBlurProg->run();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("ssao raw")->get_index());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr depth")->get_index());
+
+        ssaoBlurProg->setMat4("mvp", ssaoOrtho);
+        hud_quad_->bind();
+        glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
     // --- Resolve pass: tone-map HDR FBO to screen ---
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
@@ -468,13 +582,17 @@ void Engine::render() {
     resolveProg->setf("sdr_white", sdr_white_level_);
     resolveProg->setf("hdr_headroom", hdr_headroom_);
     resolveProg->setf("exposure", config.exposure());
+    resolveProg->seti("ao_enabled", config.is_ssao() ? 1 : 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("hdr target")->get_index());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, TextureManager::get().get_texture("ssao blurred")->get_index());
     glm::mat4 resolveProj = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f);
     resolveProg->setMat4("mvp", resolveProj);
     hud_quad_->bind();
     glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+    glActiveTexture(GL_TEXTURE0);
 
     glEnable(GL_DEPTH_TEST);
 }
