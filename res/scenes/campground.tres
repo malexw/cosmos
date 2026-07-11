@@ -32,9 +32,25 @@ position = "10.0 2.0 -10.0"
 collision_type = "sphere"
 collision_scale = "1.732 1.732 10.0"
 
+[object "tree1"]
+mesh = "res/meshes/naturePack_051.obj"
+position = "11.0 0.3 -21.0"
+
+[object "tree2"]
+mesh = "res/meshes/naturePack_052.obj"
+position = "9.0 0.3 -17.0"
+
+[object "tree3"]
+mesh = "res/meshes/naturePack_163.obj"
+position = "13.0 0.3 -14.0"
+
+[object "tree4"]
+mesh = "res/meshes/naturePack_160.obj"
+position = "15.0 0.3 -10.0"
+
 [emitter "ion_fountain"]
 source = "res/particles/ion_fountain.tres"
-position = "7.0 1.0 -20.0"
+position = "9.0 1.0 -20.5"
 direction = "0.0 1.0 0.0"
 up = "1.0 0.0 0.0"
 
@@ -46,7 +62,7 @@ up = "1.0 0.0 0.0"
 
 [sound "engine_hum"]
 source = "res/sounds/starshipmono.wav"
-position = "7.0 1.0 -20.0"
+position = "9.0 1.0 -20.5"
 gain = 1.0
 looping = true
 rolloff = 0.5
