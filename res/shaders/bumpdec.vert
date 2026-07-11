@@ -10,11 +10,13 @@ in vec3 bitangent;
 layout(std140) uniform PerFrame {
     mat4 projection;
     mat4 view;
-    vec3 lightPosEye;
     mat4 shadowMatrices[4];
     vec4 cascadeSplits;
     int cascadeCount;
+    int lightCount;
     vec4 cascadeBiases;
+    vec4 lightPosDir[8];
+    vec4 lightColor[8];
 };
 
 layout(std140) uniform PerDraw {
@@ -27,7 +29,7 @@ out vec2 vBumpCoords;
 out vec3 vMatDiffuse;
 out mat3 vTBN;
 out vec3 vWorldPos;
-out float vViewDepth;
+out vec3 vEyePos;
 
 void main(void)
 {
@@ -41,8 +43,9 @@ void main(void)
     vMatDiffuse = color;
 
     vec4 worldPos = model * vec4(position, 1.0);
+    vec4 eyePos = view * worldPos;
     vWorldPos = worldPos.xyz;
-    vViewDepth = -(view * worldPos).z;
+    vEyePos = eyePos.xyz;
 
-    gl_Position = projection * view * worldPos;
+    gl_Position = projection * eyePos;
 }

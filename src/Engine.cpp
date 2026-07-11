@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cfloat>
 #include <iostream>
 
@@ -209,6 +210,24 @@ void Engine::init_fbos() {
     }
 }
 
+void Engine::set_lights(const std::vector<Light>& lights) {
+    lights_ = lights;
+    auto it = std::find_if(lights_.begin(), lights_.end(), [](const Light& l) {
+        return l.type == Light::Type::Directional && l.cast_shadows;
+    });
+    if (it != lights_.end()) {
+        std::rotate(lights_.begin(), it, it + 1);
+    }
+}
+
+const Light* Engine::sun() const {
+    if (!lights_.empty() && lights_.front().type == Light::Type::Directional &&
+        lights_.front().cast_shadows) {
+        return &lights_.front();
+    }
+    return nullptr;
+}
+
 void Engine::run(GameScript& game) {
     if (!window_ || !gl_context_) return;
 
@@ -259,10 +278,11 @@ void Engine::render() {
     }
 
     // Shadow pass
-    if (sun_.cast_shadows && config.is_shadows()) {
+    const Light* sun = this->sun();
+    if (sun && config.is_shadows()) {
         float aspect = static_cast<float>(screen_width_) / static_cast<float>(screen_height_);
         glm::mat4 camera_view = camera_.transform()->get_inverse_matrix();
-        shadow_manager_.update(sun_.direction, camera_view,
+        shadow_manager_.update(sun->direction, camera_view,
             glm::radians(45.0f), aspect, 1.0f,
             config.shadow_cascades(), config.shadow_distance());
         shadow_manager_.render([this](const ShadowMap& sm, int i) {
@@ -392,15 +412,32 @@ void Engine::render_hdr_pass() {
     glm::mat4 mainView = camera_.transform()->get_inverse_matrix();
     glm::mat4 mainPV = mainProj * mainView;
 
-    // Compute light direction in eye space
-    glm::vec3 lightPosEye = glm::mat3(mainView) * sun_.direction;
+    // Transform lights into eye space for the PerFrame UBO.
+    // lightPosDir: xyz = position (point) or travel direction (directional), w = 0 dir / 1 point
+    // lightColor: rgb = color * intensity, w = attenuation radius (point)
+    glm::vec4 lightPosDir[kMaxLights];
+    glm::vec4 lightColor[kMaxLights];
+    int lightCount = 0;
+    for (const Light& light : lights_) {
+        if (lightCount >= kMaxLights) break;
+        if (light.type == Light::Type::Directional) {
+            lightPosDir[lightCount] = glm::vec4(glm::mat3(mainView) * light.direction, 0.0f);
+            lightColor[lightCount] = glm::vec4(light.color * light.intensity, 0.0f);
+        } else {
+            // Spot lights are treated as points until cone support lands
+            lightPosDir[lightCount] = glm::vec4(
+                glm::vec3(mainView * glm::vec4(light.position, 1.0f)), 1.0f);
+            lightColor[lightCount] = glm::vec4(light.color * light.intensity, light.radius);
+        }
+        ++lightCount;
+    }
 
     // Build shadow matrices array and cascade splits
     glm::mat4 shadowMatrices[4] = {glm::mat4(0.0f), glm::mat4(0.0f), glm::mat4(0.0f), glm::mat4(0.0f)};
     glm::vec4 cascadeSplits(FLT_MAX);
     glm::vec4 cascadeBiases(0.0f);
     int cascadeCount = 0;
-    if (sun_.cast_shadows && config.is_shadows()) {
+    if (sun() && config.is_shadows()) {
         cascadeCount = shadow_manager_.cascade_count();
         for (int i = 0; i < cascadeCount; ++i) {
             shadowMatrices[i] = shadow_manager_.shadow_matrix(i);
@@ -413,9 +450,9 @@ void Engine::render_hdr_pass() {
     }
 
     if (config.is_textures()) {
-        ShaderManager::get().set_per_frame(mainProj, mainView, lightPosEye,
+        ShaderManager::get().set_per_frame(mainProj, mainView,
                                             shadowMatrices, cascadeSplits, cascadeCount,
-                                            cascadeBiases);
+                                            cascadeBiases, lightPosDir, lightColor, lightCount);
 
         // Set shadow debug uniform on lit shaders
         bool shadowDbg = config.is_shadow_debug();
@@ -515,7 +552,7 @@ void Engine::render_hdr_pass() {
     }
 
     // Shadow debug frustum wireframes
-    if (config.is_shadow_debug() && sun_.cast_shadows && config.is_shadows()) {
+    if (config.is_shadow_debug() && sun() && config.is_shadows()) {
         shadow_manager_.render_debug_frustums(mainPV);
     }
 

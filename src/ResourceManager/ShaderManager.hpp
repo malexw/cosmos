@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Light.hpp"
 #include "Shaders/VertexShader.hpp"
 #include "Shaders/FragmentShader.hpp"
 #include "Shaders/ShaderProgram.hpp"
@@ -25,9 +26,11 @@ class ShaderManager {
 	// is found.
 	const ShaderProgram::ShPtr get_shader_program(const std::string& name) const;
 
-	void set_per_frame(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& lightPosEye,
+	void set_per_frame(const glm::mat4& projection, const glm::mat4& view,
 	                   const glm::mat4 shadowMatrices[4], const glm::vec4& cascadeSplits,
-	                   int cascadeCount, const glm::vec4& cascadeBiases);
+	                   int cascadeCount, const glm::vec4& cascadeBiases,
+	                   const glm::vec4 lightPosDir[kMaxLights], const glm::vec4 lightColor[kMaxLights],
+	                   int lightCount);
 	void set_per_draw(const glm::mat4& model, const glm::mat3& normalMatrix);
 
  private:

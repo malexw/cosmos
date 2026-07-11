@@ -67,7 +67,7 @@ struct SceneDefinition {
     TerrainRef terrain;
     SkyboxDef skybox;
     CameraDef camera;
-    Light light;
+    std::vector<Light> lights;
     std::vector<ObjectDef> objects;
     std::vector<EmitterDef> emitters;
     std::vector<SoundDef> sounds;

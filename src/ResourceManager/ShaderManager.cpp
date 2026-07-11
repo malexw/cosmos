@@ -334,7 +334,7 @@ void ShaderManager::load_shaders() {
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);
   glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
-  glBufferData(GL_UNIFORM_BUFFER, 448, nullptr, GL_DYNAMIC_DRAW);
+  glBufferData(GL_UNIFORM_BUFFER, 688, nullptr, GL_DYNAMIC_DRAW);
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, per_frame_ubo_);
 
   // PerDraw UBO (binding point 1)
@@ -419,26 +419,31 @@ void ShaderManager::print_program_log(int id) {
 }
 
 void ShaderManager::set_per_frame(const glm::mat4& projection, const glm::mat4& view,
-                                   const glm::vec3& light,
                                    const glm::mat4 shadowMatrices[4],
                                    const glm::vec4& cascadeSplits, int cascadeCount,
-                                   const glm::vec4& cascadeBiases) {
+                                   const glm::vec4& cascadeBiases,
+                                   const glm::vec4 lightPosDir[kMaxLights],
+                                   const glm::vec4 lightColor[kMaxLights], int lightCount) {
     struct {
-        glm::mat4 projection;        // offset 0
-        glm::mat4 view;              // offset 64
-        glm::vec4 lightPosEye;       // offset 128 (vec3 padded to vec4)
-        glm::mat4 shadowMatrices[4]; // offset 144
-        glm::vec4 cascadeSplits;     // offset 400
-        glm::ivec4 cascadeCount;     // offset 416 (int + 12 pad)
-        glm::vec4 cascadeBiases;     // offset 432
+        glm::mat4 projection;              // offset 0
+        glm::mat4 view;                    // offset 64
+        glm::mat4 shadowMatrices[4];       // offset 128
+        glm::vec4 cascadeSplits;           // offset 384
+        glm::ivec4 counts;                 // offset 400 (x = cascadeCount, y = lightCount)
+        glm::vec4 cascadeBiases;           // offset 416
+        glm::vec4 lightPosDir[kMaxLights]; // offset 432
+        glm::vec4 lightColor[kMaxLights];  // offset 560
     } data;
     data.projection = projection;
     data.view = view;
-    data.lightPosEye = glm::vec4(light, 0.0f);
     for (int i = 0; i < 4; ++i) data.shadowMatrices[i] = shadowMatrices[i];
     data.cascadeSplits = cascadeSplits;
-    data.cascadeCount = glm::ivec4(cascadeCount, 0, 0, 0);
+    data.counts = glm::ivec4(cascadeCount, lightCount, 0, 0);
     data.cascadeBiases = cascadeBiases;
+    for (int i = 0; i < kMaxLights; ++i) {
+        data.lightPosDir[i] = i < lightCount ? lightPosDir[i] : glm::vec4(0.0f);
+        data.lightColor[i] = i < lightCount ? lightColor[i] : glm::vec4(0.0f);
+    }
     glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(data), &data);
 }

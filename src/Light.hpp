@@ -3,6 +3,10 @@
 
 #include <glm/glm.hpp>
 
+// Maximum lights uploaded to the PerFrame UBO; must match the array sizes
+// in the shader PerFrame blocks.
+constexpr int kMaxLights = 8;
+
 struct Light {
     enum class Type : uint8_t { Directional, Point, Spot };
 
@@ -13,8 +17,8 @@ struct Light {
     glm::vec3 color{1.0f};                     // RGB
     float intensity = 1.0f;
 
-    // Attenuation (point/spot — unused for now)
-    float radius = 0.0f;
+    // Attenuation cutoff distance (point/spot)
+    float radius = 10.0f;
 
     // Spot cone (unused for now)
     float inner_cone = 0.0f;  // radians

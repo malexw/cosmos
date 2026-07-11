@@ -51,8 +51,12 @@ public:
         emitters_.clear();
         if (e) emitters_.push_back(e);
     }
-    void set_sun(const Light& light) { sun_ = light; }
-    const Light& sun() const { return sun_; }
+    // Stores the scene's lights, moving the shadow-casting directional light
+    // (if any) to the front so it lands at index 0 in the PerFrame UBO.
+    void set_lights(const std::vector<Light>& lights);
+    const std::vector<Light>& lights() const { return lights_; }
+    // The shadow-casting directional light, or nullptr if the scene has none.
+    const Light* sun() const;
 
 private:
     int screen_width_;
@@ -82,7 +86,7 @@ private:
     Mesh::ShPtr hud_quad_;
     std::vector<ParticleEmitter::ShPtr> emitters_;
 
-    Light sun_;
+    std::vector<Light> lights_;
 
     DebugAxes debug_axes_;
 

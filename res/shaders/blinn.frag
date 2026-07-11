@@ -7,24 +7,26 @@ uniform int pcf_mode;
 layout(std140) uniform PerFrame {
     mat4 projection;
     mat4 view;
-    vec3 lightPosEye;
     mat4 shadowMatrices[4];
     vec4 cascadeSplits;
     int cascadeCount;
+    int lightCount;
     vec4 cascadeBiases;
+    vec4 lightPosDir[8];
+    vec4 lightColor[8];
 };
 
 in vec3 vMatDiffuse;
 in mat3 vTBN;
 in vec3 vWorldPos;
-in float vViewDepth;
+in vec3 vEyePos;
 
 out vec4 fragColor;
 
 float calcShadow() {
     int cascade = 0;
     for (int i = 0; i < cascadeCount; ++i)
-        if (vViewDepth > cascadeSplits[i]) cascade = i + 1;
+        if (-vEyePos.z > cascadeSplits[i]) cascade = i + 1;
     if (cascade >= cascadeCount) return 1.0;
 
     vec4 sc = shadowMatrices[cascade] * vec4(vWorldPos, 1.0);
@@ -50,17 +52,40 @@ float calcShadow() {
     return shadow / float(count);
 }
 
+// lightPosDir[i].xyz: eye-space position (point) or travel direction (directional)
+// lightPosDir[i].w: 0 = directional, 1 = point
+// lightColor[i].rgb: color * intensity; lightColor[i].w: attenuation radius (point)
+vec3 calcLighting(vec3 normalEye, float sunShadow) {
+    vec3 lighting = vec3(0.0);
+    for (int i = 0; i < lightCount; ++i) {
+        vec3 L;
+        float att = 1.0;
+        if (lightPosDir[i].w == 0.0) {
+            L = -normalize(lightPosDir[i].xyz);
+            // Only the primary directional light casts (cascaded) shadows
+            if (i == 0) att = sunShadow;
+        } else {
+            vec3 toLight = lightPosDir[i].xyz - vEyePos;
+            float dist = length(toLight);
+            L = toLight / dist;
+            float falloff = clamp(1.0 - dist / lightColor[i].w, 0.0, 1.0);
+            att = falloff * falloff;
+        }
+        lighting += lightColor[i].rgb * (max(0.0, dot(normalEye, L)) * att);
+    }
+    return lighting;
+}
+
 void main(void)
 {
     vec3 normalEye = normalize(vTBN[2]);
-    float diffuseIntensity = max(0.0, dot(normalEye, -normalize(lightPosEye)));
 
     float shadow = calcShadow();
 
     if (debug_shadows && shadow < 1.0) {
         int cascade = 0;
         for (int i = 0; i < cascadeCount; ++i)
-            if (vViewDepth > cascadeSplits[i]) cascade = i + 1;
+            if (-vEyePos.z > cascadeSplits[i]) cascade = i + 1;
         if (cascade == 0)      fragColor = vec4(1.0, 0.0, 0.0, 1.0);
         else if (cascade == 1) fragColor = vec4(0.0, 1.0, 0.0, 1.0);
         else if (cascade == 2) fragColor = vec4(0.0, 0.0, 1.0, 1.0);
@@ -68,6 +93,6 @@ void main(void)
         return;
     }
 
-    vec3 color = (0.1 + diffuseIntensity * shadow) * vMatDiffuse;
+    vec3 color = (vec3(0.1) + calcLighting(normalEye, shadow)) * vMatDiffuse;
     fragColor = vec4(color, 1.0);
 }
