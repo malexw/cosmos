@@ -21,6 +21,7 @@
 #include "TileGrid.hpp"
 #include "ParticleEmitter.hpp"
 #include "ParticleEmitterDef.hpp"
+#include "ShadowCubeMap.hpp"
 #include "ShadowMapManager.hpp"
 #include "SkyBox.hpp"
 #include "TerrainData.hpp"
@@ -68,6 +69,8 @@ private:
 
     Camera camera_;
     ShadowMapManager shadow_manager_;
+    ShadowCubeMap point_shadow_;
+    bool point_shadow_rendered_ = false;
     std::unique_ptr<RenderTarget> hdr_target_;
     std::unique_ptr<RenderTarget> ssao_target_;
     std::unique_ptr<RenderTarget> ssao_blur_target_;
@@ -93,6 +96,7 @@ private:
     void init_fbos();
     void render();
     void render_shadow_pass(const ShadowMap& cascade, int index);
+    void render_depth_geometry(const glm::mat4& proj_view);
     void render_hdr_pass();
     void render_ssao_pass();
     void render_ssao_blur_pass();

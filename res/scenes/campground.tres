@@ -24,6 +24,7 @@ position = "3.3 1.2 -5.3"
 color = "1.0 0.55 0.25"
 intensity = 2.0
 radius = 10.0
+cast_shadows = true
 
 [object "pit"]
 mesh = "res/meshes/fire_pit.obj"

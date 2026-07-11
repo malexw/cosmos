@@ -160,6 +160,7 @@ void Engine::init_fbos() {
     int h = screen_height_;
 
     shadow_manager_.init(2048);
+    point_shadow_.init(1024);
 
     hdr_target_ = std::make_unique<RenderTarget>(w, h,
         std::initializer_list<RenderTargetAttachment>{
@@ -290,6 +291,21 @@ void Engine::render() {
         });
     }
 
+    // Point-light shadow pass: depth cube for the first shadow-casting
+    // point light. Depth only for now — shaders don't sample it yet.
+    point_shadow_rendered_ = false;
+    if (config.is_shadows()) {
+        for (const Light& light : lights_) {
+            if (light.type == Light::Type::Directional || !light.cast_shadows) continue;
+            point_shadow_.update(light.position, light.radius);
+            point_shadow_.render([this](const glm::mat4& proj_view, int /*face*/) {
+                render_depth_geometry(proj_view);
+            });
+            point_shadow_rendered_ = true;
+            break;
+        }
+    }
+
     // HDR pass
     {
         RenderPassParams hdr_params;
@@ -334,9 +350,12 @@ void Engine::render() {
 }
 
 void Engine::render_shadow_pass(const ShadowMap& cascade, int /*index*/) {
-    glm::mat4 shadow_view = cascade.view_matrix();
-    glm::mat4 shadow_proj = cascade.projection();
+    render_depth_geometry(cascade.projection() * cascade.view_matrix());
+}
 
+// Depth-only draw of all shadow-casting geometry, shared by the cascade and
+// point-light (cube map) shadow passes.
+void Engine::render_depth_geometry(const glm::mat4& proj_view) {
     auto flatProg = ShaderManager::get().get_shader_program("flat");
     flatProg->run();
 
@@ -359,7 +378,7 @@ void Engine::render_shadow_pass(const ShadowMap& cascade, int /*index*/) {
                 model = glm::translate(model, glm::vec3(-shadow_half, 0.0f, shadow_half));
             }
 
-            flatProg->setMat4("mvp", shadow_proj * shadow_view * model);
+            flatProg->setMat4("mvp", proj_view * model);
             tile.mesh->bind();
             glDrawArrays(GL_TRIANGLES, 0, tile.mesh->vertex_count());
         }
@@ -369,14 +388,14 @@ void Engine::render_shadow_pass(const ShadowMap& cascade, int /*index*/) {
     // Draw renderable game objects with transforms
     for (const auto& obj : GameObjectManager::get().objects()) {
         if (obj->get_transform() && obj->get_renderable()) {
-            flatProg->setMat4("mvp", shadow_proj * shadow_view * obj->get_transform()->get_matrix());
+            flatProg->setMat4("mvp", proj_view * obj->get_transform()->get_matrix());
             obj->get_renderable()->draw_geometry();
         }
     }
 
     // Draw instanced terrain shadows
     if (terrain_) {
-        terrain_->render_shadow(shadow_proj * shadow_view);
+        terrain_->render_shadow(proj_view);
     }
 }
 
@@ -639,6 +658,25 @@ void Engine::render_resolve_pass() {
     resolveProg->setMat4("mvp", resolveProj);
     hud_quad_->bind();
     glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+
+    // Point-light shadow cube debug: draw the selected face as a linearized
+    // depth grayscale in the lower-left corner
+    if (config.is_shadow_cube_debug() && point_shadow_rendered_) {
+        auto cubeDebugProg = ShaderManager::get().get_shader_program("cube_debug");
+        cubeDebugProg->run();
+        cubeDebugProg->seti("face", config.shadow_cube_face());
+        cubeDebugProg->setf("near_plane", point_shadow_.near_plane());
+        cubeDebugProg->setf("far_plane", point_shadow_.far_plane());
+        cubeDebugProg->setMat4("mvp", resolveProj);
+        point_shadow_.bind_texture(GL_TEXTURE0);
+
+        int inset = screen_height_ / 3;
+        glViewport(0, 0, inset, inset);
+        hud_quad_->bind();
+        glDrawArrays(GL_TRIANGLES, 0, hud_quad_->vertex_count());
+        glViewport(0, 0, screen_width_, screen_height_);
+    }
+
     glActiveTexture(GL_TEXTURE0);
 }
 

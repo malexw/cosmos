@@ -89,6 +89,12 @@ public:
   void set_shadow_bias(float b) { shadow_bias_ = b; }
   float shadow_bias() const { return shadow_bias_; }
 
+  void set_shadow_cube_debug(bool value) { shadow_cube_debug_ = value; }
+  bool is_shadow_cube_debug() const { return shadow_cube_debug_; }
+
+  void set_shadow_cube_face(int f) { shadow_cube_face_ = f; }
+  int shadow_cube_face() const { return shadow_cube_face_; }
+
 private:
   bool valid_;
   bool hdr_;
@@ -114,6 +120,8 @@ private:
   float shadow_distance_;
   int shadow_cascades_;
   float shadow_bias_;
+  bool shadow_cube_debug_;
+  int shadow_cube_face_;
 
 	CosmosConfig(const CosmosConfig&) = delete;
 	CosmosConfig& operator=(const CosmosConfig&) = delete;

@@ -40,6 +40,7 @@ void ShaderManager::init() {
   shader_names_.emplace_back("res/shaders/resolve.frag");       // fshaders_[8]
   shader_names_.emplace_back("res/shaders/ssao.frag");          // fshaders_[9]
   shader_names_.emplace_back("res/shaders/ssao_blur.frag");     // fshaders_[10]
+  shader_names_.emplace_back("res/shaders/cube_debug.frag");    // fshaders_[11]
   load_shaders();
 }
 
@@ -330,6 +331,21 @@ void ShaderManager::load_shaders() {
   glUniform1i(ssaoTexSampler, 0);
   GLint blurDepthSampler = glGetUniformLocation(p, "depthTex");
   glUniform1i(blurDepthSampler, 1);
+
+  // The cube map debug program (programs_[14])
+  p = glCreateProgram();
+  v = vshaders_[4]->get_id();   // unlit.vert
+  f = fshaders_[11]->get_id();  // cube_debug.frag
+  glAttachShader(p, v);
+  glAttachShader(p, f);
+  bindStandardAttribs(p);
+  glLinkProgram(p);
+  print_program_log(p);
+  auto cubeDebug = std::make_shared<ShaderProgram>("cube_debug", p);
+  programs_.push_back(cubeDebug);
+  glUseProgram(p);
+  GLint cubeSampler = glGetUniformLocation(p, "cubeMap");
+  glUniform1i(cubeSampler, 0);
 
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);

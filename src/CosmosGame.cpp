@@ -139,6 +139,16 @@ bool CosmosGame::update(float dt) {
             float shadowBias = config.shadow_bias();
             if (ImGui::SliderFloat("Shadow Bias", &shadowBias, 0.001f, 0.5f))
                 config.set_shadow_bias(shadowBias);
+
+            bool cubeDbg = config.is_shadow_cube_debug();
+            if (ImGui::Checkbox("Cube Map Debug", &cubeDbg)) config.set_shadow_cube_debug(cubeDbg);
+
+            if (cubeDbg) {
+                int cubeFace = config.shadow_cube_face();
+                const char* faceItems[] = { "+X", "-X", "+Y", "-Y", "+Z", "-Z" };
+                if (ImGui::Combo("Cube Face", &cubeFace, faceItems, 6))
+                    config.set_shadow_cube_face(cubeFace);
+            }
         }
 
         if (ImGui::CollapsingHeader("Physics")) {
