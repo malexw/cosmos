@@ -136,62 +136,6 @@ void TextureManager::load_textures() {
     load_texture(name);
   }
 
-  // Generate a texture as a target for the shadow mapping FBO
-  GLuint shadow_index;
-  glGenTextures(1, &shadow_index);
-  glBindTexture(GL_TEXTURE_2D, shadow_index);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-  auto shadow = std::make_shared<Texture>("shadow_map");
-  shadow->set_index(shadow_index);
-  textures_.push_back(shadow);
-
-  // Generate a texture as a target for the HDR rendering FBO
-  GLuint hdr_index;
-  glGenTextures(1, &hdr_index);
-  glBindTexture(GL_TEXTURE_2D, hdr_index);
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1, 1, 0, GL_RGBA, GL_FLOAT, 0);
-  auto hdrTarget = std::make_shared<Texture>("hdr target");
-  hdrTarget->set_index(hdr_index);
-  textures_.push_back(hdrTarget);
-
-  // Generate a depth texture for the HDR FBO (used by SSAO)
-  GLuint hdr_depth_index;
-  glGenTextures(1, &hdr_depth_index);
-  glBindTexture(GL_TEXTURE_2D, hdr_depth_index);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1, 1, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-  auto hdrDepth = std::make_shared<Texture>("hdr depth");
-  hdrDepth->set_index(hdr_depth_index);
-  textures_.push_back(hdrDepth);
-
-  // SSAO raw occlusion texture
-  GLuint ssao_raw_index;
-  glGenTextures(1, &ssao_raw_index);
-  glBindTexture(GL_TEXTURE_2D, ssao_raw_index);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 1, 1, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-  auto ssaoRaw = std::make_shared<Texture>("ssao raw");
-  ssaoRaw->set_index(ssao_raw_index);
-  textures_.push_back(ssaoRaw);
-
-  // SSAO blurred occlusion texture
-  GLuint ssao_blur_index;
-  glGenTextures(1, &ssao_blur_index);
-  glBindTexture(GL_TEXTURE_2D, ssao_blur_index);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 1, 1, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-  auto ssaoBlurred = std::make_shared<Texture>("ssao blurred");
-  ssaoBlurred->set_index(ssao_blur_index);
-  textures_.push_back(ssaoBlurred);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	loaded_ = true;

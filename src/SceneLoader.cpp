@@ -44,13 +44,6 @@ static glm::vec3 parse_glm_vec3(const std::string& s) {
     return glm::vec3(x, y, z);
 }
 
-static glm::vec4 parse_glm_vec4(const std::string& s) {
-    std::istringstream ss(s);
-    float x = 0, y = 0, z = 0, w = 0;
-    ss >> x >> y >> z >> w;
-    return glm::vec4(x, y, z, w);
-}
-
 // Parses a section header line like [type] or [type "name"]
 // Returns the section type and optionally the name.
 static void parse_section_header(const std::string& line, std::string& type, std::string& name) {
@@ -161,14 +154,16 @@ SceneDefinition SceneLoader::load(const std::string& path) {
             else if (key == "direction") scene.camera.direction = parse_vec3(value);
             else if (key == "collision_scale") scene.camera.collision_scale = parse_vec3(value);
         } else if (current_section == "light") {
-            if (key == "direction") scene.light.direction = parse_glm_vec3(value);
-            else if (key == "ambient") scene.light.ambient = parse_glm_vec4(value);
-            else if (key == "diffuse") scene.light.diffuse = parse_glm_vec4(value);
-            else if (key == "specular") scene.light.specular = parse_glm_vec4(value);
-            else if (key == "ambient_global") scene.light.ambient_global = parse_glm_vec4(value);
-        } else if (current_section == "shadow") {
-            if (key == "position") scene.shadow.position = parse_glm_vec3(value);
-            else if (key == "direction") scene.shadow.direction = parse_glm_vec3(value);
+            if (key == "type") {
+                if (value == "point") scene.light.type = Light::Type::Point;
+                else if (value == "spot") scene.light.type = Light::Type::Spot;
+                else scene.light.type = Light::Type::Directional;
+            }
+            else if (key == "direction") scene.light.direction = parse_glm_vec3(value);
+            else if (key == "position") scene.light.position = parse_glm_vec3(value);
+            else if (key == "color") scene.light.color = parse_glm_vec3(value);
+            else if (key == "intensity") scene.light.intensity = std::stof(value);
+            else if (key == "cast_shadows") scene.light.cast_shadows = (value == "true");
         } else if (current_section == "object" && current_object >= 0) {
             auto& obj = scene.objects[current_object];
             if (key == "mesh") obj.mesh = value;
@@ -258,22 +253,14 @@ SceneInstances SceneLoader::instantiate(const SceneDefinition& scene, Engine& en
     }
     engine.set_tile_grid(tile_grid);
 
-    // Shadow camera
-    engine.shadow_camera().set_position(scene.shadow.position);
-    engine.shadow_camera().set_direction(scene.shadow.direction);
+    // Light (configures sun + shadow camera internally)
+    engine.set_sun(scene.light);
 
     // Terrain
     if (!scene.terrain.source.empty()) {
         TerrainData::ShPtr terrain = TerrainLoader::load(scene.terrain.source);
         engine.set_terrain(terrain);
     }
-
-    // Lighting
-    engine.set_light_direction(scene.light.direction);
-    engine.set_light_ambient(scene.light.ambient);
-    engine.set_light_diffuse(scene.light.diffuse);
-    engine.set_light_specular(scene.light.specular);
-    engine.set_ambient_global(scene.light.ambient_global);
 
     return instances;
 }

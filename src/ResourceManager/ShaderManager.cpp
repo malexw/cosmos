@@ -20,28 +20,26 @@ ShaderManager::ShaderManager()
  * hand
  */
 void ShaderManager::init() {
-	shader_names_.emplace_back("res/shaders/bumpdec.vert");
-  shader_names_.emplace_back("res/shaders/bumpdec.frag");
-  shader_names_.emplace_back("res/shaders/shadow.vert");
-  shader_names_.emplace_back("res/shaders/shadow.frag");
-  shader_names_.emplace_back("res/shaders/hdr.vert");
-  shader_names_.emplace_back("res/shaders/hdr.frag");
-  shader_names_.emplace_back("res/shaders/bump.vert");
-  shader_names_.emplace_back("res/shaders/bump.frag");
-  shader_names_.emplace_back("res/shaders/flat.vert");
-  shader_names_.emplace_back("res/shaders/flat.frag");
-  shader_names_.emplace_back("res/shaders/unlit.vert");
-  shader_names_.emplace_back("res/shaders/unlit.frag");
-  shader_names_.emplace_back("res/shaders/simple.vert");
-  shader_names_.emplace_back("res/shaders/simple.frag");
-  shader_names_.emplace_back("res/shaders/blinn.frag");
-  shader_names_.emplace_back("res/shaders/particle.vert");
-  shader_names_.emplace_back("res/shaders/particle.frag");
-  shader_names_.emplace_back("res/shaders/bumpdec_instanced.vert");
-  shader_names_.emplace_back("res/shaders/flat_instanced.vert");
-  shader_names_.emplace_back("res/shaders/resolve.frag");
-  shader_names_.emplace_back("res/shaders/ssao.frag");
-  shader_names_.emplace_back("res/shaders/ssao_blur.frag");
+	shader_names_.emplace_back("res/shaders/bumpdec.vert");       // vshaders_[0]
+  shader_names_.emplace_back("res/shaders/bumpdec.frag");       // fshaders_[0]
+  shader_names_.emplace_back("res/shaders/hdr.vert");           // vshaders_[1]
+  shader_names_.emplace_back("res/shaders/hdr.frag");           // fshaders_[1]
+  shader_names_.emplace_back("res/shaders/bump.vert");          // vshaders_[2]
+  shader_names_.emplace_back("res/shaders/bump.frag");          // fshaders_[2]
+  shader_names_.emplace_back("res/shaders/flat.vert");          // vshaders_[3]
+  shader_names_.emplace_back("res/shaders/flat.frag");          // fshaders_[3]
+  shader_names_.emplace_back("res/shaders/unlit.vert");         // vshaders_[4]
+  shader_names_.emplace_back("res/shaders/unlit.frag");         // fshaders_[4]
+  shader_names_.emplace_back("res/shaders/simple.vert");        // vshaders_[5]
+  shader_names_.emplace_back("res/shaders/simple.frag");        // fshaders_[5]
+  shader_names_.emplace_back("res/shaders/blinn.frag");         // fshaders_[6]
+  shader_names_.emplace_back("res/shaders/particle.vert");      // vshaders_[6]
+  shader_names_.emplace_back("res/shaders/particle.frag");      // fshaders_[7]
+  shader_names_.emplace_back("res/shaders/bumpdec_instanced.vert"); // vshaders_[7]
+  shader_names_.emplace_back("res/shaders/flat_instanced.vert");    // vshaders_[8]
+  shader_names_.emplace_back("res/shaders/resolve.frag");       // fshaders_[8]
+  shader_names_.emplace_back("res/shaders/ssao.frag");          // fshaders_[9]
+  shader_names_.emplace_back("res/shaders/ssao_blur.frag");     // fshaders_[10]
   load_shaders();
 }
 
@@ -54,16 +52,16 @@ ShaderManager& ShaderManager::get() {
 }
 
 /*
- * 
+ *
  */
 void ShaderManager::load_shaders() {
   if (loaded_) {
 		std::cout << "ShaderManager error: shaders already loaded" << std::endl;
 		return;
 	}
-    
+
   int shader_count = shader_names_.size();
-    
+
   for (int j = 0; j < shader_count; ++j) {
     std::cout << "Processing " << shader_names_[j] << std::endl;
     auto file = std::make_shared<FileBlob>(shader_names_[j]);
@@ -87,7 +85,7 @@ void ShaderManager::load_shaders() {
       std::cout << "ShaderManager error: shader type not recognized" << std::endl;
     }
 	}
-  // The bumpdec program
+  // The bumpdec program (programs_[0])
   int p = glCreateProgram();
   int v = vshaders_[0]->get_id();
   int f = fshaders_[0]->get_id();
@@ -100,7 +98,7 @@ void ShaderManager::load_shaders() {
   auto program = std::make_shared<ShaderProgram>("bumpdec", p);
   programs_.push_back(program);
   glUseProgram(p);
-  
+
   GLint texSampler = glGetUniformLocation(p, "tex");
   GLint bumpSampler = glGetUniformLocation(p, "bump");
   GLint decalSampler = glGetUniformLocation(p, "decal");
@@ -110,28 +108,10 @@ void ShaderManager::load_shaders() {
   glUniform1i(decalSampler, 2);
   glUniform1i(shadowSampler, 3);
 
-  // The shadow program
+  // HDR program (programs_[1])
   p = glCreateProgram();
   v = vshaders_[1]->get_id();
   f = fshaders_[1]->get_id();
-
-  glAttachShader(p, v);
-  glAttachShader(p, f);
-  bindStandardAttribs(p);
-  glLinkProgram(p);
-  print_program_log(p);
-  auto shadow = std::make_shared<ShaderProgram>("shadow", p);
-  programs_.push_back(shadow);
-  glUseProgram(p);
-  texSampler = glGetUniformLocation(p, "tex");
-  shadowSampler = glGetUniformLocation(p, "shadowMap");
-  glUniform1i(texSampler, 0);
-  glUniform1i(shadowSampler, 3);
-
-  // HDR program
-  p = glCreateProgram();
-  v = vshaders_[2]->get_id();
-  f = fshaders_[2]->get_id();
 
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -144,11 +124,11 @@ void ShaderManager::load_shaders() {
   Texture::ShPtr hdrTex = TextureManager::get().get_texture("res/textures/qwantani.hdr");
   float default_exp = hdrTex ? hdrTex->get_default_exposure() : 1.0f;
   CosmosConfig::get().set_exposure(default_exp);
-  
-  // The bump program
+
+  // The bump program (programs_[2])
   p = glCreateProgram();
-  v = vshaders_[3]->get_id();
-  f = fshaders_[3]->get_id();
+  v = vshaders_[2]->get_id();
+  f = fshaders_[2]->get_id();
 
   glAttachShader(p,v);
   glAttachShader(p,f);
@@ -158,16 +138,16 @@ void ShaderManager::load_shaders() {
   auto bump = std::make_shared<ShaderProgram>("bump", p);
   programs_.push_back(bump);
   glUseProgram(p);
-  
+
   texSampler = glGetUniformLocation(p, "tex");
   bumpSampler = glGetUniformLocation(p, "bump");
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
 
-  // The flat program (wireframes, depth-only passes)
+  // The flat program (programs_[3])
   p = glCreateProgram();
-  v = vshaders_[4]->get_id();
-  f = fshaders_[4]->get_id();
+  v = vshaders_[3]->get_id();
+  f = fshaders_[3]->get_id();
 
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -177,10 +157,10 @@ void ShaderManager::load_shaders() {
   auto flat = std::make_shared<ShaderProgram>("flat", p);
   programs_.push_back(flat);
 
-  // The unlit program (textured, no lighting — skybox, HUD, particles)
+  // The unlit program (programs_[4])
   p = glCreateProgram();
-  v = vshaders_[5]->get_id();
-  f = fshaders_[5]->get_id();
+  v = vshaders_[4]->get_id();
+  f = fshaders_[4]->get_id();
 
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -193,10 +173,10 @@ void ShaderManager::load_shaders() {
   texSampler = glGetUniformLocation(p, "tex");
   glUniform1i(texSampler, 0);
 
-  // The simple program (per-vertex lighting, no shadows)
+  // The simple program (programs_[5])
   p = glCreateProgram();
-  v = vshaders_[6]->get_id();
-  f = fshaders_[6]->get_id();
+  v = vshaders_[5]->get_id();
+  f = fshaders_[5]->get_id();
 
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -206,10 +186,10 @@ void ShaderManager::load_shaders() {
   auto simple = std::make_shared<ShaderProgram>("simple", p);
   programs_.push_back(simple);
 
-  // The blinn program (untextured diffuse lighting — bumpdec.vert + blinn.frag)
+  // The blinn program (programs_[6])
   p = glCreateProgram();
   v = vshaders_[0]->get_id();
-  f = fshaders_[7]->get_id();
+  f = fshaders_[6]->get_id();
 
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -222,10 +202,10 @@ void ShaderManager::load_shaders() {
   shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(shadowSampler, 3);
 
-  // The particle program (instanced, textured, color-tinted billboard)
+  // The particle program (programs_[7])
   p = glCreateProgram();
-  v = vshaders_[7]->get_id();   // particle.vert
-  f = fshaders_[8]->get_id();   // particle.frag
+  v = vshaders_[6]->get_id();   // particle.vert
+  f = fshaders_[7]->get_id();   // particle.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -240,9 +220,9 @@ void ShaderManager::load_shaders() {
   GLint particleTexLoc = glGetUniformLocation(p, "tex");
   glUniform1i(particleTexLoc, 0);
 
-  // The bumpdec_instanced program (instanced terrain rendering)
+  // The bumpdec_instanced program (programs_[8])
   p = glCreateProgram();
-  v = vshaders_[8]->get_id();   // bumpdec_instanced.vert
+  v = vshaders_[7]->get_id();   // bumpdec_instanced.vert
   f = fshaders_[0]->get_id();   // bumpdec.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
@@ -265,10 +245,10 @@ void ShaderManager::load_shaders() {
   glUniform1i(decalSampler, 2);
   glUniform1i(shadowSampler, 3);
 
-  // The flat_instanced program (instanced shadow pass)
+  // The flat_instanced program (programs_[9])
   p = glCreateProgram();
-  v = vshaders_[9]->get_id();   // flat_instanced.vert
-  f = fshaders_[4]->get_id();   // flat.frag
+  v = vshaders_[8]->get_id();   // flat_instanced.vert
+  f = fshaders_[3]->get_id();   // flat.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -281,10 +261,10 @@ void ShaderManager::load_shaders() {
   auto flatInst = std::make_shared<ShaderProgram>("flat_instanced", p);
   programs_.push_back(flatInst);
 
-  // The blinn_instanced program (instanced untextured materials)
+  // The blinn_instanced program (programs_[10])
   p = glCreateProgram();
-  v = vshaders_[8]->get_id();   // bumpdec_instanced.vert
-  f = fshaders_[7]->get_id();   // blinn.frag
+  v = vshaders_[7]->get_id();   // bumpdec_instanced.vert
+  f = fshaders_[6]->get_id();   // blinn.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -300,10 +280,10 @@ void ShaderManager::load_shaders() {
   shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(shadowSampler, 3);
 
-  // The resolve program (fullscreen HDR-to-SDR tone mapping)
+  // The resolve program (programs_[11])
   p = glCreateProgram();
-  v = vshaders_[5]->get_id();   // unlit.vert
-  f = fshaders_[9]->get_id();   // resolve.frag
+  v = vshaders_[4]->get_id();   // unlit.vert
+  f = fshaders_[8]->get_id();   // resolve.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -317,10 +297,10 @@ void ShaderManager::load_shaders() {
   GLint aoSampler = glGetUniformLocation(p, "aoTex");
   glUniform1i(aoSampler, 1);
 
-  // The SSAO program (unlit.vert + ssao.frag)
+  // The SSAO program (programs_[12])
   p = glCreateProgram();
-  v = vshaders_[5]->get_id();   // unlit.vert
-  f = fshaders_[10]->get_id();  // ssao.frag
+  v = vshaders_[4]->get_id();   // unlit.vert
+  f = fshaders_[9]->get_id();   // ssao.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -334,10 +314,10 @@ void ShaderManager::load_shaders() {
   glUniform1i(depthSampler, 0);
   glUniform1i(noiseSampler, 1);
 
-  // The SSAO blur program (unlit.vert + ssao_blur.frag)
+  // The SSAO blur program (programs_[13])
   p = glCreateProgram();
-  v = vshaders_[5]->get_id();   // unlit.vert
-  f = fshaders_[11]->get_id();  // ssao_blur.frag
+  v = vshaders_[4]->get_id();   // unlit.vert
+  f = fshaders_[10]->get_id();  // ssao_blur.frag
   glAttachShader(p, v);
   glAttachShader(p, f);
   bindStandardAttribs(p);
@@ -354,7 +334,7 @@ void ShaderManager::load_shaders() {
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);
   glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
-  glBufferData(GL_UNIFORM_BUFFER, 208, nullptr, GL_DYNAMIC_DRAW);
+  glBufferData(GL_UNIFORM_BUFFER, 448, nullptr, GL_DYNAMIC_DRAW);
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, per_frame_ubo_);
 
   // PerDraw UBO (binding point 1)
@@ -370,19 +350,19 @@ void ShaderManager::load_shaders() {
   blockIdx = glGetUniformBlockIndex(programs_[0]->get_id(), "PerDraw");
   if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[0]->get_id(), blockIdx, 1);
 
-  // Bind uniform blocks for blinn (programs_[7])
-  blockIdx = glGetUniformBlockIndex(programs_[7]->get_id(), "PerFrame");
-  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[7]->get_id(), blockIdx, 0);
-  blockIdx = glGetUniformBlockIndex(programs_[7]->get_id(), "PerDraw");
-  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[7]->get_id(), blockIdx, 1);
+  // Bind uniform blocks for blinn (programs_[6])
+  blockIdx = glGetUniformBlockIndex(programs_[6]->get_id(), "PerFrame");
+  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[6]->get_id(), blockIdx, 0);
+  blockIdx = glGetUniformBlockIndex(programs_[6]->get_id(), "PerDraw");
+  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[6]->get_id(), blockIdx, 1);
 
-  // Bind uniform blocks for bumpdec_instanced (programs_[9])
-  blockIdx = glGetUniformBlockIndex(programs_[9]->get_id(), "PerFrame");
-  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[9]->get_id(), blockIdx, 0);
+  // Bind uniform blocks for bumpdec_instanced (programs_[8])
+  blockIdx = glGetUniformBlockIndex(programs_[8]->get_id(), "PerFrame");
+  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[8]->get_id(), blockIdx, 0);
 
-  // Bind uniform blocks for blinn_instanced (programs_[11])
-  blockIdx = glGetUniformBlockIndex(programs_[11]->get_id(), "PerFrame");
-  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[11]->get_id(), blockIdx, 0);
+  // Bind uniform blocks for blinn_instanced (programs_[10])
+  blockIdx = glGetUniformBlockIndex(programs_[10]->get_id(), "PerFrame");
+  if (blockIdx != GL_INVALID_INDEX) glUniformBlockBinding(programs_[10]->get_id(), blockIdx, 0);
 
   glUseProgram(0);
 }
@@ -396,7 +376,7 @@ const ShaderProgram::ShPtr ShaderManager::get_shader_program(const std::string& 
 			return shaderp;
 		}
 	}
-	
+
   std::cout << "Error: shader program <" << name << "> not found" << std::endl;
 	return ShaderProgram::ShPtr();
 }
@@ -438,17 +418,27 @@ void ShaderManager::print_program_log(int id) {
   }
 }
 
-void ShaderManager::set_per_frame(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& light, const glm::mat4& shadowMatrix) {
+void ShaderManager::set_per_frame(const glm::mat4& projection, const glm::mat4& view,
+                                   const glm::vec3& light,
+                                   const glm::mat4 shadowMatrices[4],
+                                   const glm::vec4& cascadeSplits, int cascadeCount,
+                                   const glm::vec4& cascadeBiases) {
     struct {
-        glm::mat4 projection;
-        glm::mat4 view;
-        glm::vec4 lightPosEye;
-        glm::mat4 shadowMatrix;
+        glm::mat4 projection;        // offset 0
+        glm::mat4 view;              // offset 64
+        glm::vec4 lightPosEye;       // offset 128 (vec3 padded to vec4)
+        glm::mat4 shadowMatrices[4]; // offset 144
+        glm::vec4 cascadeSplits;     // offset 400
+        glm::ivec4 cascadeCount;     // offset 416 (int + 12 pad)
+        glm::vec4 cascadeBiases;     // offset 432
     } data;
     data.projection = projection;
     data.view = view;
     data.lightPosEye = glm::vec4(light, 0.0f);
-    data.shadowMatrix = shadowMatrix;
+    for (int i = 0; i < 4; ++i) data.shadowMatrices[i] = shadowMatrices[i];
+    data.cascadeSplits = cascadeSplits;
+    data.cascadeCount = glm::ivec4(cascadeCount, 0, 0, 0);
+    data.cascadeBiases = cascadeBiases;
     glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(data), &data);
 }

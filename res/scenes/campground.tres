@@ -12,15 +12,11 @@ direction = "0.5 -0.25 -0.75"
 collision_scale = "3.0 3.0 3.0"
 
 [light]
+type = directional
 direction = "-0.428714 -0.848049 -0.311478"
-ambient = "0.0 0.0 0.0 1.0"
-diffuse = "1.0 1.0 1.0 1.0"
-specular = "1.0 1.0 1.0 1.0"
-ambient_global = "0.0 0.0 0.0 1.0"
-
-[shadow]
-position = "22.9 25.4 -0.7"
-direction = "-0.428714 -0.848049 -0.311478"
+color = "1.0 1.0 1.0"
+intensity = 1.0
+cast_shadows = true
 
 [object "pit"]
 mesh = "res/meshes/fire_pit.obj"

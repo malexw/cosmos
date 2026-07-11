@@ -119,7 +119,7 @@ bool CosmosGame::update(float dt) {
 
         if (ImGui::CollapsingHeader("Shadows")) {
             bool shadows = config.is_shadows();
-            if (ImGui::Checkbox("Shadows", &shadows)) config.set_shadows(shadows);
+            if (ImGui::Checkbox("Enabled", &shadows)) config.set_shadows(shadows);
 
             bool shadowDbg = config.is_shadow_debug();
             if (ImGui::Checkbox("Shadow Debug", &shadowDbg)) config.set_shadow_debug(shadowDbg);
@@ -127,6 +127,18 @@ bool CosmosGame::update(float dt) {
             int pcf = config.pcf_mode();
             const char* pcfItems[] = { "Off", "Basic", "Poisson" };
             if (ImGui::Combo("PCF Mode", &pcf, pcfItems, 3)) config.set_pcf_mode(pcf);
+
+            float shadowDist = config.shadow_distance();
+            if (ImGui::SliderFloat("Shadow Distance", &shadowDist, 10.0f, 200.0f))
+                config.set_shadow_distance(shadowDist);
+
+            int cascades = config.shadow_cascades();
+            if (ImGui::SliderInt("Cascades", &cascades, 1, 4))
+                config.set_shadow_cascades(cascades);
+
+            float shadowBias = config.shadow_bias();
+            if (ImGui::SliderFloat("Shadow Bias", &shadowBias, 0.001f, 0.5f))
+                config.set_shadow_bias(shadowBias);
         }
 
         if (ImGui::CollapsingHeader("Physics")) {

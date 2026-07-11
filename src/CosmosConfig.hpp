@@ -80,6 +80,15 @@ public:
   void set_ssao_power(float value) { ssao_power_ = value; }
   float ssao_power() const { return ssao_power_; }
 
+  void set_shadow_distance(float d) { shadow_distance_ = d; }
+  float shadow_distance() const { return shadow_distance_; }
+
+  void set_shadow_cascades(int n) { shadow_cascades_ = n; }
+  int shadow_cascades() const { return shadow_cascades_; }
+
+  void set_shadow_bias(float b) { shadow_bias_ = b; }
+  float shadow_bias() const { return shadow_bias_; }
+
 private:
   bool valid_;
   bool hdr_;
@@ -102,6 +111,9 @@ private:
   float ssao_radius_;
   float ssao_bias_;
   float ssao_power_;
+  float shadow_distance_;
+  int shadow_cascades_;
+  float shadow_bias_;
 
 	CosmosConfig(const CosmosConfig&) = delete;
 	CosmosConfig& operator=(const CosmosConfig&) = delete;

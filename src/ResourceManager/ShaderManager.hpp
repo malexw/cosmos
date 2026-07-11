@@ -25,7 +25,9 @@ class ShaderManager {
 	// is found.
 	const ShaderProgram::ShPtr get_shader_program(const std::string& name) const;
 
-	void set_per_frame(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& lightPosEye, const glm::mat4& shadowMatrix);
+	void set_per_frame(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& lightPosEye,
+	                   const glm::mat4 shadowMatrices[4], const glm::vec4& cascadeSplits,
+	                   int cascadeCount, const glm::vec4& cascadeBiases);
 	void set_per_draw(const glm::mat4& model, const glm::mat3& normalMatrix);
 
  private:

@@ -11,7 +11,10 @@ layout(std140) uniform PerFrame {
     mat4 projection;
     mat4 view;
     vec3 lightPosEye;
-    mat4 shadowMatrix;
+    mat4 shadowMatrices[4];
+    vec4 cascadeSplits;
+    int cascadeCount;
+    vec4 cascadeBiases;
 };
 
 layout(std140) uniform PerDraw {
@@ -23,7 +26,8 @@ out vec2 vTexCoords;
 out vec2 vBumpCoords;
 out vec3 vMatDiffuse;
 out mat3 vTBN;
-out vec4 vShadowCoord;
+out vec3 vWorldPos;
+out float vViewDepth;
 
 void main(void)
 {
@@ -35,7 +39,10 @@ void main(void)
     vTexCoords = texCoord;
     vBumpCoords = texCoord;
     vMatDiffuse = color;
-    vShadowCoord = shadowMatrix * model * vec4(position, 1.0);
 
-    gl_Position = projection * view * model * vec4(position, 1.0);
+    vec4 worldPos = model * vec4(position, 1.0);
+    vWorldPos = worldPos.xyz;
+    vViewDepth = -(view * worldPos).z;
+
+    gl_Position = projection * view * worldPos;
 }

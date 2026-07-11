@@ -9,16 +9,19 @@
 
 #include <glm/glm.hpp>
 
+#include <memory>
 #include <vector>
 
 #include "Camera.hpp"
 #include "DebugAxes.hpp"
 #include "DisplayConfig.hpp"
 #include "InputManager.hpp"
+#include "Light.hpp"
+#include "RenderTarget.hpp"
 #include "TileGrid.hpp"
 #include "ParticleEmitter.hpp"
 #include "ParticleEmitterDef.hpp"
-#include "ShadowCamera.hpp"
+#include "ShadowMapManager.hpp"
 #include "SkyBox.hpp"
 #include "TerrainData.hpp"
 #include "Timer.hpp"
@@ -40,7 +43,6 @@ public:
     SDL_Window* window() { return window_; }
 
     Camera& camera() { return camera_; }
-    ShadowCamera& shadow_camera() { return shadow_camera_; }
     void set_tile_grid(const TileGrid& tg) { tile_grid_ = tg; }
     void set_terrain(TerrainData::ShPtr t) { terrain_ = t; }
     void set_skybox(SkyBox::ShPtr s) { skybox_ = s; }
@@ -49,11 +51,8 @@ public:
         emitters_.clear();
         if (e) emitters_.push_back(e);
     }
-    void set_light_direction(const glm::vec3& d) { light_dir_ = d; }
-    void set_light_ambient(const glm::vec4& a) { light_ambient_ = a; }
-    void set_light_diffuse(const glm::vec4& d) { light_diffuse_ = d; }
-    void set_light_specular(const glm::vec4& s) { light_specular_ = s; }
-    void set_ambient_global(const glm::vec4& a) { ambient_global_ = a; }
+    void set_sun(const Light& light) { sun_ = light; }
+    const Light& sun() const { return sun_; }
 
 private:
     int screen_width_;
@@ -64,12 +63,11 @@ private:
     InputManager input_manager_;
 
     Camera camera_;
-    ShadowCamera shadow_camera_;
-    GLuint shadow_buffer_;
-    GLuint hdr_frame_buffer_;
-    GLuint ssao_fbo_;
-    GLuint ssao_blur_fbo_;
-    GLuint ssao_noise_tex_;
+    ShadowMapManager shadow_manager_;
+    std::unique_ptr<RenderTarget> hdr_target_;
+    std::unique_ptr<RenderTarget> ssao_target_;
+    std::unique_ptr<RenderTarget> ssao_blur_target_;
+    GLuint ssao_noise_tex_ = 0;
     std::vector<glm::vec3> ssao_kernel_;
 
     // HDR display state
@@ -84,16 +82,17 @@ private:
     Mesh::ShPtr hud_quad_;
     std::vector<ParticleEmitter::ShPtr> emitters_;
 
-    glm::vec3 light_dir_;
-    glm::vec4 light_ambient_;
-    glm::vec4 light_diffuse_;
-    glm::vec4 light_specular_;
-    glm::vec4 ambient_global_;
+    Light sun_;
 
     DebugAxes debug_axes_;
 
     void init_fbos();
     void render();
+    void render_shadow_pass(const ShadowMap& cascade, int index);
+    void render_hdr_pass();
+    void render_ssao_pass();
+    void render_ssao_blur_pass();
+    void render_resolve_pass();
     void update_engine(float dt);
 
     Engine(const Engine&) = delete;

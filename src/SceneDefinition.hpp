@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Light.hpp"
 #include "Vector3f.hpp"
 
 struct SceneDefinition {
@@ -32,18 +33,6 @@ struct SceneDefinition {
         Vector3f collision_scale;
     };
 
-    struct LightDef {
-        glm::vec3 direction;
-        glm::vec4 ambient;
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-        glm::vec4 ambient_global;
-    };
-
-    struct ShadowDef {
-        glm::vec3 position;
-        glm::vec3 direction;
-    };
 
     struct ObjectDef {
         std::string name;
@@ -78,8 +67,7 @@ struct SceneDefinition {
     TerrainRef terrain;
     SkyboxDef skybox;
     CameraDef camera;
-    LightDef light;
-    ShadowDef shadow;
+    Light light;
     std::vector<ObjectDef> objects;
     std::vector<EmitterDef> emitters;
     std::vector<SoundDef> sounds;
