@@ -48,8 +48,8 @@ From the project root (so it can find res/):
 - [x] HDR
 - [x] Improved keybinding; prep for OpenXR's actions
 - [x] SSAO
-- [ ] Multiple shadow casters and shadow types
-- [ ] Multiple light sources and types
+- [x] Multiple shadow casters and shadow types
+- [x] Multiple light sources and types
 - [ ] Emissive particles
 - [ ] Migrate from OpenAL to Steam Audio + SDL3 audio
 - [ ] Physically-based rendering

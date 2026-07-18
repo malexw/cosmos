@@ -30,7 +30,8 @@ class ShaderManager {
 	                   const glm::mat4 shadowMatrices[4], const glm::vec4& cascadeSplits,
 	                   int cascadeCount, const glm::vec4& cascadeBiases,
 	                   const glm::vec4 lightPosDir[kMaxLights], const glm::vec4 lightColor[kMaxLights],
-	                   int lightCount);
+	                   int lightCount, const glm::vec4& pointShadowPos,
+	                   const glm::vec4& pointShadowParams, int pointShadowIndex);
 	void set_per_draw(const glm::mat4& model, const glm::mat3& normalMatrix);
 
  private:

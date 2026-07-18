@@ -437,6 +437,7 @@ void Engine::render_hdr_pass() {
     glm::vec4 lightPosDir[kMaxLights];
     glm::vec4 lightColor[kMaxLights];
     int lightCount = 0;
+    int pointShadowIndex = -1;
     for (const Light& light : lights_) {
         if (lightCount >= kMaxLights) break;
         if (light.type == Light::Type::Directional) {
@@ -447,8 +448,22 @@ void Engine::render_hdr_pass() {
             lightPosDir[lightCount] = glm::vec4(
                 glm::vec3(mainView * glm::vec4(light.position, 1.0f)), 1.0f);
             lightColor[lightCount] = glm::vec4(light.color * light.intensity, light.radius);
+            // First shadow-casting point light matches the cube map rendered this frame
+            if (pointShadowIndex < 0 && light.cast_shadows && point_shadow_rendered_) {
+                pointShadowIndex = lightCount;
+            }
         }
         ++lightCount;
+    }
+
+    glm::vec4 pointShadowPos(0.0f);
+    glm::vec4 pointShadowParams(0.0f);
+    if (pointShadowIndex >= 0) {
+        pointShadowPos = glm::vec4(point_shadow_.position(), 0.0f);
+        pointShadowParams = glm::vec4(point_shadow_.near_plane(), point_shadow_.far_plane(),
+                                      config.shadow_bias(), 0.0f);
+        point_shadow_.bind_texture(GL_TEXTURE4);
+        glActiveTexture(GL_TEXTURE0);
     }
 
     // Build shadow matrices array and cascade splits
@@ -471,7 +486,8 @@ void Engine::render_hdr_pass() {
     if (config.is_textures()) {
         ShaderManager::get().set_per_frame(mainProj, mainView,
                                             shadowMatrices, cascadeSplits, cascadeCount,
-                                            cascadeBiases, lightPosDir, lightColor, lightCount);
+                                            cascadeBiases, lightPosDir, lightColor, lightCount,
+                                            pointShadowPos, pointShadowParams, pointShadowIndex);
 
         // Set shadow debug uniform on lit shaders
         bool shadowDbg = config.is_shadow_debug();

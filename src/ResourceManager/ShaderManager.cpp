@@ -104,10 +104,12 @@ void ShaderManager::load_shaders() {
   GLint bumpSampler = glGetUniformLocation(p, "bump");
   GLint decalSampler = glGetUniformLocation(p, "decal");
   GLint shadowSampler = glGetUniformLocation(p, "shadowMap");
+  GLint pointShadowSampler = glGetUniformLocation(p, "pointShadowMap");
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
   glUniform1i(decalSampler, 2);
   glUniform1i(shadowSampler, 3);
+  glUniform1i(pointShadowSampler, 4);
 
   // HDR program (programs_[1])
   p = glCreateProgram();
@@ -202,6 +204,8 @@ void ShaderManager::load_shaders() {
   glUseProgram(p);
   shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(shadowSampler, 3);
+  pointShadowSampler = glGetUniformLocation(p, "pointShadowMap");
+  glUniform1i(pointShadowSampler, 4);
 
   // The particle program (programs_[7])
   p = glCreateProgram();
@@ -241,10 +245,12 @@ void ShaderManager::load_shaders() {
   bumpSampler = glGetUniformLocation(p, "bump");
   decalSampler = glGetUniformLocation(p, "decal");
   shadowSampler = glGetUniformLocation(p, "shadowMap");
+  pointShadowSampler = glGetUniformLocation(p, "pointShadowMap");
   glUniform1i(texSampler, 0);
   glUniform1i(bumpSampler, 1);
   glUniform1i(decalSampler, 2);
   glUniform1i(shadowSampler, 3);
+  glUniform1i(pointShadowSampler, 4);
 
   // The flat_instanced program (programs_[9])
   p = glCreateProgram();
@@ -280,6 +286,8 @@ void ShaderManager::load_shaders() {
   glUseProgram(p);
   shadowSampler = glGetUniformLocation(p, "shadowMap");
   glUniform1i(shadowSampler, 3);
+  pointShadowSampler = glGetUniformLocation(p, "pointShadowMap");
+  glUniform1i(pointShadowSampler, 4);
 
   // The resolve program (programs_[11])
   p = glCreateProgram();
@@ -350,7 +358,7 @@ void ShaderManager::load_shaders() {
   // PerFrame UBO (binding point 0)
   glGenBuffers(1, &per_frame_ubo_);
   glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
-  glBufferData(GL_UNIFORM_BUFFER, 688, nullptr, GL_DYNAMIC_DRAW);
+  glBufferData(GL_UNIFORM_BUFFER, 720, nullptr, GL_DYNAMIC_DRAW);
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, per_frame_ubo_);
 
   // PerDraw UBO (binding point 1)
@@ -439,27 +447,33 @@ void ShaderManager::set_per_frame(const glm::mat4& projection, const glm::mat4& 
                                    const glm::vec4& cascadeSplits, int cascadeCount,
                                    const glm::vec4& cascadeBiases,
                                    const glm::vec4 lightPosDir[kMaxLights],
-                                   const glm::vec4 lightColor[kMaxLights], int lightCount) {
+                                   const glm::vec4 lightColor[kMaxLights], int lightCount,
+                                   const glm::vec4& pointShadowPos,
+                                   const glm::vec4& pointShadowParams, int pointShadowIndex) {
     struct {
         glm::mat4 projection;              // offset 0
         glm::mat4 view;                    // offset 64
         glm::mat4 shadowMatrices[4];       // offset 128
         glm::vec4 cascadeSplits;           // offset 384
-        glm::ivec4 counts;                 // offset 400 (x = cascadeCount, y = lightCount)
+        glm::ivec4 counts;                 // offset 400 (x = cascadeCount, y = lightCount, z = pointShadowIndex)
         glm::vec4 cascadeBiases;           // offset 416
         glm::vec4 lightPosDir[kMaxLights]; // offset 432
         glm::vec4 lightColor[kMaxLights];  // offset 560
+        glm::vec4 pointShadowPos;          // offset 688
+        glm::vec4 pointShadowParams;       // offset 704 (near, far, bias)
     } data;
     data.projection = projection;
     data.view = view;
     for (int i = 0; i < 4; ++i) data.shadowMatrices[i] = shadowMatrices[i];
     data.cascadeSplits = cascadeSplits;
-    data.counts = glm::ivec4(cascadeCount, lightCount, 0, 0);
+    data.counts = glm::ivec4(cascadeCount, lightCount, pointShadowIndex, 0);
     data.cascadeBiases = cascadeBiases;
     for (int i = 0; i < kMaxLights; ++i) {
         data.lightPosDir[i] = i < lightCount ? lightPosDir[i] : glm::vec4(0.0f);
         data.lightColor[i] = i < lightCount ? lightColor[i] : glm::vec4(0.0f);
     }
+    data.pointShadowPos = pointShadowPos;
+    data.pointShadowParams = pointShadowParams;
     glBindBuffer(GL_UNIFORM_BUFFER, per_frame_ubo_);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(data), &data);
 }

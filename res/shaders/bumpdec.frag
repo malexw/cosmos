@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform sampler2D bump;
 uniform sampler2D decal;
 uniform sampler2DArray shadowMap;
+uniform samplerCube pointShadowMap;
 layout(std140) uniform PerFrame {
     mat4 projection;
     mat4 view;
@@ -11,9 +12,12 @@ layout(std140) uniform PerFrame {
     vec4 cascadeSplits;
     int cascadeCount;
     int lightCount;
+    int pointShadowIndex;
     vec4 cascadeBiases;
     vec4 lightPosDir[8];
     vec4 lightColor[8];
+    vec4 pointShadowPos;
+    vec4 pointShadowParams;
 };
 uniform bool has_bump_map;
 uniform bool has_decal;
@@ -58,6 +62,24 @@ float calcShadow() {
     return shadow / float(count);
 }
 
+// Omnidirectional shadow lookup for the light at pointShadowIndex.
+// pointShadowPos.xyz = light world position; pointShadowParams = (near, far, bias)
+float calcPointShadow() {
+    vec3 fragToLight = vWorldPos - pointShadowPos.xyz;
+    vec3 a = abs(fragToLight);
+    // Distance along the sampled face's major axis — matches the face's depth axis
+    float dist = max(a.x, max(a.y, a.z));
+
+    float near = pointShadowParams.x;
+    float far = pointShadowParams.y;
+    float stored = texture(pointShadowMap, fragToLight).r;
+    // Linearize the stored perspective depth back to a distance
+    float storedDist = (2.0 * near * far) / (far + near - (stored * 2.0 - 1.0) * (far - near));
+
+    // Full occlusion: unlike the sun's soft 0.5, no fill light leaks through
+    return storedDist < dist - pointShadowParams.z ? 0.0 : 1.0;
+}
+
 // lightPosDir[i].xyz: eye-space position (point) or travel direction (directional)
 // lightPosDir[i].w: 0 = directional, 1 = point
 // lightColor[i].rgb: color * intensity; lightColor[i].w: attenuation radius (point)
@@ -76,6 +98,7 @@ vec3 calcLighting(vec3 normalEye, float sunShadow) {
             L = toLight / dist;
             float falloff = clamp(1.0 - dist / lightColor[i].w, 0.0, 1.0);
             att = falloff * falloff;
+            if (i == pointShadowIndex) att *= calcPointShadow();
         }
         lighting += lightColor[i].rgb * (max(0.0, dot(normalEye, L)) * att);
     }

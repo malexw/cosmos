@@ -20,9 +20,12 @@ layout(std140) uniform PerFrame {
     vec4 cascadeSplits;
     int cascadeCount;
     int lightCount;
+    int pointShadowIndex;
     vec4 cascadeBiases;
     vec4 lightPosDir[8];
     vec4 lightColor[8];
+    vec4 pointShadowPos;
+    vec4 pointShadowParams;
 };
 
 out vec2 vTexCoords;
