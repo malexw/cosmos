@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 
 // Omnidirectional shadow map for a point light: a depth cube texture rendered

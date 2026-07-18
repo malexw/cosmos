@@ -4,7 +4,7 @@
 #include <array>
 #include <functional>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 
 #include "ShadowMap.hpp"

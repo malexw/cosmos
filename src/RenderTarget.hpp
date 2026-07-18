@@ -1,7 +1,7 @@
 #ifndef COSMOS_RENDER_TARGET_HPP_
 #define COSMOS_RENDER_TARGET_HPP_
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 
 #include <initializer_list>
 #include <vector>

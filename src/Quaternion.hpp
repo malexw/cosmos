@@ -6,6 +6,8 @@
 
 #include <memory>
 
+#include <glm/gtc/constants.hpp>
+
 #include "util.hpp"
 #include "Vector3f.hpp"
 
@@ -72,10 +74,10 @@ class Quaternion {
         y = fSin*rkAxis.y;
         z = fSin*rkAxis.z;*/
 	Quaternion(Vector3f axis, float angle)
-   :  x_(axis.x() * sin(angle * M_PI / 360)),
-      y_(axis.y() * sin(angle * M_PI / 360)),
-      z_(axis.z() * sin(angle * M_PI / 360)),
-      w_(cos(angle * M_PI / 360)) {}
+   :  x_(axis.x() * sin(angle * glm::pi<float>() / 360)),
+      y_(axis.y() * sin(angle * glm::pi<float>() / 360)),
+      z_(axis.z() * sin(angle * glm::pi<float>() / 360)),
+      w_(cos(angle * glm::pi<float>() / 360)) {}
   /*Quaternion(Vector3f axis, float angle)
    :  x_(axis.x() * sin(angle / 2)),
       y_(axis.y() * sin(angle / 2)),

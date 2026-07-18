@@ -1,16 +1,13 @@
 #include <cmath>
 #include <vector>
 
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "GameObjectManager.hpp"
 #include "CollidableObject.hpp"
 #include "ResourceManager/ShaderManager.hpp"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 GLuint CollidableObject::sphere_vbo_ = 0;
 GLuint CollidableObject::sphere_vao_ = 0;
@@ -22,11 +19,11 @@ bool CollidableObject::geometry_initialized_ = false;
 
 static void generateSphere(std::vector<float>& verts, int slices, int stacks) {
   for (int i = 0; i < stacks; ++i) {
-    float phi0 = (float)M_PI * (float)i / (float)stacks;
-    float phi1 = (float)M_PI * (float)(i + 1) / (float)stacks;
+    float phi0 = glm::pi<float>() * (float)i / (float)stacks;
+    float phi1 = glm::pi<float>() * (float)(i + 1) / (float)stacks;
     for (int j = 0; j < slices; ++j) {
-      float theta0 = 2.0f * (float)M_PI * (float)j / (float)slices;
-      float theta1 = 2.0f * (float)M_PI * (float)(j + 1) / (float)slices;
+      float theta0 = glm::two_pi<float>() * (float)j / (float)slices;
+      float theta1 = glm::two_pi<float>() * (float)(j + 1) / (float)slices;
 
       float x00 = sinf(phi0)*cosf(theta0), y00 = sinf(phi0)*sinf(theta0), z00 = cosf(phi0);
       float x10 = sinf(phi1)*cosf(theta0), y10 = sinf(phi1)*sinf(theta0), z10 = cosf(phi1);
@@ -49,8 +46,8 @@ static void generateCylinder(std::vector<float>& verts, int slices, int stacks) 
     float z0 = (float)i / (float)stacks;
     float z1 = (float)(i + 1) / (float)stacks;
     for (int j = 0; j < slices; ++j) {
-      float theta0 = 2.0f * (float)M_PI * (float)j / (float)slices;
-      float theta1 = 2.0f * (float)M_PI * (float)(j + 1) / (float)slices;
+      float theta0 = glm::two_pi<float>() * (float)j / (float)slices;
+      float theta1 = glm::two_pi<float>() * (float)(j + 1) / (float)slices;
 
       float x0 = cosf(theta0), y0 = sinf(theta0);
       float x1 = cosf(theta1), y1 = sinf(theta1);

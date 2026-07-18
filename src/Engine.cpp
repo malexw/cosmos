@@ -83,6 +83,19 @@ Engine::Engine(const DisplayConfig& display, const char* title)
         return;
     }
 
+    int gl_version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+    if (gl_version == 0) {
+        std::cout << "gladLoadGL failed to load OpenGL functions" << std::endl;
+        SDL_GL_DestroyContext(gl_context_);
+        gl_context_ = nullptr;
+        SDL_DestroyWindow(window_);
+        window_ = nullptr;
+        SDL_Quit();
+        return;
+    }
+    std::cout << "OpenGL " << GLAD_VERSION_MAJOR(gl_version) << "."
+              << GLAD_VERSION_MINOR(gl_version) << " context" << std::endl;
+
     // Query pixel size after context creation — on Wayland the compositor
     // configures the fullscreen window size asynchronously, and the EGL
     // surface creation above forces that round-trip to complete.

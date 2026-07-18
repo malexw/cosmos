@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

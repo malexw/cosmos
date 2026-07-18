@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 
 #include "CosmosConfig.hpp"
 

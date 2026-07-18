@@ -1,5 +1,8 @@
 #include <cstring>
 
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+
 #include "DisplayConfig.hpp"
 #include "Engine.hpp"
 #include "CosmosConfig.hpp"

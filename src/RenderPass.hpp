@@ -1,7 +1,7 @@
 #ifndef COSMOS_RENDER_PASS_HPP_
 #define COSMOS_RENDER_PASS_HPP_
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 
 #include <functional>
 

@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 
 #include "Material.hpp"
 #include "util.hpp"

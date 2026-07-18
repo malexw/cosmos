@@ -5,7 +5,7 @@
 #include <vector>
 #include <math.h>
 
-#include <SDL3/SDL_opengl.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 
 #include "Mesh.hpp"
