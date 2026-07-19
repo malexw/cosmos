@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-24.04
 
     steps:
@@ -42,3 +42,25 @@ jobs:
           path: |
             build/cosmos
             build/libphonon.so
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosmos-windows
+          path: |
+            build/cosmos.exe
+            build/*.dll
