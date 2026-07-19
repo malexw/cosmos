@@ -1,5 +1,6 @@
 #include "Mesh.hpp"
 
+#include <cstdint>
 #include <memory>
 
 void Mesh::add_triangle(Vector3f v1, Vector2f vt1, Vector3f vn1, Vector3f c1,
@@ -68,22 +69,22 @@ void Mesh::uploadToGpu() {
   // Generic vertex attributes
   // location 0 = position (vec3)
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[0]));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[0])));
   // location 1 = texcoord (vec2)
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[1]));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[1])));
   // location 2 = normal (vec3)
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[2]));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[2])));
   // location 3 = color (vec3)
   glEnableVertexAttribArray(3);
-  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[3]));
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[3])));
   // location 4 = tangent (vec3)
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[4]));
+  glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[4])));
   // location 5 = bitangent (vec3)
   glEnableVertexAttribArray(5);
-  glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(offsets_[5]));
+  glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(offsets_[5])));
 
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);

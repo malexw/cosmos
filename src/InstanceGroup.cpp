@@ -1,5 +1,6 @@
 #include "InstanceGroup.hpp"
 
+#include <cstdint>
 #include <iostream>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -37,27 +38,27 @@ void InstanceGroup::setup_vao() {
     // location 0 = position (vec3)
     GL_CHECK(glEnableVertexAttribArray(0));
     GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->vertex_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->vertex_offset()))));
     // location 1 = texCoord (vec2)
     GL_CHECK(glEnableVertexAttribArray(1));
     GL_CHECK(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->texcoord_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->texcoord_offset()))));
     // location 2 = normal (vec3)
     GL_CHECK(glEnableVertexAttribArray(2));
     GL_CHECK(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->normal_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->normal_offset()))));
     // location 3 = color (vec3)
     GL_CHECK(glEnableVertexAttribArray(3));
     GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->color_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->color_offset()))));
     // location 4 = tangent (vec3)
     GL_CHECK(glEnableVertexAttribArray(4));
     GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->tangent_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->tangent_offset()))));
     // location 5 = bitangent (vec3)
     GL_CHECK(glEnableVertexAttribArray(5));
     GL_CHECK(glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0,
-        reinterpret_cast<GLvoid*>(mesh_->bitangent_offset())));
+        reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->bitangent_offset()))));
 
     // Create instance VBO for mat4 transforms
     GL_CHECK(glGenBuffers(1, &instance_vbo_));

@@ -1,5 +1,6 @@
 #include "ParticleEmitter.hpp"
 
+#include <cstdint>
 #include <memory>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -49,11 +50,11 @@ void ParticleEmitter::init() {
         // location 0 = position (vec3)
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0,
-            reinterpret_cast<GLvoid*>(mesh_->vertex_offset()));
+            reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->vertex_offset())));
         // location 1 = texCoord (vec2)
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
-            reinterpret_cast<GLvoid*>(mesh_->texcoord_offset()));
+            reinterpret_cast<GLvoid*>(static_cast<std::uintptr_t>(mesh_->texcoord_offset())));
     }
 
     // Create and set up instance VBO

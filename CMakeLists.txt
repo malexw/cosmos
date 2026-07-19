@@ -17,6 +17,7 @@ FetchContent_Declare(
     steamaudio
     URL https://github.com/ValveSoftware/steam-audio/releases/download/v4.8.1/steamaudio_4.8.1.zip
     URL_HASH SHA256=4a0aa5ec1176f38f0b0993a37c2259d9e86f27e22d5e24f83ec4c3cb9a1d5449
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(steamaudio)
 
@@ -63,9 +64,13 @@ add_executable(cosmos ${SOURCES} ${IMGUI_SOURCES})
 target_include_directories(cosmos PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/lib
-    ${CMAKE_SOURCE_DIR}/lib/glad/include
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
+)
+
+# SYSTEM so vendored-header warnings are suppressed
+target_include_directories(cosmos SYSTEM PRIVATE
+    ${CMAKE_SOURCE_DIR}/lib/glad/include
 )
 
 target_link_libraries(cosmos
