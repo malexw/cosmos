@@ -4,11 +4,10 @@
 
 void Timer::frame_start() {
     last_start_ = frame_start_;
-    gettimeofday(&frame_start_, nullptr);
+    frame_start_ = std::chrono::steady_clock::now();
 }
 
 float Timer::frame_delta() const {
-    float dt = static_cast<float>(frame_start_.tv_sec - last_start_.tv_sec)
-             + static_cast<float>(frame_start_.tv_usec - last_start_.tv_usec) / 1000000.0f;
+    float dt = std::chrono::duration<float>(frame_start_ - last_start_).count();
     return (dt > PAUSE_THRESHOLD) ? PAUSE_DT : dt;
 }
