@@ -8,15 +8,15 @@ My playground for game engine architecture and graphics experiments
 - Ninja
 - SDL3
 - OpenGL
-- OpenAL
+- Steam Audio (auto-downloaded by CMake)
 
 Ubuntu 25.04+ / Debian:
 
-    sudo apt install cmake ninja-build libsdl3-dev libglu1-mesa-dev libopenal-dev
+    sudo apt install cmake ninja-build libsdl3-dev libglu1-mesa-dev
 
 On Ubuntu 24.04 and earlier, SDL3 is not in the package repos and must be built from source:
 
-    sudo apt install cmake ninja-build libglu1-mesa-dev libopenal-dev libglm-dev \
+    sudo apt install cmake ninja-build libglu1-mesa-dev libglm-dev \
         libwayland-dev libdecor-0-dev libxkbcommon-dev wayland-protocols
     git clone --depth 1 https://github.com/libsdl-org/SDL.git SDL3
     cmake -S SDL3 -B SDL3/build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -24,8 +24,7 @@ On Ubuntu 24.04 and earlier, SDL3 is not in the package repos and must be built 
     sudo cmake --install SDL3/build
 
 macOS:
-    brew install cmake ninja sdl3 openal-soft
-    export CMAKE_PREFIX_PATH="/opt/homebrew/opt/openal-soft"
+    brew install cmake ninja sdl3
 
 ## Build
 
@@ -51,7 +50,7 @@ From the project root (so it can find res/):
 - [x] Multiple shadow casters and shadow types
 - [x] Multiple light sources and types
 - [ ] Emissive particles
-- [ ] Migrate from OpenAL to Steam Audio + SDL3 audio
+- [x] Migrate from OpenAL to Steam Audio + SDL3 audio
 - [ ] Physically-based rendering
 - [ ] glTF 2.0 support
 - [ ] Animation system

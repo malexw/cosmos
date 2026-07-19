@@ -1,12 +1,11 @@
 #include "Sound.hpp"
 
-Sound::Sound(std::string name, unsigned int sound_index, unsigned int buffer_index)
+#include "ResourceManager/AudioManager.hpp"
+
+Sound::Sound(std::string name, int voice_index, int clip_index)
   : name_(name),
-    sound_index_(sound_index),
-    buffer_index_(buffer_index) {
-  alSourcei(sound_index_, AL_BUFFER, buffer_index_);
-  alSourcef(sound_index_, AL_PITCH, 1.0f);
-  alSourcef(sound_index_, AL_GAIN, 0.0f);
+    voice_index_(voice_index),
+    clip_index_(clip_index) {
 }
 
 std::string Sound::get_name() const {
@@ -18,29 +17,29 @@ bool Sound::is_name(std::string_view rhs) const {
 }
 
 int Sound::get_index() const {
-	return sound_index_;
+	return voice_index_;
 }
 
 void Sound::play() {
-  alSourcePlay(sound_index_);
+  AudioManager::get().mixer().play(voice_index_);
 }
 
 void Sound::pause() {
-  alSourcePause(sound_index_);
+  AudioManager::get().mixer().pause(voice_index_);
 }
 
 void Sound::set_gain(float gain) {
-  alSourcef(sound_index_, AL_GAIN, gain);
+  AudioManager::get().mixer().set_gain(voice_index_, gain);
 }
 
 void Sound::set_looping(bool loop) {
-  alSourcei(sound_index_, AL_LOOPING, loop);
+  AudioManager::get().mixer().set_looping(voice_index_, loop);
 }
 
 void Sound::set_position(const Vector3f& pos) {
-  alSource3f(sound_index_, AL_POSITION, pos.x(), pos.y(), pos.z());
+  AudioManager::get().mixer().set_position(voice_index_, pos);
 }
 
 void Sound::set_rolloff(float rolloff) {
-  alSourcef(sound_index_, AL_ROLLOFF_FACTOR, rolloff);
+  AudioManager::get().mixer().set_rolloff(voice_index_, rolloff);
 }

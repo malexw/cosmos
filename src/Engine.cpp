@@ -165,6 +165,7 @@ Engine::~Engine() {
     if (window_) {
         SDL_DestroyWindow(window_);
     }
+    AudioManager::get().shutdown();
     SDL_Quit();
 }
 
